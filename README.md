@@ -1,24 +1,23 @@
-
-Meta University Eng Project Plan 
+Meta University Eng Project Plan
 Project Planner and Roadmap Generator
 Intern: Solomon Agyire
 Intern Manager: Jessica Sun
-Intern Director: 
+Intern Director:
 Peer(s): Winston Lu , Shelly Fang
-GitHub Repository Link: https://github.com/MetaU-Capstone-Solomon/project-planner. 
+GitHub Repository Link: https://github.com/MetaU-Capstone-Solomon/project-planner.
 
 **Overview**
-Project Planner and Roadmap Generator, is an innovative tool designed to assist students in transforming their ideas into reality. It aims to solve the common problems of lack of structure, resource discovery, and time management that often hinder students from bringing their projects to life, particularly in academic settings where deadlines and deliverables are crucial. By providing a custom, step-by-step roadmap with timelines, technical tasks, and curated learning resources, the project will empower students to work more efficiently and effectively, ultimately helping them achieve their goals. In the long term, we envision expanding this tool to cater to the needs of all developers, providing a valuable resource for professionals and hobbyists alike. 
+Project Planner and Roadmap Generator, is an innovative tool designed to assist students in transforming their ideas into reality. It aims to solve the common problems of lack of structure, resource discovery, and time management that often hinder students from bringing their projects to life, particularly in academic settings where deadlines and deliverables are crucial. By providing a custom, step-by-step roadmap with timelines, technical tasks, and curated learning resources, the project will empower students to work more efficiently and effectively, ultimately helping them achieve their goals. In the long term, we envision expanding this tool to cater to the needs of all developers, providing a valuable resource for professionals and hobbyists alike.
 
 **Category**:Productivity
 
-Story: As a student myself, I have experienced firsthand the frustration of having a great project idea, but struggling to bring it to life. I would start with enthusiasm, only to hit roadblocks and lose momentum. That's why I am creating Project Planner and Roadmap Generator, an app designed to help students like me overcome the obstacles that stand in the way of turning our ideas into reality. 
+Story: As a student myself, I have experienced firsthand the frustration of having a great project idea, but struggling to bring it to life. I would start with enthusiasm, only to hit roadblocks and lose momentum. That's why I am creating Project Planner and Roadmap Generator, an app designed to help students like me overcome the obstacles that stand in the way of turning our ideas into reality.
 
-**Market**: undergraduate students 
+**Market**: undergraduate students
 
 Habit: We anticipate that students will use the app, daily or every other day to track progress, update tasks, and access resources; weekly, to review project timelines, adjust plans, and set new goals; monthly to reflect on progress and identify areas for improvement.
 
-Scope: The initial scope of Project Planner and Roadmap Generator will cover project planning and management tools specifically designed for students, including features to help them create, organize, and track their projects. This will include project idea generation, task creation, timeline and deadline management, resource allocation, and progress monitoring. It is strictly going to be a roadmap and resource planning and guide. Something that will be out of scope will be brainstorming ideas from it 
+Scope: The initial scope of Project Planner and Roadmap Generator will cover project planning and management tools specifically designed for students, including features to help them create, organize, and track their projects. This will include project idea generation, task creation, timeline and deadline management, resource allocation, and progress monitoring. It is strictly going to be a roadmap and resource planning and guide. Something that will be out of scope will be brainstorming ideas from it
 
 **Product Spec**
 Basically, a student signs up for our app and inputs their project idea, goals, and requirements, and experience level. The app generates a custom, step-by-step roadmap with timelines, technical tasks, and curated learning resources tailored to the student's needs. The student uses the roadmap to guide their project development, marking tasks as completed and tracking their progress along the way. As they work on their project, they can access additional resources and support through our app, such as tutorials, and documentation. By providing a structured approach to project planning and execution, the app helps students to bring their ideas to life and develop valuable skills in project management, time management, and problem-solving.
@@ -43,7 +42,7 @@ User can create an account
 User can see their profile
 User can send inputs to our AI
 User can view response from AI
-User can add or modify inputs 
+User can add or modify inputs
 User save response
 Users can track their progress
 Optional
@@ -71,40 +70,32 @@ Technology access: Laptop and phone
 Motivation: Vivian has an idea and started building it, but hit a roadblock and doesn't know how to proceed. She needs help replanning his approach and finding ways to resolve the issue.
 Pain points: Vivian is frustrated with being stuck and doesn't know where to turn for help. She needs guidance on how to overcome the obstacle and finish his project.
 
-
 Technical Challenge #1 - [Name/Small Description]
 What
 
-What problem are you solving, and what parts go beyond what you learned in CodePath? 
+What problem are you solving, and what parts go beyond what you learned in CodePath?
 How
-Explain in words how you’ll solve this problem. 
+Explain in words how you’ll solve this problem.
 
 You’re encouraged to expand on this section with pseudo-code, links to external frameworks, architecture / design diagrams, anything that you can use to explain this to others!
 Technical Challenge #2
 What
 How
 
-
 Technical challenge examples:
 Algorithm design
 Think about data source -> algorithm -> API -> UI
 Consider edge cases and error cases
-Should result in  a big chunk of custom code that you write
+Should result in a big chunk of custom code that you write
 Should not be just if-else statements
 Architecture
 Examples: get more data, store/cache data, or combine data
 Not just make many calls to different APIs or store data into databases
 
-
 Final technical challenges
 Allow users to input data from various sources such as direct input, document uploads, or imports from Google Drive. Design an algorithm to transform these diverse data inputs into a common structure for display and processing.
 
-
-
-
 Create advanced visualization tools that provide insights into project progress, such as Gantt charts or burn-down charts. Implement analytics to track user engagement and project completion rates.
-
-
 
 Technical challenge ideas:
 Allow users to input data from various sources such as direct input, document uploads, or imports from Google Drive. Design an algorithm to transform these diverse data inputs into a common structure for display and processing.
