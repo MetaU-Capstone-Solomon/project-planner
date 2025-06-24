@@ -19,7 +19,7 @@ app.get('/users', async (req, res) => {
 app.get('/posts', async (req, res) => {
   const posts = await prisma.post.findMany({
     include: { user: true },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   });
   res.json(posts);
 });
@@ -27,7 +27,7 @@ app.get('/posts', async (req, res) => {
 app.post('/posts', async (req, res) => {
   const post = await prisma.post.create({
     data: req.body,
-    include: { user: true }
+    include: { user: true },
   });
   res.status(201).json(post);
 });
