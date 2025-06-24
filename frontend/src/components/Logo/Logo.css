@@ -1,0 +1,24 @@
+.logo {
+  display: inline-block;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sm {
+  width: 32px;
+  height: 32px;
+}
+
+.md {
+  width: 48px;
+  height: 48px;
+}
+
+.lg {
+  width: 64px;
+  height: 64px;
+} 
