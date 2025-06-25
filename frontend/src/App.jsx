@@ -1,7 +1,7 @@
-import { Routes, Route } from 'react-router-dom'
-import RootLayout from './layouts/RootLayout'
-import Home from './pages/Home/Home'
-import Auth from './pages/Auth/Auth'
+import { Routes, Route } from 'react-router-dom';
+import RootLayout from './layouts/RootLayout';
+import Home from './pages/Home/Home';
+import Auth from './pages/Auth/Auth';
 
 export default function App() {
   return (
@@ -15,5 +15,5 @@ export default function App() {
         <Route path="/app/profile" element={<div>Profile</div>} />
       </Route>
     </Routes>
-  )
+  );
 }

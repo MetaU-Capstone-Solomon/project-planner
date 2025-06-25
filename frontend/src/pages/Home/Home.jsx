@@ -11,47 +11,50 @@ const Home = () => {
     {
       number: '1',
       title: 'Create Your Project',
-      description: 'Start by setting up your project with a clear name and description'
+      description: 'Start by setting up your project with a clear name and description',
     },
     {
       number: '2',
       title: 'Add Tasks',
-      description: 'Break down your project into manageable tasks and set deadlines'
+      description: 'Break down your project into manageable tasks and set deadlines',
     },
     {
       number: '3',
       title: 'Track Progress',
-      description: 'Monitor your progress and update task status as you complete them'
-    }
+      description: 'Monitor your progress and update task status as you complete them',
+    },
   ];
 
   const testimonials = [
     {
       name: 'Prosper Banda',
       role: 'Software Engineer at Meta',
-      content: 'This app is still in development, but I can see the potential. Looking forward to the full release!',
-      image: prosperImg
+      content:
+        'This app is still in development, but I can see the potential. Looking forward to the full release!',
+      image: prosperImg,
     },
     {
       name: 'Sudeep Joshi',
       role: 'SWE Intern at Amazon',
-      content: 'The interface looks promising. Can\'t wait to try out all the features when it\'s ready.',
-      image: sudeepImg
+      content:
+        "The interface looks promising. Can't wait to try out all the features when it's ready.",
+      image: sudeepImg,
     },
     {
       name: 'Vincent Anim-Addo',
       role: 'Meta U Intern at Meta',
-      content: 'Clean design and intuitive layout. This will be great for managing our design projects.',
-      image: vincentImg
-    }
+      content:
+        'Clean design and intuitive layout. This will be great for managing our design projects.',
+      image: vincentImg,
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
             <Logo />
           </div>
         </div>
@@ -59,22 +62,28 @@ const Home = () => {
 
       {/* Hero Section */}
       <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-6">
+            <h1 className="mb-6 text-4xl font-bold text-gray-900">
               Plan Your Projects
               <span className="text-blue-600"> Smarter</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Streamline your workflow with our intuitive project management platform. 
-              Keep your team organized and projects on track.
+            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600">
+              Streamline your workflow with our intuitive project management platform. Keep your
+              team organized and projects on track.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Link
+                to="/auth"
+                className="flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+              >
                 Get Started
-                <ArrowRight className="ml-2 w-4 h-4" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <Link to="/auth" className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">
+              <Link
+                to="/auth"
+                className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 hover:bg-gray-50"
+              >
                 Sign In
               </Link>
             </div>
@@ -83,29 +92,28 @@ const Home = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              How it works
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section className="bg-gray-50 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900">How it works</h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
               Get started in just a few simple steps
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid gap-8 md:grid-cols-3">
             {steps.map((step, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <div className="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+              <div
+                key={index}
+                className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
                   {step.number}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
+                <h3 className="mb-2 text-center text-xl font-semibold text-gray-900">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 text-center">
-                  {step.description}
-                </p>
+                <p className="text-center text-gray-600">{step.description}</p>
               </div>
             ))}
           </div>
@@ -113,35 +121,33 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What people are saying
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900">What people are saying</h2>
+            <p className="mx-auto max-w-2xl text-gray-600">
               Hear from developers about their experience
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
+
+          <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg">
-                <div className="flex items-center mb-4">
-                  <img 
-                    src={testimonial.image} 
+              <div key={index} className="rounded-lg bg-gray-50 p-6">
+                <div className="mb-4 flex items-center">
+                  <img
+                    src={testimonial.image}
                     alt={testimonial.name}
-                    className="w-12 h-12 rounded-full mr-4"
+                    className="mr-4 h-12 w-12 rounded-full"
                   />
                   <div>
                     <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
-                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                    <p className="text-sm text-gray-600">{testimonial.role}</p>
                   </div>
                 </div>
                 <p className="text-gray-700">{testimonial.content}</p>
-                <div className="flex mt-4">
+                <div className="mt-4 flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                    <Star key={i} className="h-4 w-4 fill-current text-yellow-400" />
                   ))}
                 </div>
               </div>
@@ -151,9 +157,9 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-800 text-center text-gray-400 py-8">
+      <footer className="bg-gray-900 py-12 text-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-gray-800 py-8 text-center text-gray-400">
             <p>&copy; 2024 Project Planner. All rights reserved.</p>
           </div>
         </div>
@@ -162,4 +168,4 @@ const Home = () => {
   );
 };
 
-export default Home; 
+export default Home;
