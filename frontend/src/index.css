@@ -14,7 +14,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
@@ -22,17 +22,17 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition-colors;
+    @apply rounded bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded hover:bg-gray-300 transition-colors;
+    @apply rounded bg-gray-200 px-4 py-2 font-semibold text-gray-800 transition-colors hover:bg-gray-300;
   }
-  
+
   .card-hover {
-    @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
   }
@@ -43,9 +43,10 @@
     background-size: 400% 400%;
     animation: gradient-xy 15s ease infinite;
   }
-  
+
   @keyframes gradient-xy {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {

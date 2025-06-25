@@ -1,29 +1,88 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X } from 'lucide-react';
 
 function Auth() {
   const [activeTab, setActiveTab] = useState('signup');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [experiences, setExperiences] = useState([]);
+  const [experienceInput, setExperienceInput] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const experienceSuggestions = [
+    'JavaScript',
+    'React',
+    'Node.js',
+    'Python',
+    'Java',
+    'C++',
+    'TypeScript',
+    'Vue.js',
+    'Angular',
+    'PHP',
+    'Ruby',
+    'Go',
+    'Rust',
+    'Swift',
+    'Kotlin',
+    'Docker',
+    'AWS',
+    'Azure',
+    'Git',
+    'MongoDB',
+    'PostgreSQL',
+    'MySQL',
+    'Redis',
+    'GraphQL',
+    'REST API',
+    'Machine Learning',
+    'Data Science',
+    'DevOps',
+    'UI/UX Design',
+    'Mobile Development',
+  ];
+
+  const addExperience = (experience) => {
+    if (experience.trim() && !experiences.includes(experience.trim())) {
+      setExperiences([...experiences, experience.trim()]);
+      setExperienceInput('');
+      setShowDropdown(false);
+    }
+  };
+
+  const removeExperience = (index) => {
+    setExperiences(experiences.filter((_, i) => i !== index));
+  };
+
+  const handleExperienceInputChange = (value) => {
+    setExperienceInput(value);
+    setShowDropdown(value.length > 0);
+  };
+
+  const filteredSuggestions = experienceSuggestions.filter(
+    (suggestion) =>
+      suggestion.toLowerCase().includes(experienceInput.toLowerCase()) &&
+      !experiences.includes(suggestion)
+  );
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white p-8 rounded-lg shadow-md">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center space-x-2 mb-2">
-              <div className="p-2 rounded-lg border border-gray-300">
+        <div className="rounded-lg bg-white p-8 shadow-md">
+          <div className="mb-6 text-center">
+            <div className="mb-2 inline-flex items-center space-x-2">
+              <div className="rounded-lg border border-gray-300 p-2">
                 <Sparkles className="h-6 w-6 text-blue-600" />
               </div>
               <span className="text-xl font-bold text-gray-900">ProPlan</span>
             </div>
           </div>
 
-          <div className="flex space-x-2 mb-8">
+          <div className="mb-8 flex space-x-2">
             <button
               onClick={() => setActiveTab('signin')}
-              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-colors ${
+              className={`flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'signin'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -33,7 +92,7 @@ function Auth() {
             </button>
             <button
               onClick={() => setActiveTab('signup')}
-              className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-colors ${
+              className={`flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors ${
                 activeTab === 'signup'
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -46,48 +105,44 @@ function Auth() {
           {activeTab === 'signup' && (
             <form className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Full Name
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type="text"
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
                     placeholder="Enter your full name"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type="email"
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
                     placeholder="Enter your email"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    className="w-full pl-10 pr-12 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
                     placeholder="Create a password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -95,29 +150,98 @@ function Auth() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
-                    className="w-full pl-10 pr-12 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
                     placeholder="Confirm your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Experience</label>
+                <p className="mb-3 text-xs text-gray-500">
+                  Add your technical experience (optional)
+                </p>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={experienceInput}
+                    onChange={(e) => handleExperienceInputChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addExperience(experienceInput);
+                      }
+                    }}
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 placeholder-gray-500"
+                    placeholder="Type your experience or select from suggestions"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => addExperience(experienceInput)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-blue-600"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {showDropdown && filteredSuggestions.length > 0 && (
+                  <div className="absolute z-10 mt-1 max-h-48 w-64 overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
+                    {filteredSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => addExperience(suggestion)}
+                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {experiences.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {experiences.map((experience, index) => (
+                      <span
+                        key={index}
+                        className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                      >
+                        {experience}
+                        <button
+                          type="button"
+                          onClick={() => removeExperience(index)}
+                          className="text-blue-500 hover:text-blue-700"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700"
+                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
               >
                 Create Account
               </button>
@@ -127,43 +251,45 @@ function Auth() {
           {activeTab === 'signin' && (
             <form className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type="email"
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
                     placeholder="Enter your email"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
-                </label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                   <input
                     type={showSignInPassword ? 'text' : 'password'}
-                    className="w-full pl-10 pr-12 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500"
+                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
                     placeholder="Enter your password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignInPassword(!showSignInPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
                   >
-                    {showSignInPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showSignInPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700"
+                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
               >
                 Sign In
               </button>
@@ -175,4 +301,4 @@ function Auth() {
   );
 }
 
-export default Auth; 
+export default Auth;
