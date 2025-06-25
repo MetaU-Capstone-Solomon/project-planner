@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X, Loader2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Auth() {
   const [activeTab, setActiveTab] = useState('signup');
@@ -9,6 +11,30 @@ function Auth() {
   const [experiences, setExperiences] = useState([]);
   const [experienceInput, setExperienceInput] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { signInWithGoogle, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect if user is already authenticated
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err.message || 'Failed to sign in with Google');
+      console.error('Google sign in error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const experienceSuggestions = [
     'JavaScript',
@@ -78,6 +104,38 @@ function Auth() {
               <span className="text-xl font-bold text-gray-900">ProPlan</span>
             </div>
           </div>
+
+          <div className="mb-6">
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <img
+                  src="https://developers.google.com/identity/images/g-logo.png"
+                  alt="Google logo"
+                  className="h-5 w-5"
+                />
+              )}
+              <span>{isLoading ? 'Signing in...' : 'Continue with Google'}</span>
+            </button>
+          </div>
+
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">Or continue with email</span>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          )}
 
           <div className="mb-8 flex space-x-2">
             <button
