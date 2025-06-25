@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle } from 'lucide-react';
 import Logo from '../../components/Logo/Logo';
 import prosperImg from '../../assets/images/testimonials/prosper.jpg';
@@ -69,13 +70,13 @@ const Home = () => {
               Keep your team organized and projects on track.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+              <Link to="/auth" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center">
                 Get Started
                 <ArrowRight className="ml-2 w-4 h-4" />
-              </button>
-              <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">
+              </Link>
+              <Link to="/auth" className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">
                 Sign In
-              </button>
+              </Link>
             </div>
           </div>
         </div>
