@@ -17,7 +17,7 @@ function Auth() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signInWithGoogle, signUpWithEmail, user } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +35,19 @@ function Auth() {
     } catch (err) {
       setError(err.message || 'Failed to sign in with Google');
       console.error('Google sign in error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      setError('');
+      await signInWithEmail({ email, password });
+    } catch (err) {
+      setError(err.message || 'Failed to sign in');
     } finally {
       setIsLoading(false);
     }
@@ -331,7 +344,7 @@ function Auth() {
           )}
 
           {activeTab === 'signin' && (
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSignIn}>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
                   Email Address
@@ -353,7 +366,7 @@ function Auth() {
                   <input
                     type={showSignInPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your password"
+                    placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -371,9 +384,10 @@ function Auth() {
 
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                disabled={isLoading}
+                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                Sign In
+                {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Sign In'}
               </button>
             </form>
           )}
