@@ -46,8 +46,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signUpWithEmail = async ({ email, password, fullName, experiences }) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            experiences: experiences || [],
+          },
+        },
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error signing up with email:', error.message);
+      throw error;
+    }
+  };
+
   const value = {
     signInWithGoogle,
+    signUpWithEmail,
     signOut,
     user,
     loading,
