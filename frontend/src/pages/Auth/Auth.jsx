@@ -8,12 +8,16 @@ function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [experiences, setExperiences] = useState([]);
   const [experienceInput, setExperienceInput] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signInWithGoogle, user } = useAuth();
+  const { signInWithGoogle, signUpWithEmail, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,6 +96,25 @@ function Auth() {
       !experiences.includes(suggestion)
   );
 
+    const handleCreateAccount = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    try {
+      setIsLoading(true);
+      setError('');
+      await signUpWithEmail({ email, password, fullName, experiences });
+      alert('Account created! Please check your email to confirm.');
+      setActiveTab('signin');
+    } catch (err) {
+      setError(err.message || 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md">
@@ -161,7 +184,7 @@ function Auth() {
           </div>
 
           {activeTab === 'signup' && (
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleCreateAccount}>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">Full Name</label>
                 <div className="relative">
@@ -169,7 +192,7 @@ function Auth() {
                   <input
                     type="text"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your full name"
+                    placeholder="Enter your full name" value={fullName} onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
               </div>
@@ -183,7 +206,7 @@ function Auth() {
                   <input
                     type="email"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email"
+                    placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -195,7 +218,7 @@ function Auth() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Create a password"
+                    placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -216,7 +239,7 @@ function Auth() {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Confirm your password"
+                    placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -299,9 +322,10 @@ function Auth() {
 
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                disabled={isLoading}
+                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                Create Account
+                {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Create Account'}
               </button>
             </form>
           )}
@@ -317,7 +341,7 @@ function Auth() {
                   <input
                     type="email"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email"
+                    placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
