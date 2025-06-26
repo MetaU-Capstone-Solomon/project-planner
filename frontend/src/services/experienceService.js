@@ -4,4 +4,4 @@ export const filterExperiences = (suggestions, input, currentExperiences) => {
       suggestion.toLowerCase().includes(input.toLowerCase()) &&
       !currentExperiences.includes(suggestion)
   );
-}; 
+};

@@ -1,10 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import RootLayout from './layouts/RootLayout';
-import Home from './pages/Home/Home';
-import Auth from './pages/Auth/Auth';
-import Callback from './pages/Auth/Callback';
-import Dashboard from './pages/Dashboard/Dashboard';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import RootLayout from '@/layouts/RootLayout';
+import Home from '@/pages/Home/Home';
+import Auth from '@/pages/Auth/Auth';
+import Callback from '@/pages/Auth/Callback';
+import Dashboard from '@/pages/Dashboard/Dashboard';
+import NewProjectChatPage from '@/pages/NewProjectChat/NewProjectChatPage';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -35,6 +36,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/new-project-chat"
+        element={
+          <ProtectedRoute>
+            <NewProjectChatPage />
           </ProtectedRoute>
         }
       />

@@ -29,4 +29,4 @@ export const EXPERIENCE_SUGGESTIONS = [
   'DevOps',
   'UI/UX Design',
   'Mobile Development',
-]; 
+];
