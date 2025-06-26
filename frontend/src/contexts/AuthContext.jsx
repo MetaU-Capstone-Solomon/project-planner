@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export const AuthContext = createContext({});
 
@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check active sessions and set the user
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -70,6 +69,7 @@ export const AuthProvider = ({ children }) => {
             full_name: fullName,
             experiences: experiences || [],
           },
+          emailRedirectTo: 'http://localhost:5173/auth/callback',
         },
       });
       if (error) throw error;

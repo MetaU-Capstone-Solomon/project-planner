@@ -1,4 +1,4 @@
-import logo from '../../assets/images/logo.png';
+import logo from '@/assets/images/logo.png';
 
 export default function Logo({ size = 'md', className = '' }) {
   const sizeClasses = {

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X, Loader2 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useExperiences } from '@/hooks/useExperiences';
 
 function Auth() {
   const [activeTab, setActiveTab] = useState('signup');
@@ -12,22 +13,27 @@ function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [experiences, setExperiences] = useState([]);
-  const [experienceInput, setExperienceInput] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { signInWithGoogle, signInWithEmail, signUpWithEmail, user } = useAuth();
   const navigate = useNavigate();
+  const {
+    experiences,
+    experienceInput,
+    showDropdown,
+    filteredSuggestions,
+    addExperience,
+    removeExperience,
+    handleExperienceInputChange,
+  } = useExperiences();
 
   useEffect(() => {
-    // Redirect if user is already authenticated
     if (user) {
       navigate('/dashboard');
     }
   }, [user, navigate]);
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
@@ -38,9 +44,9 @@ function Auth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [signInWithGoogle]);
 
-  const handleSignIn = async (e) => {
+  const handleSignIn = useCallback(async (e) => {
     e.preventDefault();
     try {
       setIsLoading(true);
@@ -51,65 +57,9 @@ function Auth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [signInWithEmail, email, password]);
 
-  const experienceSuggestions = [
-    'JavaScript',
-    'React',
-    'Node.js',
-    'Python',
-    'Java',
-    'C++',
-    'TypeScript',
-    'Vue.js',
-    'Angular',
-    'PHP',
-    'Ruby',
-    'Go',
-    'Rust',
-    'Swift',
-    'Kotlin',
-    'Docker',
-    'AWS',
-    'Azure',
-    'Git',
-    'MongoDB',
-    'PostgreSQL',
-    'MySQL',
-    'Redis',
-    'GraphQL',
-    'REST API',
-    'Machine Learning',
-    'Data Science',
-    'DevOps',
-    'UI/UX Design',
-    'Mobile Development',
-  ];
-
-  const addExperience = (experience) => {
-    if (experience.trim() && !experiences.includes(experience.trim())) {
-      setExperiences([...experiences, experience.trim()]);
-      setExperienceInput('');
-      setShowDropdown(false);
-    }
-  };
-
-  const removeExperience = (index) => {
-    setExperiences(experiences.filter((_, i) => i !== index));
-  };
-
-  const handleExperienceInputChange = (value) => {
-    setExperienceInput(value);
-    setShowDropdown(value.length > 0);
-  };
-
-  const filteredSuggestions = experienceSuggestions.filter(
-    (suggestion) =>
-      suggestion.toLowerCase().includes(experienceInput.toLowerCase()) &&
-      !experiences.includes(suggestion)
-  );
-
-    const handleCreateAccount = async (e) => {
+  const handleCreateAccount = useCallback(async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -126,7 +76,7 @@ function Auth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [signUpWithEmail, email, password, confirmPassword, fullName, experiences]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
