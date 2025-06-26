@@ -2,13 +2,17 @@ import React from 'react';
 import FormField from '@/components/Form/FormField';
 import Input from '@/components/Form/Input';
 import Textarea from '@/components/Form/Textarea';
+import FileUpload from '@/components/Form/FileUpload';
 import useForm from '@/hooks/useForm';
+import useFileUpload from '@/hooks/useFileUpload';
 
 const NewProjectChatPage = () => {
   const { values, handleChange } = useForm({
     title: '',
     description: '',
   });
+
+  const { file, error, handleFileSelect } = useFileUpload();
 
   return (
     <div className="mx-auto min-h-screen max-w-4xl bg-gray-50 p-6">
@@ -33,6 +37,11 @@ const NewProjectChatPage = () => {
                 value={values.description}
                 onChange={handleChange}
               />
+            </FormField>
+
+            <FormField label="Upload Document (Optional)">
+              <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
+              {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
             </FormField>
           </div>
         </div>
