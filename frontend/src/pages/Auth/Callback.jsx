@@ -1,7 +1,6 @@
-// Callback Component For Handling OAuth Redirection
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function Callback() {
   const navigate = useNavigate();
