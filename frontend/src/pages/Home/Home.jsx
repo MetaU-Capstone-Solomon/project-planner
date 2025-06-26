@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle } from 'lucide-react';
-import Logo from '../../components/Logo/Logo';
-import prosperImg from '../../assets/images/testimonials/prosper.jpg';
-import sudeepImg from '../../assets/images/testimonials/sudeep.jpg';
-import vincentImg from '../../assets/images/testimonials/vincent.jpg';
+import Logo from '@/components/Logo/Logo';
+import prosperImg from '@/assets/images/testimonials/prosper.jpg';
+import sudeepImg from '@/assets/images/testimonials/sudeep.jpg';
+import vincentImg from '@/assets/images/testimonials/vincent.jpg';
 
 const Home = () => {
   const steps = [
