@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FormField from '@/components/Form/FormField';
 import Input from '@/components/Form/Input';
 import Textarea from '@/components/Form/Textarea';
@@ -14,6 +14,61 @@ const NewProjectChatPage = () => {
   });
 
   const { file, error, handleFileSelect } = useFileUpload();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
+  const handleGenerate = async () => {
+    // Clear previous errors
+    setValidationError('');
+
+    // Validate required fields
+    if (!values.title.trim()) {
+      setValidationError('Project title is required');
+      return;
+    }
+
+    if (!values.description.trim()) {
+      setValidationError('Project description is required');
+      return;
+    }
+
+    // Start generation process
+    setIsGenerating(true);
+    
+    try {
+      // Create prompt for AI
+      const prompt = `Create a project roadmap for: ${values.title}
+
+Description: ${values.description}
+
+Please provide a detailed roadmap with steps, timeline, and key milestones.`;
+
+      // Call backend API
+      const response = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate roadmap');
+      }
+
+      const data = await response.json();
+      console.log('Generated roadmap:', data.content);
+      
+      // TODO: Handle the generated roadmap (will be added in next PR)
+      
+    } catch (error) {
+      console.error('Generation error:', error);
+      setValidationError(error.message || 'Failed to generate roadmap');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="mx-auto min-h-screen max-w-7xl bg-gray-50 p-6">
@@ -49,13 +104,17 @@ const NewProjectChatPage = () => {
             </FormField>
 
             {/* Generate button */}
-            <div className="flex justify-center pt-4">
+            <div className="flex flex-col items-center space-y-2 pt-4">
+              {validationError && (
+                <p className="text-sm text-red-600">{validationError}</p>
+              )}
               <button
                 type="button"
-                disabled={!values.title || !values.description}
+                onClick={handleGenerate}
+                disabled={!values.title.trim() || !values.description.trim() || isGenerating}
                 className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Generate
+                {isGenerating ? 'Generating...' : 'Generate'}
               </button>
             </div>
           </div>
