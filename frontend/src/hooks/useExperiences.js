@@ -13,7 +13,7 @@ export const useExperiences = () => {
 
   const addExperience = useCallback((experience) => {
     if (experience.trim()) {
-      setExperiences(prev => {
+      setExperiences((prev) => {
         if (prev.includes(experience.trim())) return prev;
         return [...prev, experience.trim()];
       });
@@ -23,7 +23,7 @@ export const useExperiences = () => {
   }, []);
 
   const removeExperience = useCallback((index) => {
-    setExperiences(prev => prev.filter((_, i) => i !== index));
+    setExperiences((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleExperienceInputChange = useCallback((value) => {
@@ -40,4 +40,4 @@ export const useExperiences = () => {
     removeExperience,
     handleExperienceInputChange,
   };
-}; 
+};
