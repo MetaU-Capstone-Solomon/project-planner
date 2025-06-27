@@ -6,26 +6,26 @@ const ChatMessage = ({ message }) => {
 
   // markdown rendering for AI responses
   const renderMarkdown = (text) => {
-    if (isUser) return text; // Don't render markdown 
+    if (isUser) return text; // Don't render markdown
 
     return text
       .split('\n')
-      .map((line, index) => {
+      .map((line) => {
         // Bold text
         if (line.includes('**')) {
           line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
-        
+
         // Numbered lists
         if (/^\d+\.\s/.test(line)) {
           return `<div class="ml-4">${line}</div>`;
         }
-        
+
         // Bullet points
         if (line.trim().startsWith('- ')) {
           return `<div class="ml-4">• ${line.substring(2)}</div>`;
         }
-        
+
         return line;
       })
       .join('\n');
@@ -45,4 +45,4 @@ const ChatMessage = ({ message }) => {
   );
 };
 
-export default ChatMessage; 
+export default ChatMessage;
