@@ -19,7 +19,10 @@ const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabl
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-start space-x-2 border-t border-gray-200 p-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-start space-x-2 border-t border-gray-200 p-4"
+    >
       <div className="flex-1">
         <textarea
           value={message}

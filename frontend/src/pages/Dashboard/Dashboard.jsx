@@ -1,39 +1,35 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  const handleNewProject = () => {
-    navigate('/new-project-chat');
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mx-auto max-w-4xl">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <button
-            onClick={handleNewProject}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            onClick={handleSignOut}
+            className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >
-            New Project
+            Sign Out
           </button>
         </div>
 
-        <div className="flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="mb-4 text-4xl font-bold text-gray-900">Welcome to your dashboard</h2>
-            <p className="mb-6 text-gray-600">You have successfully logged in with Google OAuth!</p>
-            <button
-              onClick={signOut}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
-              Sign Out
-            </button>
-          </div>
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900">Welcome to ProPlan</h2>
+          <p className="text-gray-600">
+            This is your project planning dashboard. Start by creating a new project roadmap.
+          </p>
         </div>
       </div>
     </div>
