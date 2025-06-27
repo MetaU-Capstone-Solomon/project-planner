@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { readFileAsText, processFileContent } from '@/utils/fileUtils';
 
 const useChat = () => {
   const [messages, setMessages] = useState([]);
@@ -30,20 +31,49 @@ const useChat = () => {
   }, []);
 
   const startChatWithDetails = useCallback(
-    async ({ title, description }) => {
+    async ({ title, description, file }) => {
       setProjectTitle(title);
       setLoading(true);
       appendMessage({ role: 'user', content: `Generating a roadmap for: **${title}**` });
 
       try {
-        const prompt = `You are ProPlan, an expert AI project manager that helps students create detailed project roadmaps.
+        // Process file content if provided
+        let fileContent = '';
+        let isTruncated = false;
+        
+        if (file) {
+          const rawContent = await readFileAsText(file);
+          const processed = processFileContent(rawContent);
+          fileContent = processed.content;
+          isTruncated = processed.isTruncated;
+        }
+
+        // Build prompt with file content
+        let prompt = `You are ProPlan, an expert AI project manager that helps students create detailed project roadmaps.
 
 Project Title: "${title}"
 
 Project Description:
 """
 ${description}
+"""`;
+
+        if (fileContent) {
+          prompt += `
+
+Additional document content:
 """
+${fileContent}
+"""`;
+          
+          if (isTruncated) {
+            prompt += `
+
+Note: Document was truncated to fit context limits.`;
+          }
+        }
+
+        prompt += `
 
 Based on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
 

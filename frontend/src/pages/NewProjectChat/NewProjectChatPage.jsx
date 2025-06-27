@@ -19,7 +19,7 @@ const NewProjectChatPage = () => {
 
   const handleGenerateRoadmap = () => {
     if (values.title && values.description) {
-      startChatWithDetails({ ...values });
+      startChatWithDetails({ ...values, file });
     }
   };
 
