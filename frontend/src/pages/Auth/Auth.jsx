@@ -46,37 +46,43 @@ function Auth() {
     }
   }, [signInWithGoogle]);
 
-  const handleSignIn = useCallback(async (e) => {
-    e.preventDefault();
-    try {
-      setIsLoading(true);
-      setError('');
-      await signInWithEmail({ email, password });
-    } catch (err) {
-      setError(err.message || 'Failed to sign in');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [signInWithEmail, email, password]);
+  const handleSignIn = useCallback(
+    async (e) => {
+      e.preventDefault();
+      try {
+        setIsLoading(true);
+        setError('');
+        await signInWithEmail({ email, password });
+      } catch (err) {
+        setError(err.message || 'Failed to sign in');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [signInWithEmail, email, password]
+  );
 
-  const handleCreateAccount = useCallback(async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    try {
-      setIsLoading(true);
-      setError('');
-      await signUpWithEmail({ email, password, fullName, experiences });
-      alert('Account created! Please check your email to confirm.');
-      setActiveTab('signin');
-    } catch (err) {
-      setError(err.message || 'Failed to create account');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [signUpWithEmail, email, password, confirmPassword, fullName, experiences]);
+  const handleCreateAccount = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        return;
+      }
+      try {
+        setIsLoading(true);
+        setError('');
+        await signUpWithEmail({ email, password, fullName, experiences });
+        alert('Account created! Please check your email to confirm.');
+        setActiveTab('signin');
+      } catch (err) {
+        setError(err.message || 'Failed to create account');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [signUpWithEmail, email, password, confirmPassword, fullName, experiences]
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
@@ -155,7 +161,9 @@ function Auth() {
                   <input
                     type="text"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your full name" value={fullName} onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
               </div>
@@ -169,7 +177,9 @@ function Auth() {
                   <input
                     type="email"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -181,7 +191,9 @@ function Auth() {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -202,7 +214,9 @@ function Auth() {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Confirm your password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -286,9 +300,13 @@ function Auth() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
               >
-                {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Create Account'}
+                {isLoading ? (
+                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                ) : (
+                  'Create Account'
+                )}
               </button>
             </form>
           )}
@@ -304,7 +322,9 @@ function Auth() {
                   <input
                     type="email"
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -316,7 +336,9 @@ function Auth() {
                   <input
                     type={showSignInPassword ? 'text' : 'password'}
                     className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
@@ -335,7 +357,7 @@ function Auth() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
               >
                 {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Sign In'}
               </button>
