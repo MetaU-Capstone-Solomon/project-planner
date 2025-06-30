@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
 
 const Profile = () => {
+  const [showPw, setShowPw] = useState(false);
+  const [showPwConfirm, setShowPwConfirm] = useState(false);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const {
     user,
     displayName,
     emailUser,
+    avatarUrl,
+    handleAvatarUpload,
+    avatarLoading,
     showPasswordForm,
     setShowPasswordForm,
     passwordData,
@@ -43,6 +49,34 @@ const Profile = () => {
           <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">{success}</div>
         )}
 
+        {/* Avatar */}
+        <div className="flex flex-col items-center py-4">
+          <img
+            src={avatarUrl}
+            alt="Profile picture"
+            className="h-28 w-28 rounded-full object-cover shadow-md"
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                handleAvatarUpload(e.target.files[0]);
+              }
+            }}
+          />
+          <button
+            type="button"
+            disabled={avatarLoading}
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-3 rounded-md bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+          >
+            {avatarLoading ? 'Uploading…' : 'Change Picture'}
+          </button>
+        </div>
+
         <div className="space-y-6">
           {/* User account information */}
           <div className="rounded-lg bg-white p-6 shadow-md">
@@ -75,25 +109,28 @@ const Profile = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">New Password</label>
                     <input
-                      type="password"
+                      type={showPw ? 'text' : 'password'}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                       className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                       placeholder="Enter new password"
+                      
                       required
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
                     <input
-                      type="password"
+                      type={showPwConfirm ? 'text' : 'password'}
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                       className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                       placeholder="Confirm new password"
+                      
                       required
                     />
                   </div>
+                  <p className="text-xs text-gray-500">Password must be at least 8 characters and include uppercase, lowercase, number, and special character.</p>
                   <div className="flex space-x-3">
                     <button
                       type="submit"
