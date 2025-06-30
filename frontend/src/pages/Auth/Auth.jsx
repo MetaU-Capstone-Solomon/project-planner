@@ -52,7 +52,7 @@ function Auth() {
       try {
         setIsLoading(true);
         setError('');
-        await signInWithEmail({ email, password });
+        await signInWithEmail(email, password);
       } catch (err) {
         setError(err.message || 'Failed to sign in');
       } finally {
@@ -72,7 +72,7 @@ function Auth() {
       try {
         setIsLoading(true);
         setError('');
-        await signUpWithEmail({ email, password, fullName, experiences });
+        await signUpWithEmail(email, password, fullName);
         alert('Account created! Please check your email to confirm.');
         setActiveTab('signin');
       } catch (err) {
@@ -81,7 +81,7 @@ function Auth() {
         setIsLoading(false);
       }
     },
-    [signUpWithEmail, email, password, confirmPassword, fullName, experiences]
+    [signUpWithEmail, email, password, confirmPassword, fullName]
   );
 
   return (
