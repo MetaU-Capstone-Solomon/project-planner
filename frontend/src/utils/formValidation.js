@@ -1,3 +1,5 @@
+import { PASSWORD_MIN_LENGTH, ERROR_MESSAGES } from '@/constants/validation';
+
 export const validateProjectForm = (values) => {
   const errors = {};
 
