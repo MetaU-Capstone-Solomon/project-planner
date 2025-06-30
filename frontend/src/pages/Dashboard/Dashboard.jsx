@@ -10,17 +10,29 @@ const Dashboard = () => {
     navigate('/new-project-chat');
   };
 
+  const handleProfile = () => {
+    navigate('/profile');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <button
-            onClick={handleNewProject}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-          >
-            New Project
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleNewProject}
+              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              New Project
+            </button>
+            <button
+              onClick={handleProfile}
+              className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700"
+            >
+              Profile
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-center">
