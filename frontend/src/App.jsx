@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import RootLayout from '@/layouts/RootLayout';
 import Home from '@/pages/Home/Home';
 import Auth from '@/pages/Auth/Auth';
 import Callback from '@/pages/Auth/Callback';
@@ -47,12 +46,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route element={<RootLayout />}>
-        <Route path="/app" element={<div>App</div>} />
-        <Route path="/app/new-project" element={<div>New Project</div>} />
-        <Route path="/app/calendar" element={<div>Calendar</div>} />
-        <Route path="/app/profile" element={<div>Profile</div>} />
-      </Route>
     </Routes>
   );
 }

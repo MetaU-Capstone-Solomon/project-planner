@@ -2,6 +2,17 @@
 const DEFAULT_TARGET_LENGTH = parseInt(process.env.DEFAULT_TARGET_LENGTH) || 1500;
 const MAX_SENTENCES = parseInt(process.env.MAX_SENTENCES) || 500;
 
+// Summarization configuration
+const SUMMARIZATION_CONFIG = {
+  DEFAULT_TARGET_LENGTH,
+  MAX_SENTENCES,
+  QUICK_MODE_THRESHOLD: 10000,
+  MIN_SENTENCE_LENGTH: 20,
+  BATCH_SIZE: 100,
+  KEYWORD_SCORE_MULTIPLIER: 2,
+  MAX_KEYWORD_SCORE: 10,
+};
+
 // Keywords for intelligent summarization
 const IMPORTANT_KEYWORDS = [
   'project',
@@ -64,9 +75,14 @@ const LESS_IMPORTANT_KEYWORDS = [
   'bonus',
 ];
 
+// Combined project keywords for summarization
+const PROJECT_KEYWORDS = [...IMPORTANT_KEYWORDS];
+
 module.exports = {
   IMPORTANT_KEYWORDS,
   LESS_IMPORTANT_KEYWORDS,
+  PROJECT_KEYWORDS,
+  SUMMARIZATION_CONFIG,
   DEFAULT_TARGET_LENGTH,
   MAX_SENTENCES,
 };
