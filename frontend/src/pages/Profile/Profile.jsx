@@ -27,8 +27,8 @@ const Profile = () => {
   } = useProfile();
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="mx-auto max-w-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100 p-6">
+      <div className="mx-auto max-w-3xl">
         {/* Header with back button */}
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
@@ -50,11 +50,13 @@ const Profile = () => {
         )}
 
         {/* Avatar */}
-        <div className="flex flex-col items-center py-4">
+        <div className="flex flex-col items-center rounded-lg bg-white shadow-lg">
+          <div className="h-24 w-full rounded-t-lg bg-gray-300" />
+          <div className="-mt-12 flex flex-col items-center pb-6">
           <img
             src={avatarUrl}
             alt="Profile picture"
-            className="h-28 w-28 rounded-full object-cover shadow-md"
+            className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-lg"
           />
           <input
             type="file"
@@ -71,24 +73,26 @@ const Profile = () => {
             type="button"
             disabled={avatarLoading}
             onClick={() => fileInputRef.current?.click()}
-            className="mt-3 rounded-md bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+            className="mt-4 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
           >
             {avatarLoading ? 'Uploading…' : 'Change Picture'}
           </button>
         </div>
 
+        </div>
+
         <div className="space-y-6">
           {/* User account information */}
           <div className="rounded-lg bg-white p-6 shadow-md">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">Account Information</h2>
+            <h2 className="mb-4 text-lg font-semibold text-indigo-600">Account Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="mt-1 text-gray-900">{displayName}</p>
+                <label className="block text-sm font-medium text-gray-600">Name</label>
+                <p className="mt-1 rounded-md bg-gray-50 px-3 py-2 text-gray-900">{displayName}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="mt-1 text-gray-900">{user?.email}</p>
+                <label className="block text-sm font-medium text-gray-600">Email</label>
+                <p className="mt-1 rounded-md bg-gray-50 px-3 py-2 text-gray-900">{user?.email}</p>
               </div>
             </div>
           </div>
