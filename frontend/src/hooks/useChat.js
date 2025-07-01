@@ -3,16 +3,19 @@ import { supabase } from '@/lib/supabase';
 import { extractProjectInfo } from '@/utils/fileUtils';
 import { API_ENDPOINTS } from '@/config/api';
 
+// Hook for managing AI chat interactions and roadmap generation
 const useChat = () => {
   const [messages, setMessages] = useState([]);
   const [stage, setStage] = useState('initial');
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
+  // Adds a new message to the chat history
   const appendMessage = useCallback((msg) => {
     setMessages((prev) => [...prev, msg]);
   }, []);
 
+  // Fetches AI response from the backend
   const generateAiResponse = useCallback(async (prompt) => {
     const response = await fetch(API_ENDPOINTS.CHAT, {
       method: 'POST',
@@ -31,6 +34,7 @@ const useChat = () => {
     return data.content;
   }, []);
 
+  // Initiates chat with project details and file content
   const startChatWithDetails = useCallback(
     async ({ title, description, timeline, experienceLevel, technologies, projectScope, processedFile }) => {
       setLoading(true);
@@ -101,7 +105,7 @@ const useChat = () => {
           }
         }
 
-        prompt += `\n\nBased on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
+        prompt += `\n\nBased on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. Use proper markdown formatting with **bold** for emphasis, bullet points for lists, and clear structure. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
 
         const aiResponse = await generateAiResponse(prompt);
         appendMessage({ role: 'assistant', content: aiResponse });
@@ -116,6 +120,7 @@ const useChat = () => {
     [appendMessage, generateAiResponse]
   );
 
+  // Handles user messages and generates AI responses
   const sendMessage = useCallback(
     async (content) => {
       if (stage === 'initial') {
@@ -133,7 +138,7 @@ const useChat = () => {
         let prompt = '';
         if (stage === 'awaiting_confirmation') {
           if (content.trim().toLowerCase().startsWith('yes')) {
-            prompt = `${history}\n\nUser: yes\n\nThe user has confirmed the draft. Provide the full detailed roadmap as markdown bullet list with sub-tasks, estimated durations and milestones.`;
+            prompt = `${history}\n\nUser: yes\n\nThe user has confirmed the draft. Provide the full detailed roadmap using proper markdown formatting with headers, bullet points, sub-tasks, estimated durations, and milestones. Use **bold** for emphasis and structure it clearly with sections.`;
           } else {
             prompt = `${history}\n\nUser: ${content}\n\nThe user provided feedback. Revise the summary and draft roadmap accordingly and again end with the confirmation question.`;
           }
