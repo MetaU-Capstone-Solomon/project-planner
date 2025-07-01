@@ -1,32 +1,34 @@
-export const validateFile = (
-  file,
-  allowedTypes = ['.pdf', '.doc', '.docx', '.txt'],
-  maxSize = 10 * 1024 * 1024
-) => {
-  if (!file) return { isValid: false, error: 'No file selected' };
+// Configuration
+const MAX_DESCRIPTION_LENGTH = parseInt(import.meta.env.VITE_MAX_DESCRIPTION_LENGTH) || 500;
 
-  const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-  if (!allowedTypes.includes(fileExtension)) {
-    return {
-      isValid: false,
-      error: `File type not supported. Allowed types: ${allowedTypes.join(', ')}`,
-    };
+// Extract title and description from file content
+export const extractProjectInfo = (content, fileName = '') => {
+  if (!content) {
+    const cleanFileName = fileName.replace(/\.[^/.]+$/, '');
+    return { title: cleanFileName || 'Untitled Project', description: 'No content available' };
   }
 
-  if (file.size > maxSize) {
-    return {
-      isValid: false,
-      error: `File too large. Maximum size: ${Math.round(maxSize / (1024 * 1024))}MB`,
-    };
+  // Clean the content
+  const cleanContent = content.replace(/\s+/g, ' ').trim();
+
+  // Extract title from first line or filename
+  let title = '';
+  const lines = cleanContent.split('\n');
+  const firstLine = lines[0].trim();
+
+  if (firstLine && firstLine.length > 3 && firstLine.length < 100) {
+    title = firstLine;
+  } else {
+    const cleanFileName = fileName.replace(/\.[^/.]+$/, '');
+    title = cleanFileName || 'Untitled Project';
   }
 
-  return { isValid: true, error: null };
-};
+  // Extract description from remaining content
+  const remainingContent = lines.slice(1).join(' ').trim();
+  const description =
+    remainingContent.length > MAX_DESCRIPTION_LENGTH
+      ? remainingContent.substring(0, MAX_DESCRIPTION_LENGTH) + '...'
+      : remainingContent || 'No description available';
 
-export const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return { title, description };
 };

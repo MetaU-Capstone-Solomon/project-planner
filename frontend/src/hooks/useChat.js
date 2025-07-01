@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { extractProjectInfo } from '@/utils/fileUtils';
+import { API_ENDPOINTS } from '@/config/api';
 
 const useChat = () => {
   const [messages, setMessages] = useState([]);
@@ -12,7 +14,7 @@ const useChat = () => {
   }, []);
 
   const generateAiResponse = useCallback(async (prompt) => {
-    const response = await fetch('http://localhost:3001/api/chat', {
+    const response = await fetch(API_ENDPOINTS.CHAT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -30,22 +32,59 @@ const useChat = () => {
   }, []);
 
   const startChatWithDetails = useCallback(
-    async ({ title, description }) => {
-      setProjectTitle(title);
+    async ({ title, description, processedFile }) => {
       setLoading(true);
-      appendMessage({ role: 'user', content: `Generating a roadmap for: **${title}**` });
 
       try {
-        const prompt = `You are ProPlan, an expert AI project manager that helps students create detailed project roadmaps.
+        let extractedTitle = title;
+        let extractedDescription = description;
+        let fileContent = '';
+        let isSummarized = false;
 
-Project Title: "${title}"
+        if (processedFile) {
+          fileContent = processedFile.processedText;
+          isSummarized = processedFile.isSummarized;
 
-Project Description:
-"""
-${description}
-"""
+          // no title/description provided, extract from file
+          if (!title && !description) {
+            const extracted = extractProjectInfo(
+              processedFile.originalText,
+              processedFile.fileName
+            );
+            extractedTitle = extracted.title;
+            extractedDescription = extracted.description;
+          }
+        }
 
-Based on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
+        // Set project title
+        setProjectTitle(extractedTitle || 'Untitled Project');
+
+        // Start chat
+        const userMessage = extractedTitle
+          ? `Generating a roadmap for: **${extractedTitle}**`
+          : 'Generating a roadmap from uploaded document';
+        appendMessage({ role: 'user', content: userMessage });
+
+        // Build prompt
+        let prompt = `You are ProPlan, an expert AI technical project manager that helps developers create detailed project roadmaps.`;
+
+        if (extractedTitle) {
+          prompt += `\n\nProject Title: "${extractedTitle}"`;
+        }
+
+        if (extractedDescription) {
+          prompt += `\n\nProject Description:\n"""\n${extractedDescription}\n"""`;
+        }
+
+        if (fileContent) {
+          prompt += `\n\nDocument content (${fileContent.length} characters):\n"""\n${fileContent}\n"""`;
+
+          if (isSummarized) {
+            prompt += `\n\nNote: Document was intelligently summarized to ${fileContent.length} characters to preserve important information.`;
+          }
+        }
+
+        prompt += `\n\nBased on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
 
         const aiResponse = await generateAiResponse(prompt);
         appendMessage({ role: 'assistant', content: aiResponse });
@@ -113,4 +152,4 @@ Based on all the information provided, provide a concise summary of the project 
   return { messages, loading, stage, sendMessage, startChatWithDetails };
 };
 
-export default useChat; 
+export default useChat;

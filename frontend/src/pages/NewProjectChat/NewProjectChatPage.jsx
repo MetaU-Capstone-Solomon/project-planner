@@ -14,13 +14,24 @@ const NewProjectChatPage = () => {
     description: '',
   });
 
-  const { file, error, handleFileSelect } = useFileUpload();
-  const { messages, loading, stage, sendMessage, startChatWithDetails } = useChat();
+  const { file, processedFile, error, loading: fileLoading, handleFileSelect } = useFileUpload();
+  const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails } = useChat();
 
   const handleGenerateRoadmap = () => {
-    if (values.title && values.description) {
-      startChatWithDetails({ ...values });
+    // Allow generation on conditions
+    const hasTextInput = values.title.trim() && values.description.trim();
+    const hasFile = processedFile;
+
+    if (hasTextInput || hasFile) {
+      startChatWithDetails({ ...values, processedFile });
     }
+  };
+
+  // Check if generate button is enabled
+  const canGenerate = () => {
+    const hasTextInput = values.title.trim() && values.description.trim();
+    const hasFile = processedFile;
+    return (hasTextInput || hasFile) && !chatLoading && !fileLoading;
   };
 
   return (
@@ -30,10 +41,13 @@ const NewProjectChatPage = () => {
         <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg">
           <div className="border-b border-gray-200 p-6">
             <h2 className="text-2xl font-bold text-gray-900">Project Details</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Fill in the details below or upload a document to get started
+            </p>
           </div>
 
           <div className="flex-1 space-y-4 overflow-y-auto p-6">
-            <FormField label="Project Title">
+            <FormField label="Project Title (Optional if uploading document)">
               <Input
                 name="title"
                 placeholder="Enter your project title"
@@ -42,7 +56,7 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            <FormField label="Project Description">
+            <FormField label="Project Description (Optional if uploading document)">
               <Textarea
                 name="description"
                 placeholder="Describe your project idea"
@@ -53,7 +67,15 @@ const NewProjectChatPage = () => {
 
             <FormField label="Upload Document (Optional)">
               <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
+              {fileLoading && (
+                <p className="mt-2 text-sm text-blue-600">Processing document, please wait...</p>
+              )}
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+              {processedFile && (
+                <div className="mt-2 text-sm text-green-600">
+                  <p>✓ Document processed successfully!</p>
+                </div>
+              )}
             </FormField>
 
             {/* Generate button */}
@@ -61,11 +83,21 @@ const NewProjectChatPage = () => {
               <button
                 type="button"
                 onClick={handleGenerateRoadmap}
-                disabled={!values.title.trim() || !values.description.trim() || loading}
+                disabled={!canGenerate()}
                 className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'Generating...' : 'Generate'}
+                {chatLoading ? 'Generating...' : 'Generate Roadmap'}
               </button>
+            </div>
+
+            {/* Help text */}
+            <div className="text-center text-xs text-gray-500">
+              {!values.title.trim() && !values.description.trim() && !processedFile && (
+                <p>
+                  Please provide a project title and description, or upload a document to get
+                  started.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -74,11 +106,18 @@ const NewProjectChatPage = () => {
         <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg">
           <div className="border-b border-gray-200 p-6">
             <h2 className="text-2xl font-bold text-gray-900">AI Assistant</h2>
-            <p className="mt-1 text-sm text-gray-600">Take advantage of our AI assistant (# questions max)</p>
+            <p className="mt-1 text-sm text-gray-600">
+              Take advantage of our AI assistant (# questions max)
+            </p>
           </div>
-          
+
           <div className="flex-1 overflow-hidden">
-            <ChatContainer messages={messages} loading={loading} stage={stage} sendMessage={sendMessage} />
+            <ChatContainer
+              messages={messages}
+              loading={chatLoading}
+              stage={stage}
+              sendMessage={sendMessage}
+            />
           </div>
         </div>
       </div>
