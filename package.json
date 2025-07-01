@@ -9,6 +9,7 @@
     "backend": "cd backend && npm run dev"
   },
   "devDependencies": {
-    "prettier": "^3.6.0"
+    "prettier": "^3.6.0",
+    "prettier-plugin-tailwindcss": "^0.6.13"
   }
 }
