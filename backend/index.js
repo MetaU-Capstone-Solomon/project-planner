@@ -38,6 +38,7 @@ const upload = multer({
   },
 });
 
+// Create HTTP server with CORS and route handling
 const server = http.createServer((req, res) => {
   // Set CORS headers for frontend communication
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL);

@@ -3,6 +3,7 @@ import useForm from '@/hooks/useForm';
 import { FORM_FIELDS } from '@/constants/projectOptions';
 import { hasRequiredFields, getFinalTimeline } from '@/utils/formValidation';
 
+// Hook for managing project form state and validation
 export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) => {
   // Initialize form with all project fields
   const { values, handleChange } = useForm({
@@ -15,7 +16,7 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) =
     [FORM_FIELDS.PROJECT_SCOPE]: '',
   });
 
-  // validation
+  // Validates and submits form data to generate roadmap
   const handleGenerateRoadmap = useCallback((processedFile) => {
     if (hasRequiredFields(values)) {
       const finalTimeline = getFinalTimeline(values);
@@ -23,7 +24,7 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) =
     }
   }, [values, startChatWithDetails]);
 
-  // Check if generate button should be enabled
+  // Checks if form is valid and not currently loading
   const canGenerate = useCallback((processedFile) => {
     return hasRequiredFields(values) && !chatLoading && !fileLoading;
   }, [values, chatLoading, fileLoading]);
