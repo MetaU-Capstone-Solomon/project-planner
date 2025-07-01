@@ -5,6 +5,7 @@ import Auth from '@/pages/Auth/Auth';
 import Callback from '@/pages/Auth/Callback';
 import Dashboard from '@/pages/Dashboard/Dashboard';
 import NewProjectChatPage from '@/pages/NewProjectChat/NewProjectChatPage';
+import Profile from '@/pages/Profile/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -43,6 +44,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <NewProjectChatPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />
