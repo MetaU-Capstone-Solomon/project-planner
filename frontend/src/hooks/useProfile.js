@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { getDisplayName, isEmailUser } from '@/utils/userUtils';
-import { updateUserPassword, signOutUser, validatePassword } from '@/services/profileService';
+import { getDisplayName, isEmailUser, getAvatarUrl } from '@/utils/userUtils';
+import { updateUserPassword, signOutUser, validatePassword, uploadAvatar } from '@/services/profileService';
 
 export const useProfile = () => {
   const { user, signOut, updatePassword } = useAuth();
@@ -16,9 +17,11 @@ export const useProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [avatarLoading, setAvatarLoading] = useState(false);
 
   const displayName = getDisplayName(user);
   const emailUser = isEmailUser(user);
+  const avatarUrl = getAvatarUrl(user);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -45,6 +48,18 @@ export const useProfile = () => {
     setIsLoading(false);
   };
 
+  const handleAvatarUpload = async (file) => {
+    setAvatarLoading(true);
+    const { success, error, url } = await uploadAvatar(supabase, user.id, file);
+    if (!success) {
+      setError(error);
+    } else {
+      // Propagate change
+      setSuccess('Avatar updated');
+    }
+    setAvatarLoading(false);
+  };
+
   const handleSignOut = async () => {
     const result = await signOutUser(signOut, navigate);
     if (!result.success) {
@@ -62,6 +77,7 @@ export const useProfile = () => {
     user,
     displayName,
     emailUser,
+    avatarUrl,
     showPasswordForm,
     setShowPasswordForm,
     passwordData,
@@ -71,6 +87,8 @@ export const useProfile = () => {
     success,
     handlePasswordChange,
     handleSignOut,
+    handleAvatarUpload,
+    avatarLoading,
     resetPasswordForm
   };
 }; 

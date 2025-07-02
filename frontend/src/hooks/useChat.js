@@ -32,7 +32,7 @@ const useChat = () => {
   }, []);
 
   const startChatWithDetails = useCallback(
-    async ({ title, description, processedFile }) => {
+    async ({ title, description, timeline, experienceLevel, technologies, projectScope, processedFile }) => {
       setLoading(true);
 
       try {
@@ -74,6 +74,23 @@ const useChat = () => {
 
         if (extractedDescription) {
           prompt += `\n\nProject Description:\n"""\n${extractedDescription}\n"""`;
+        }
+
+        // Add new project context
+        if (timeline) {
+          prompt += `\n\nTimeline: ${timeline}`;
+        }
+
+        if (experienceLevel) {
+          prompt += `\n\nExperience Level: ${experienceLevel}`;
+        }
+
+        if (technologies) {
+          prompt += `\n\nTechnologies/Frameworks: ${technologies}`;
+        }
+
+        if (projectScope) {
+          prompt += `\n\nProject Scope: ${projectScope}`;
         }
 
         if (fileContent) {
