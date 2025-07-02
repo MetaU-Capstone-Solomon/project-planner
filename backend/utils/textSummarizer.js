@@ -13,6 +13,7 @@ class TextSummarizer {
     this.keywordSet = new Set(PROJECT_KEYWORDS);
   }
 
+  // Main entry point for text summarization with caching and length optimization
   summarize(text) {
     if (!text || text.length <= this.targetLength) {
       return text;
@@ -34,7 +35,6 @@ class TextSummarizer {
     const cleanedText = this.cleanText(text);
     const sentences = this.splitIntoSentences(cleanedText);
 
-    // Quick mode if too many sentences
     if (sentences.length > SUMMARIZATION_CONFIG.MAX_SENTENCES) {
       const quickSummary = this.quickSummarize(text);
       this.cache.set(cacheKey, quickSummary);
@@ -57,14 +57,17 @@ class TextSummarizer {
     return words.slice(0, targetWords).join(' ') + '...';
   }
 
+  // Creates a unique key for caching based on text length and content samples
   generateCacheKey(text) {
     return `${text.length}_${text.substring(0, 100)}_${text.substring(text.length - 100)}`;
   }
 
+  // Normalizes whitespace and removes extra spaces
   cleanText(text) {
     return text.replace(/\s+/g, ' ').trim();
   }
 
+  // Breaks text into sentences and filters out very short ones
   splitIntoSentences(text) {
     const sentences = text.split(/(?<=[.!?])\s+/);
     return sentences.filter(
@@ -72,6 +75,7 @@ class TextSummarizer {
     );
   }
 
+  // Assigns importance scores to sentences based on keywords and position
   scoreSentencesOptimized(sentences) {
     const totalSentences = sentences.length;
     const results = new Array(totalSentences);
@@ -96,6 +100,7 @@ class TextSummarizer {
     return results;
   }
 
+  // Calculates scores based on sentence position in the document
   calculatePositionScores(total) {
     const scores = new Array(total);
     for (let i = 0; i < total; i++) {
@@ -112,6 +117,7 @@ class TextSummarizer {
     return scores;
   }
 
+  // Scores individual sentences based on multiple factors
   calculateSentenceScoreOptimized(sentence, index, total, positionScores) {
     let score = positionScores[index];
 
@@ -121,7 +127,7 @@ class TextSummarizer {
     else if (length >= 30 && length <= 200) score += 2;
     else score += 1;
 
-    // Boost sentences with project keywords
+    // increase score for sentences with project keywords
     const lowerSentence = sentence.toLowerCase();
     let keywordCount = 0;
     for (const keyword of this.keywordSet) {
@@ -135,7 +141,7 @@ class TextSummarizer {
       SUMMARIZATION_CONFIG.MAX_KEYWORD_SCORE
     );
 
-    // Boost well-structured sentences
+    // Increase score for sentences with verbs, numbers, or formatting
     if (/\b(is|are|will|should|must|can)\b/.test(lowerSentence)) score += 2;
     if (/\d+/.test(sentence)) score += 1;
     if (/[:|-]/.test(sentence)) score += 1;
@@ -143,6 +149,7 @@ class TextSummarizer {
     return score;
   }
 
+  // Picks the highest scoring sentences that fit within target length
   selectSentencesOptimized(scoredSentences) {
     const sorted = scoredSentences
       .sort((a, b) => b.score - a.score)
@@ -165,6 +172,7 @@ class TextSummarizer {
     return selected.sort((a, b) => a.index - b.index);
   }
 
+  // Combines selected sentences into final summary text
   reconstructSummary(selectedSentences) {
     if (selectedSentences.length === 0) return '';
 
@@ -174,10 +182,12 @@ class TextSummarizer {
       : summary;
   }
 
+  // Clears the summary cache
   clearCache() {
     this.cache.clear();
   }
 
+  // Returns current cache statistics
   getCacheStats() {
     return {
       size: this.cache.size,

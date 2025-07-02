@@ -3,11 +3,13 @@ const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const textract = require('textract');
 
+// Handles text extraction and processing from various file formats
 class FileProcessingService {
   constructor() {
     this.summarizer = new TextSummarizer();
   }
 
+  // Processes uploaded files and returns original and summarized text
   async processFile(file) {
     try {
       const fileExtension = this.getFileExtension(file.originalname);
@@ -49,14 +51,17 @@ class FileProcessingService {
     }
   }
 
+  // Gets the lowercase file extension from filename
   getFileExtension(filename) {
     return '.' + filename.split('.').pop().toLowerCase();
   }
 
+  // Extracts text from TXT files using UTF-8 encoding
   async extractTextFromTxt(file) {
     return file.buffer.toString('utf-8');
   }
 
+  // Extracts raw text from DOCX files using mammoth
   async extractTextFromDocx(file) {
     try {
       const result = await mammoth.extractRawText({ buffer: file.buffer });
@@ -66,6 +71,7 @@ class FileProcessingService {
     }
   }
 
+  // Extracts text content from PDF files
   async extractTextFromPdf(file) {
     try {
       const data = await pdfParse(file.buffer);
@@ -75,6 +81,7 @@ class FileProcessingService {
     }
   }
 
+  // Extracts text from legacy DOC files using textract
   async extractTextFromDoc(file) {
     try {
       return new Promise((resolve, reject) => {
@@ -91,10 +98,12 @@ class FileProcessingService {
     }
   }
 
+  // Returns current summarizer cache statistics
   getCacheStats() {
     return this.summarizer.getCacheStats();
   }
 
+  // Clears the summarizer cache
   clearCache() {
     this.summarizer.clearCache();
   }
