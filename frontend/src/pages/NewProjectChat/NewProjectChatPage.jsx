@@ -44,7 +44,7 @@ const NewProjectChatPage = () => {
 
           <div className="flex-1 space-y-4 overflow-y-auto p-6">
             {/* Required fields */}
-            <FormField label="Project Title *">
+            <FormField label="Project Title" isRequired={true}>
               <Input
                 name={FORM_FIELDS.TITLE}
                 placeholder="Enter your project title"
@@ -53,7 +53,7 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            <FormField label="Project Description (Optional)">
+            <FormField label="Project Description">
               <Textarea
                 name={FORM_FIELDS.DESCRIPTION}
                 placeholder="Describe your project idea"
@@ -62,7 +62,7 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            <FormField label="Timeline *">
+            <FormField label="Timeline" isRequired={true}>
               <Select
                 name={FORM_FIELDS.TIMELINE}
                 value={values[FORM_FIELDS.TIMELINE]}
@@ -71,9 +71,9 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            {/* Custom timeline input (shown when custom is selected) */}
+            {/* Custom timeline input  */}
             {values[FORM_FIELDS.TIMELINE] === 'custom' && (
-              <FormField label="Custom Timeline *">
+              <FormField label="Custom Timeline" isRequired={true}>
                 <Input
                   name={FORM_FIELDS.CUSTOM_TIMELINE}
                   placeholder="e.g., 2 weeks, 4 months, 1.5 years"
@@ -83,7 +83,7 @@ const NewProjectChatPage = () => {
               </FormField>
             )}
 
-            <FormField label="Experience Level *">
+            <FormField label="Experience Level" isRequired={true}>
               <Select
                 name={FORM_FIELDS.EXPERIENCE_LEVEL}
                 value={values[FORM_FIELDS.EXPERIENCE_LEVEL]}
@@ -92,7 +92,7 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            <FormField label="Technologies/Frameworks (Optional)">
+            <FormField label="Technologies/Frameworks">
               <Input
                 name={FORM_FIELDS.TECHNOLOGIES}
                 placeholder="e.g., React, Python, PyTorch, HTML/CSS"
@@ -101,7 +101,7 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            <FormField label="Project Scope *">
+            <FormField label="Project Scope" isRequired={true}>
               <Select
                 name={FORM_FIELDS.PROJECT_SCOPE}
                 value={values[FORM_FIELDS.PROJECT_SCOPE]}
@@ -111,7 +111,7 @@ const NewProjectChatPage = () => {
             </FormField>
 
             {/* File upload section */}
-            <FormField label="Upload Document (Optional)">
+            <FormField label="Upload Document">
               <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
               {fileLoading && (
                 <p className="mt-2 text-sm text-blue-600">Processing document, please wait...</p>
