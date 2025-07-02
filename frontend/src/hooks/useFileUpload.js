@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 import { API_ENDPOINTS } from '@/config/api';
 
+// hook for handling file uploads and processing
 const useFileUpload = () => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [processedFile, setProcessedFile] = useState(null);
 
+  // Handles file selection, upload, and processing
   const handleFileSelect = useCallback(async (selectedFile) => {
     if (!selectedFile) {
       setFile(null);
@@ -45,6 +47,7 @@ const useFileUpload = () => {
     }
   }, []);
 
+  // Resets all file-related states
   const clearFile = useCallback(() => {
     setFile(null);
     setProcessedFile(null);
