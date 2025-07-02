@@ -65,7 +65,7 @@ const useChat = () => {
 
         // Start chat
         const userMessage = extractedTitle
-          ? `Generating a roadmap for: **${extractedTitle}**`
+          ? `Generating a roadmap for: ${extractedTitle}`
           : 'Generating a roadmap from uploaded document';
         appendMessage({ role: 'user', content: userMessage });
 
