@@ -69,12 +69,15 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error;
   };
 
-  const signUpWithEmail = async (email, password) => {
+  const signUpWithEmail = async (email, password, fullName) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${FRONTEND_URL}/auth/callback`,
+        data: {
+          full_name: fullName
+        }
       },
     });
     if (error) throw error;
