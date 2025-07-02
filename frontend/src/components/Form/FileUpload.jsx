@@ -3,7 +3,7 @@ import React from 'react';
 const FileUpload = ({
   onFileSelect,
   selectedFile,
-  accept = '.pdf,.doc,.docx,.txt',
+  accept = 'pdf,doc,docx,txt',
   className = '',
 }) => {
   const handleFileChange = (e) => {
@@ -22,7 +22,7 @@ const FileUpload = ({
     const file = e.dataTransfer.files[0];
     if (
       file &&
-      accept.split(',').some((type) => file.name.toLowerCase().endsWith(type.replace('.', '')))
+      accept.split(',').some((type) => file.name.toLowerCase().endsWith(type))
     ) {
       onFileSelect(file);
     }
@@ -39,7 +39,7 @@ const FileUpload = ({
           type="file"
           className="hidden"
           id="file-upload"
-          accept={accept}
+          accept={accept.split(',').map(type => `.${type}`).join(',')}
           onChange={handleFileChange}
         />
         <label htmlFor="file-upload" className="cursor-pointer">
