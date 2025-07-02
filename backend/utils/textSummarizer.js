@@ -1,5 +1,11 @@
 const { PROJECT_KEYWORDS, SUMMARIZATION_CONFIG } = require('../constants/keywords');
 
+/**
+ * text summarizer that extracts key sentences based on:
+ * - Project-related keywords
+ * - Sentence position and length
+ * - Content structure and readability
+ */
 class TextSummarizer {
   constructor(targetLength = SUMMARIZATION_CONFIG.DEFAULT_TARGET_LENGTH) {
     this.targetLength = targetLength;
@@ -35,6 +41,7 @@ class TextSummarizer {
       return quickSummary;
     }
 
+    // Score sentences based on relevance and position
     const scoredSentences = this.scoreSentencesOptimized(sentences);
     const selectedSentences = this.selectSentencesOptimized(scoredSentences);
     const summary = this.reconstructSummary(selectedSentences);
