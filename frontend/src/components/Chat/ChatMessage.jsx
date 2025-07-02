@@ -1,46 +1,31 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 
 const ChatMessage = ({ message }) => {
   const { role, content } = message;
   const isUser = role === 'user';
 
-  // markdown rendering for AI responses
-  const renderMarkdown = (text) => {
-    if (isUser) return text; // Don't render markdown
+  // Don't render markdown for user messages
+  if (isUser) {
+    return (
+      <div className="mb-4 flex justify-end">
+        <div className="max-w-prose whitespace-pre-wrap rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white shadow-md">
+          {content}
+        </div>
+      </div>
+    );
+  }
 
-    return text
-      .split('\n')
-      .map((line) => {
-        // Bold text
-        if (line.includes('**')) {
-          line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        }
-
-        // Numbered lists
-        if (/^\d+\.\s/.test(line)) {
-          return `<div class="ml-4">${line}</div>`;
-        }
-
-        // Bullet points
-        if (line.trim().startsWith('- ')) {
-          return `<div class="ml-4">• ${line.substring(2)}</div>`;
-        }
-
-        return line;
-      })
-      .join('\n');
-  };
-
-  const formattedContent = renderMarkdown(content);
-
+  // Render markdown for AI responses - standard approach for react-markdown v10+
   return (
-    <div className={`mb-4 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div
-        className={`max-w-prose whitespace-pre-wrap rounded-lg px-4 py-2 text-sm shadow-md ${
-          isUser ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-800'
-        }`}
-        dangerouslySetInnerHTML={{ __html: formattedContent }}
-      />
+    <div className="mb-4 flex justify-start">
+      <div className="max-w-prose rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-800 shadow-md">
+        <div className="prose prose-sm max-w-none">
+          <ReactMarkdown>
+            {content}
+          </ReactMarkdown>
+        </div>
+      </div>
     </div>
   );
 };
