@@ -15,6 +15,7 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import FormField from '@/components/Form/FormField';
 import Input from '@/components/Form/Input';
 import Textarea from '@/components/Form/Textarea';
@@ -27,6 +28,7 @@ import useChat from '@/hooks/useChat';
 import { useProjectForm } from '@/hooks/useProjectForm';
 import { useProjectSave } from '@/hooks/useProjectSave';
 import { MESSAGES } from '@/constants/messages';
+import { ROUTES } from '@/constants/routes';
 import { 
   TIMELINE_OPTIONS, 
   EXPERIENCE_LEVEL_OPTIONS, 
@@ -35,6 +37,7 @@ import {
 } from '@/constants/projectOptions';
 
 const NewProjectChatPage = () => {
+  const navigate = useNavigate();
   const { file, processedFile, error, loading: fileLoading, handleFileSelect } = useFileUpload();
   const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails } = useChat();
   
@@ -48,6 +51,12 @@ const NewProjectChatPage = () => {
 
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);
+  };
+
+  const handleViewRoadmap = () => {
+    if (savedProjectId) {
+      navigate(ROUTES.PROJECT_DETAIL.replace(':projectId', savedProjectId));
+    }
   };
 
   return (
@@ -176,9 +185,15 @@ const NewProjectChatPage = () => {
           {stage === 'done' && (
             <div className="border-t border-gray-200 p-4">
               {savedProjectId ? (
-                <div className="text-center">
+                <div className="text-center space-y-3">
                   <p className="text-sm text-green-600">✓ Project saved successfully!</p>
-                  {/* TODO: Add "View Project" button linking to project detail page (Next PR) */}
+                  <Button
+                    onClick={handleViewRoadmap}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    {MESSAGES.PROJECT.VIEW_ROADMAP}
+                  </Button>
                 </div>
               ) : (
                 <div className="text-center">
@@ -187,7 +202,7 @@ const NewProjectChatPage = () => {
                     disabled={saving}
                     className="w-full"
                   >
-                    {saving ? 'Saving...' : 'Save Project'}
+                    {saving ? MESSAGES.LOADING.SAVING : MESSAGES.PROJECT.SAVE_PROJECT}
                   </Button>
                 </div>
               )}
