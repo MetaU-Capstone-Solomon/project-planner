@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle } from 'lucide-react';
 import Logo from '@/components/Logo/Logo';
+import Button from '@/components/Button/Button';
+import { ROUTES } from '@/constants/routes';
 import prosperImg from '@/assets/images/testimonials/prosper.jpg';
 import sudeepImg from '@/assets/images/testimonials/sudeep.jpg';
 import vincentImg from '@/assets/images/testimonials/vincent.jpg';
@@ -73,18 +75,16 @@ const Home = () => {
               team organized and projects on track.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Link
-                to="/auth"
-                className="flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
-              >
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to={ROUTES.AUTH}>
+                <Button variant="primary" size="lg" className="flex items-center">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </Link>
-              <Link
-                to="/auth"
-                className="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 hover:bg-gray-50"
-              >
-                Sign In
+              <Link to={ROUTES.AUTH}>
+                <Button variant="outline" size="lg">
+                  Sign In
+                </Button>
               </Link>
             </div>
           </div>

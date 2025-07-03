@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import { ROUTES } from '@/constants/routes';
 
 export default function Callback() {
   const navigate = useNavigate();
@@ -12,13 +14,13 @@ export default function Callback() {
         if (error) throw error;
 
         if (data?.session) {
-          navigate('/dashboard');
+          navigate(ROUTES.DASHBOARD);
         } else {
-          navigate('/auth');
+          navigate(ROUTES.AUTH);
         }
       } catch (error) {
         console.error('Error handling auth callback:', error);
-        navigate('/auth');
+        navigate(ROUTES.AUTH);
       }
     };
 
@@ -26,8 +28,8 @@ export default function Callback() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+    <div className="min-h-screen">
+      <LoadingSpinner size="lg" className="min-h-screen" />
     </div>
   );
 }

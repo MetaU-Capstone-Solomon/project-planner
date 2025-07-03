@@ -3,6 +3,7 @@ import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X, Loader2 } from 'lucid
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useExperiences } from '@/hooks/useExperiences';
+import { ROUTES } from '@/constants/routes';
 
 function Auth() {
   const [activeTab, setActiveTab] = useState('signup');
@@ -29,7 +30,7 @@ function Auth() {
 
   useEffect(() => {
     if (user) {
-      navigate('/dashboard');
+      navigate(ROUTES.DASHBOARD);
     }
   }, [user, navigate]);
 

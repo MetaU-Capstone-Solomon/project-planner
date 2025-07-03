@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ROUTES } from '@/constants/routes';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import Home from '@/pages/Home/Home';
 import Auth from '@/pages/Auth/Auth';
 import Callback from '@/pages/Auth/Callback';
@@ -12,15 +14,11 @@ const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
-      </div>
-    );
+    return <LoadingSpinner size="lg" className="min-h-screen" />;
   }
 
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to={ROUTES.AUTH} replace />;
   }
 
   return children;
@@ -29,11 +27,11 @@ const ProtectedRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/auth/callback" element={<Callback />} />
+      <Route path={ROUTES.HOME} element={<Home />} />
+      <Route path={ROUTES.AUTH} element={<Auth />} />
+      <Route path={ROUTES.AUTH_CALLBACK} element={<Callback />} />
       <Route
-        path="/dashboard"
+        path={ROUTES.DASHBOARD}
         element={
           <ProtectedRoute>
             <Dashboard />
@@ -41,7 +39,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/new-project-chat"
+        path={ROUTES.NEW_PROJECT_CHAT}
         element={
           <ProtectedRoute>
             <NewProjectChatPage />
@@ -49,7 +47,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/profile"
+        path={ROUTES.PROFILE}
         element={
           <ProtectedRoute>
             <Profile />
@@ -57,7 +55,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/project/:projectId"
+        path={ROUTES.PROJECT_DETAIL}
         element={
           <ProtectedRoute>
             <ProjectDetailPage />

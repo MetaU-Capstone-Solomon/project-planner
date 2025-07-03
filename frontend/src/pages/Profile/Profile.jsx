@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
+import Button from '@/components/Button/Button';
+import { ROUTES } from '@/constants/routes';
 
 const Profile = () => {
   const [showPw, setShowPw] = useState(false);
@@ -24,7 +26,7 @@ const Profile = () => {
     success,
     handlePasswordChange,
     handleSignOut,
-    resetPasswordForm
+    resetPasswordForm,
   } = useProfile();
 
   return (
@@ -33,18 +35,17 @@ const Profile = () => {
         {/* Header with back button */}
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700"
+          <Button
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+            variant="secondary"
+            aria-label="Navigate back to dashboard"
           >
             Back to Dashboard
-          </button>
+          </Button>
         </div>
 
         {/* Error and success messages */}
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
-        )}
+        {error && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
         {success && (
           <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-700">{success}</div>
@@ -54,32 +55,32 @@ const Profile = () => {
         <div className="flex flex-col items-center rounded-lg bg-white shadow-lg">
           <div className="h-24 w-full rounded-t-lg bg-gray-300" />
           <div className="-mt-12 flex flex-col items-center pb-6">
-          <img
-            src={avatarUrl}
-            alt="Profile picture"
-            className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-lg"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files && e.target.files[0]) {
-                handleAvatarUpload(e.target.files[0]);
-              }
-            }}
-          />
-          <button
-            type="button"
-            disabled={avatarLoading}
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-4 rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
-          >
-            {avatarLoading ? 'Uploading…' : 'Change Picture'}
-          </button>
-        </div>
-
+            <img
+              src={avatarUrl}
+              alt="Profile picture"
+              className="h-32 w-32 rounded-full object-cover shadow-lg ring-4 ring-white"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  handleAvatarUpload(e.target.files[0]);
+                }
+              }}
+            />
+            <Button
+              type="button"
+              disabled={avatarLoading}
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              aria-label="Change profile picture"
+            >
+              {avatarLoading ? 'Uploading…' : 'Change Picture'}
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -103,12 +104,13 @@ const Profile = () => {
             <div className="rounded-lg bg-white p-6 shadow-md">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">Change Password</h2>
               {!showPasswordForm ? (
-                <button
+                <Button
                   onClick={() => setShowPasswordForm(true)}
-                  className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  variant="primary"
+                  aria-label="Open password change form"
                 >
                   Change Password
-                </button>
+                </Button>
               ) : (
                 <form onSubmit={handlePasswordChange} className="space-y-4">
                   <div>
@@ -117,7 +119,9 @@ const Profile = () => {
                       <input
                         type={showPw ? 'text' : 'password'}
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({ ...passwordData, newPassword: e.target.value })
+                        }
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:border-blue-500 focus:outline-none"
                         placeholder="Enter new password"
                         required
@@ -132,12 +136,16 @@ const Profile = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Confirm New Password
+                    </label>
                     <div className="relative">
                       <input
                         type={showPwConfirm ? 'text' : 'password'}
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                        onChange={(e) =>
+                          setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                        }
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:border-blue-500 focus:outline-none"
                         placeholder="Confirm new password"
                         required
@@ -147,26 +155,35 @@ const Profile = () => {
                         onClick={() => setShowPwConfirm(!showPwConfirm)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
                       >
-                        {showPwConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPwConfirm ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500">Password must be at least 8 characters and include uppercase, lowercase, number, and special character.</p>
+                  <p className="text-xs text-gray-500">
+                    Password must be at least 8 characters and include uppercase, lowercase, number,
+                    and special character.
+                  </p>
                   <div className="flex space-x-3">
-                    <button
+                    <Button
                       type="submit"
                       disabled={isLoading}
-                      className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                      variant="primary"
+                      aria-label="Update password"
                     >
                       {isLoading ? 'Updating...' : 'Update Password'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={resetPasswordForm}
-                      className="rounded-md bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400"
+                      variant="outline"
+                      aria-label="Cancel password change"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
@@ -176,12 +193,9 @@ const Profile = () => {
           {/* Sign out */}
           <div className="rounded-lg bg-white p-6 shadow-md">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Sign Out</h2>
-            <button
-              onClick={handleSignOut}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
+            <Button onClick={handleSignOut} variant="danger" aria-label="Sign out of application">
               Sign Out
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -189,4 +203,4 @@ const Profile = () => {
   );
 };
 
-export default Profile; 
+export default Profile;
