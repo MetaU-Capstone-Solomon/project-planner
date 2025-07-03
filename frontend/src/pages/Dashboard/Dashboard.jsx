@@ -1,54 +1,51 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Button from '@/components/Button/Button';
+import { ROUTES } from '@/constants/routes';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleNewProject = () => {
-    navigate('/new-project-chat');
+    navigate(ROUTES.NEW_PROJECT_CHAT);
   };
 
   const handleProfile = () => {
-    navigate('/profile');
+    navigate(ROUTES.PROFILE);
+  };
+
+  const handleSignOut = () => {
+    signOut();
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
-        <div className="mb-8 flex items-center justify-between">
+        <header className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <div className="flex space-x-3">
-            <button
-              onClick={handleNewProject}
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
+            <Button onClick={handleNewProject} variant="primary" aria-label="Create new project">
               New Project
-            </button>
-            <button
-              onClick={handleProfile}
-              className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700"
-            >
+            </Button>
+            <Button onClick={handleProfile} variant="secondary" aria-label="View profile">
               Profile
-            </button>
+            </Button>
           </div>
-        </div>
+        </header>
 
         {/* TODO: Add project cards with "View Details" button*/}
 
-        <div className="flex items-center justify-center">
+        <main className="flex items-center justify-center">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold text-gray-900">Welcome to your dashboard</h2>
             <p className="mb-6 text-gray-600">You have successfully logged in with Google OAuth!</p>
-            <button
-              onClick={signOut}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-            >
+            <Button onClick={handleSignOut} variant="danger" aria-label="Sign out of application">
               Sign Out
-            </button>
+            </Button>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
