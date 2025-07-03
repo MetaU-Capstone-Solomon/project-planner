@@ -1,13 +1,31 @@
-import React from 'react';
+/**
+ * NewProjectChatPage - Project creation and AI chat interface
+ * 
+ * Current Implementation (PR #1):
+ * - Basic project form with AI chat
+ * - Save project functionality after roadmap generation
+ * - Simple success message display
+ * - Console logging for saved project details
+ * 
+ * Future Enhancements (Next PRs):
+ * - Toast notifications for better UX
+ * - Project detail page navigation
+ * - Timeline visualization and progress tracking
+ * - Enhanced error handling and retry mechanisms
+ */
+
+import React, { useState } from 'react';
 import FormField from '@/components/Form/FormField';
 import Input from '@/components/Form/Input';
 import Textarea from '@/components/Form/Textarea';
 import Select from '@/components/Form/Select';
 import FileUpload from '@/components/Form/FileUpload';
 import ChatContainer from '@/components/Chat/ChatContainer';
+import Button from '@/components/Button/Button';
 import useFileUpload from '@/hooks/useFileUpload';
 import useChat from '@/hooks/useChat';
 import { useProjectForm } from '@/hooks/useProjectForm';
+import { saveProject } from '@/services/projectService';
 import { 
   TIMELINE_OPTIONS, 
   EXPERIENCE_LEVEL_OPTIONS, 
@@ -19,6 +37,10 @@ const NewProjectChatPage = () => {
   const { file, processedFile, error, loading: fileLoading, handleFileSelect } = useFileUpload();
   const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails } = useChat();
   
+  // Project saving state
+  const [saving, setSaving] = useState(false);
+  const [savedProjectId, setSavedProjectId] = useState(null);
+  
   // Custom hook for form logic and validation
   const { values, handleChange, handleGenerateRoadmap, canGenerate } = useProjectForm(
     startChatWithDetails, 
@@ -28,6 +50,42 @@ const NewProjectChatPage = () => {
 
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);
+  };
+
+  // Save project after AI generates roadmap
+  const handleSaveProject = async () => {
+    if (saving || savedProjectId) return;
+    
+    setSaving(true);
+    try {
+      // Find the last AI message (the generated roadmap)
+      const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
+      if (!lastAssistantMessage) {
+        throw new Error('No AI roadmap found to save.');
+      }
+
+      const result = await saveProject({
+        title: values[FORM_FIELDS.TITLE] || 'Untitled Project',
+        content: lastAssistantMessage.content,
+      });
+
+      if (result.success) {
+        setSavedProjectId(result.projectId);
+        console.log('Project saved successfully!', {
+          projectId: result.projectId,
+          title: values[FORM_FIELDS.TITLE] || 'Untitled Project',
+          content: lastAssistantMessage.content.substring(0, 100) + '...', // First 100 chars
+          savedAt: new Date().toISOString()
+        });
+      } else {
+        throw new Error(result.error || 'Failed to save project');
+      }
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      // TODO: Add user-facing error handling with toast notifications (PR feedback: better UX)
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -126,14 +184,14 @@ const NewProjectChatPage = () => {
 
             {/* Generate button */}
             <div className="flex justify-center pt-4">
-              <button
-                type="button"
+              <Button
                 onClick={onGenerateClick}
                 disabled={!canGenerate(processedFile)}
-                className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                size="md"
+                className="px-6 py-2"
               >
                 {chatLoading ? 'Generating...' : 'Generate Roadmap'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -155,6 +213,28 @@ const NewProjectChatPage = () => {
               sendMessage={sendMessage}
             />
           </div>
+          
+          {/* Project saving section - show when roadmap is generated */}
+          {stage === 'done' && (
+            <div className="border-t border-gray-200 p-4">
+              {savedProjectId ? (
+                <div className="text-center">
+                  <p className="text-sm text-green-600">✓ Project saved successfully!</p>
+                  {/* TODO: Add "View Project" button linking to project detail page (Next PR) */}
+                </div>
+              ) : (
+                <div className="text-center">
+                  <Button
+                    onClick={handleSaveProject}
+                    disabled={saving}
+                    className="w-full"
+                  >
+                    {saving ? 'Saving...' : 'Save Project'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
