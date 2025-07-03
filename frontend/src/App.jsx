@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
@@ -70,6 +71,7 @@ export default function App() {
   return (
     <AuthProvider>
       <AppRoutes />
+      <Toaster />
     </AuthProvider>
   );
 }

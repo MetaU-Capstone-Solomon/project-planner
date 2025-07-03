@@ -4,7 +4,6 @@ import Button from '@/components/Button/Button';
 import { ROUTES } from '@/constants/routes';
 
 // Displays detailed information about a specific project
-
 // TODO: Add timeline bar, progress calculation, markdown rendering, and real project data
 const ProjectDetailPage = () => {
   const navigate = useNavigate();

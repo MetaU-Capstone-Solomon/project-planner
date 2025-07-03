@@ -14,7 +14,7 @@
  * - Enhanced error handling and retry mechanisms
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import FormField from '@/components/Form/FormField';
 import Input from '@/components/Form/Input';
 import Textarea from '@/components/Form/Textarea';
@@ -25,7 +25,8 @@ import Button from '@/components/Button/Button';
 import useFileUpload from '@/hooks/useFileUpload';
 import useChat from '@/hooks/useChat';
 import { useProjectForm } from '@/hooks/useProjectForm';
-import { saveProject } from '@/services/projectService';
+import { useProjectSave } from '@/hooks/useProjectSave';
+import { MESSAGES } from '@/constants/messages';
 import { 
   TIMELINE_OPTIONS, 
   EXPERIENCE_LEVEL_OPTIONS, 
@@ -37,55 +38,16 @@ const NewProjectChatPage = () => {
   const { file, processedFile, error, loading: fileLoading, handleFileSelect } = useFileUpload();
   const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails } = useChat();
   
-  // Project saving state
-  const [saving, setSaving] = useState(false);
-  const [savedProjectId, setSavedProjectId] = useState(null);
-  
-  // Custom hook for form logic and validation
   const { values, handleChange, handleGenerateRoadmap, canGenerate } = useProjectForm(
     startChatWithDetails, 
     chatLoading, 
     fileLoading
   );
 
+  const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, { title: values[FORM_FIELDS.TITLE] });
+
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);
-  };
-
-  // Save project after AI generates roadmap
-  const handleSaveProject = async () => {
-    if (saving || savedProjectId) return;
-    
-    setSaving(true);
-    try {
-      // Find the last AI message (the generated roadmap)
-      const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
-      if (!lastAssistantMessage) {
-        throw new Error('No AI roadmap found to save.');
-      }
-
-      const result = await saveProject({
-        title: values[FORM_FIELDS.TITLE] || 'Untitled Project',
-        content: lastAssistantMessage.content,
-      });
-
-      if (result.success) {
-        setSavedProjectId(result.projectId);
-        console.log('Project saved successfully!', {
-          projectId: result.projectId,
-          title: values[FORM_FIELDS.TITLE] || 'Untitled Project',
-          content: lastAssistantMessage.content.substring(0, 100) + '...', // First 100 chars
-          savedAt: new Date().toISOString()
-        });
-      } else {
-        throw new Error(result.error || 'Failed to save project');
-      }
-    } catch (error) {
-      console.error('Failed to save project:', error);
-      // TODO: Add user-facing error handling with toast notifications (PR feedback: better UX)
-    } finally {
-      setSaving(false);
-    }
   };
 
   return (
@@ -101,7 +63,6 @@ const NewProjectChatPage = () => {
           </div>
 
           <div className="flex-1 space-y-4 overflow-y-auto p-6">
-            {/* Required fields */}
             <FormField label="Project Title" isRequired={true}>
               <Input
                 name={FORM_FIELDS.TITLE}
@@ -129,7 +90,6 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            {/* Custom timeline input  */}
             {values[FORM_FIELDS.TIMELINE] === 'custom' && (
               <FormField label="Custom Timeline" isRequired={true}>
                 <Input
@@ -168,21 +128,19 @@ const NewProjectChatPage = () => {
               />
             </FormField>
 
-            {/* File upload section */}
             <FormField label="Upload Document">
               <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
               {fileLoading && (
-                <p className="mt-2 text-sm text-blue-600">Processing document, please wait...</p>
+                <p className="mt-2 text-sm text-blue-600">{MESSAGES.LOADING.PROCESSING}</p>
               )}
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
               {processedFile && (
                 <div className="mt-2 text-sm text-green-600">
-                  <p>✓ Document processed successfully!</p>
+                  <p>{MESSAGES.FILE.PROCESSED_SUCCESS}</p>
                 </div>
               )}
             </FormField>
 
-            {/* Generate button */}
             <div className="flex justify-center pt-4">
               <Button
                 onClick={onGenerateClick}
@@ -190,7 +148,7 @@ const NewProjectChatPage = () => {
                 size="md"
                 className="px-6 py-2"
               >
-                {chatLoading ? 'Generating...' : 'Generate Roadmap'}
+                {chatLoading ? MESSAGES.LOADING.GENERATING : MESSAGES.LOADING.GENERATE_ROADMAP}
               </Button>
             </div>
           </div>
