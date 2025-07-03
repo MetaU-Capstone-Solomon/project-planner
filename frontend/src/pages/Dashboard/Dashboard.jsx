@@ -35,6 +35,8 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* TODO: Add project cards with "View Details" button*/}
+
         <div className="flex items-center justify-center">
           <div className="text-center">
             <h2 className="mb-4 text-4xl font-bold text-gray-900">Welcome to your dashboard</h2>
