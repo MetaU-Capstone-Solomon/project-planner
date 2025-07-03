@@ -6,6 +6,7 @@ import Callback from '@/pages/Auth/Callback';
 import Dashboard from '@/pages/Dashboard/Dashboard';
 import NewProjectChatPage from '@/pages/NewProjectChat/NewProjectChatPage';
 import Profile from '@/pages/Profile/Profile';
+import ProjectDetailPage from '@/pages/ProjectDetail/ProjectDetailPage';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -52,6 +53,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/project/:projectId"
+        element={
+          <ProtectedRoute>
+            <ProjectDetailPage />
           </ProtectedRoute>
         }
       />
