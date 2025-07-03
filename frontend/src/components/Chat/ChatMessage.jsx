@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 const ChatMessage = ({ message }) => {
   const { role, content } = message;
@@ -16,15 +16,15 @@ const ChatMessage = ({ message }) => {
     );
   }
 
-  // Render markdown for AI responses - standard approach for react-markdown v10+
+  // Render markdown for AI responses using reusable component
   return (
     <div className="mb-4 flex justify-start">
       <div className="max-w-prose rounded-lg bg-gray-100 px-4 py-2 text-sm text-gray-800 shadow-md">
-        <div className="prose prose-sm max-w-none">
-          <ReactMarkdown>
-            {content}
-          </ReactMarkdown>
-        </div>
+        <MarkdownRenderer 
+          content={content} 
+          className="prose-sm"
+          fallbackToPlain={false}
+        />
       </div>
     </div>
   );
