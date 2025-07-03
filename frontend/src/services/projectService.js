@@ -1,7 +1,16 @@
 import { supabase } from '@/lib/supabase';
 
 /**
+ *  Project Service
  * Save a new project to the database
+ * 
+ * Handles all project-related database operations including:
+ * - Saving new projects with roadmap content
+ * - Retrieving projects by ID
+ * - User authentication validation
+ * - Error handling and response formatting
+ * 
+ * All functions return response objects with success/error status.
  * @param {Object} projectData - Project data to save
  * @param {string} projectData.title - Project title
  * @param {string} projectData.content - Project roadmap content
@@ -39,5 +48,24 @@ export const saveProject = async (projectData) => {
   }
 };
 
-// TODO: Add getProject function for retrieving saved projects (Next PR)
-// TODO: Add getUserProjects function for listing user's projects 
+/**
+ * Retrieve a project by ID
+ * @param {string} projectId - Project ID to retrieve
+ * @returns {Promise<Object>} - Result with project data or error
+ */
+export const getProject = async (projectId) => {
+  try {
+    const { data, error } = await supabase
+      .from('roadmap')
+      .select('id, title, content, created_at')
+      .eq('id', projectId)
+      .single();
+
+    if (error) throw error;
+
+    return { success: true, project: data };
+  } catch (error) {
+    console.error('Failed to fetch project:', error);
+    return { success: false, error: error.message };
+  }
+};

@@ -1,0 +1,56 @@
+import toast from 'react-hot-toast';
+
+/**
+ * Toast notification utilities
+ * 
+ * Provides standardized toast notifications with consistent styling
+ * and configuration
+ * 
+ * TODO: Add theme.js and refactor all toasts to use centralized theme configuration
+ */
+
+export const showSuccessToast = (message, options = {}) => {
+  toast.success(message, {
+    duration: 3000,
+    position: 'top-right',
+    style: {
+      background: '#10B981',
+      color: '#fff',
+    },
+    ...options,
+  });
+};
+
+export const showErrorToast = (message, options = {}) => {
+  toast.error(message, {
+    duration: 4000,
+    position: 'top-right',
+    style: {
+      background: '#EF4444',
+      color: '#fff',
+    },
+    ...options,
+  });
+};
+
+export const showInfoToast = (message, options = {}) => {
+  toast(message, {
+    duration: 3000,
+    position: 'top-right',
+    style: {
+      background: '#3B82F6',
+      color: '#fff',
+    },
+    ...options,
+  });
+};
+
+export const showLoadingToast = (message) => {
+  return toast.loading(message, {
+    position: 'top-right',
+  });
+};
+
+export const dismissToast = (toastId) => {
+  toast.dismiss(toastId);
+}; 
