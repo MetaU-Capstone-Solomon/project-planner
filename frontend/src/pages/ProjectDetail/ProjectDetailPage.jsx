@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
@@ -12,9 +13,10 @@ import { MESSAGES } from '@/constants/messages';
  * 
  * Features:
  * - Loads project data from database using projectId
- * - Displays project title, content, and creation date
+ * - Displays project title, content, and creation date with markdown rendering
  * - Shows loading states and error handling
  * - Navigation back to dashboard
+ * - Renders AI-generated roadmap content with proper formatting
  */
 const ProjectDetailPage = () => {
   const navigate = useNavigate();
@@ -62,7 +64,7 @@ const ProjectDetailPage = () => {
     return (
       <div className="min-h-screen bg-gray-100">
         <div className="p-6">
-          <header className="mb-8">
+          <header className="mb-6">
             <Button
               onClick={handleBackToDashboard}
               variant="secondary"
@@ -91,6 +93,8 @@ const ProjectDetailPage = () => {
     });
   };
 
+
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
@@ -116,12 +120,8 @@ const ProjectDetailPage = () => {
           {/* Separator line */}
           <div className="mb-6 h-px bg-gray-200"></div>
 
-          {/* Project content */}
-          <div className="prose prose-lg max-w-none">
-            <pre className="whitespace-pre-wrap font-sans text-gray-900 bg-gray-50 p-6 rounded-lg border">
-              {project.content}
-            </pre>
-          </div>
+          {/* Project content with reusable markdown renderer */}
+          <MarkdownRenderer content={project.content} />
         </main>
       </div>
     </div>
