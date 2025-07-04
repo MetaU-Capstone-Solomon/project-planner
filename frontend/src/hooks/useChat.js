@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { extractProjectInfo } from '@/utils/fileUtils';
 import { API_ENDPOINTS } from '@/config/api';
+import { MESSAGE_TYPES } from '@/constants/messageTypes';
 
 // Hook for managing AI chat interactions and roadmap generation
 const useChat = () => {
@@ -12,7 +13,7 @@ const useChat = () => {
 
   // Adds a new message to the chat history
   const appendMessage = useCallback((msg) => {
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => [...prev, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }]);
   }, []);
 
   // Fetches AI response from the backend
@@ -67,7 +68,11 @@ const useChat = () => {
         const userMessage = extractedTitle
           ? `Generating a roadmap for: ${extractedTitle}`
           : 'Generating a roadmap from uploaded document';
-        appendMessage({ role: 'user', content: userMessage });
+        appendMessage({ 
+          role: 'user', 
+          content: userMessage, 
+          type: MESSAGE_TYPES.REQUEST 
+        });
 
         // Build prompt
         let prompt = `You are ProPlan, an expert AI technical project manager that helps developers create detailed project roadmaps.`;
@@ -108,11 +113,19 @@ const useChat = () => {
         prompt += `\n\nBased on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. Use proper markdown formatting with **bold** for emphasis, bullet points for lists, and clear structure. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
 
         const aiResponse = await generateAiResponse(prompt);
-        appendMessage({ role: 'assistant', content: aiResponse });
+        appendMessage({ 
+          role: 'assistant', 
+          content: aiResponse, 
+          type: MESSAGE_TYPES.CONFIRMATION 
+        });
         setStage('awaiting_confirmation');
       } catch (error) {
         console.error('AI generate error', error);
-        appendMessage({ role: 'assistant', content: `An error occurred: ${error.message}` });
+        appendMessage({ 
+          role: 'assistant', 
+          content: `An error occurred: ${error.message}`, 
+          type: MESSAGE_TYPES.ERROR 
+        });
       } finally {
         setLoading(false);
       }
@@ -127,7 +140,11 @@ const useChat = () => {
         return;
       }
 
-      appendMessage({ role: 'user', content });
+      appendMessage({ 
+        role: 'user', 
+        content, 
+        type: MESSAGE_TYPES.REQUEST 
+      });
       setLoading(true);
 
       try {
@@ -136,18 +153,27 @@ const useChat = () => {
           .join('\n');
 
         let prompt = '';
+        let responseType = MESSAGE_TYPES.EXPLANATION;
+
         if (stage === 'awaiting_confirmation') {
           if (content.trim().toLowerCase().startsWith('yes')) {
             prompt = `${history}\n\nUser: yes\n\nThe user has confirmed the draft. Provide the full detailed roadmap using proper markdown formatting with headers, bullet points, sub-tasks, estimated durations, and milestones. Use **bold** for emphasis and structure it clearly with sections.`;
+            responseType = MESSAGE_TYPES.ROADMAP;
           } else {
             prompt = `${history}\n\nUser: ${content}\n\nThe user provided feedback. Revise the summary and draft roadmap accordingly and again end with the confirmation question.`;
+            responseType = MESSAGE_TYPES.CONFIRMATION;
           }
         } else {
           prompt = content;
+          responseType = MESSAGE_TYPES.EXPLANATION;
         }
 
         const aiText = await generateAiResponse(prompt);
-        appendMessage({ role: 'assistant', content: aiText });
+        appendMessage({ 
+          role: 'assistant', 
+          content: aiText, 
+          type: responseType 
+        });
 
         if (stage === 'awaiting_confirmation' && content.trim().toLowerCase().startsWith('yes')) {
           const { error } = await supabase
@@ -163,7 +189,11 @@ const useChat = () => {
         }
       } catch (err) {
         console.error('AI generate error', err);
-        appendMessage({ role: 'assistant', content: `An error occurred: ${err.message}` });
+        appendMessage({ 
+          role: 'assistant', 
+          content: `An error occurred: ${err.message}`, 
+          type: MESSAGE_TYPES.ERROR 
+        });
       } finally {
         setLoading(false);
       }
@@ -171,7 +201,20 @@ const useChat = () => {
     [stage, appendMessage, generateAiResponse, messages, projectTitle]
   );
 
-  return { messages, loading, stage, sendMessage, startChatWithDetails };
+  // Utility function to find roadmap message
+  const findRoadmapMessage = useCallback(() => {
+    return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+  }, [messages]);
+
+  return { 
+    messages, 
+    loading, 
+    stage, 
+    sendMessage, 
+    startChatWithDetails,
+    findRoadmapMessage,
+    MESSAGE_TYPES
+  };
 };
 
 export default useChat;
