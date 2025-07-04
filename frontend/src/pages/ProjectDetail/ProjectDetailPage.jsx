@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
+import { formatDate } from '@/utils/dateUtils';
 
 /**
  * ProjectDetailPage - Displays detailed information about a specific project
@@ -35,11 +36,11 @@ const ProjectDetailPage = () => {
         if (result.success) {
           setProject(result.project);
         } else {
-          showErrorToast(MESSAGES.PROJECT.LOAD_ERROR);
+          showErrorToast(MESSAGES.ERROR.PROJECT_LOAD_FAILED);
         }
       } catch (error) {
-        console.error('Error fetching project:', error);
-        showErrorToast(MESSAGES.PROJECT.LOAD_ERROR);
+        console.error('Error loading project:', error);
+        showErrorToast(MESSAGES.ERROR.PROJECT_LOAD_FAILED);
       } finally {
         setLoading(false);
       }
@@ -74,26 +75,13 @@ const ProjectDetailPage = () => {
             </Button>
           </header>
           <main className="rounded-lg bg-white p-8 shadow-sm text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.PROJECT.NOT_FOUND}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.ERROR.PROJECT_NOT_FOUND}</h2>
             <p className="text-gray-600">The requested project could not be found.</p>
           </main>
         </div>
       </div>
     );
   }
-
-  // Format project creation date for display
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-
 
   return (
     <div className="min-h-screen bg-gray-100">
