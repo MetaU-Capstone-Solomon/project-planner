@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
+import { formatDate } from '@/utils/dateUtils';
 
 /**
  * ProjectDetailPage - Displays detailed information about a specific project
@@ -81,19 +82,6 @@ const ProjectDetailPage = () => {
       </div>
     );
   }
-
-  // Format project creation date for display
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-
 
   return (
     <div className="min-h-screen bg-gray-100">
