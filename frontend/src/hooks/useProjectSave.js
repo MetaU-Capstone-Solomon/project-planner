@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { saveProject } from '@/services/projectService';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { createISOTimestamp } from '@/utils/dateUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
 
@@ -39,8 +40,8 @@ export const useProjectSave = (messages, formValues) => {
 
       const projectData = {
         title: formValues?.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
-        roadmap: roadmapMessage.content,
-        created_at: new Date().toISOString(),
+        content: roadmapMessage.content,
+        created_at: createISOTimestamp(),
       };
 
       const result = await saveProject(projectData);

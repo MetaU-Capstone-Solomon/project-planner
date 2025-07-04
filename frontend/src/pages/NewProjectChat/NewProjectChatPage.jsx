@@ -35,7 +35,7 @@ import {
   PROJECT_SCOPE_OPTIONS,
   FORM_FIELDS 
 } from '@/constants/projectOptions';
-import { LoadingSpinner } from '@/components/Loading/LoadingSpinner';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import { CheckCircle } from 'lucide-react';
 
 const NewProjectChatPage = () => {
