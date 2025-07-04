@@ -31,26 +31,4 @@ export const showErrorToast = (message, options = {}) => {
     },
     ...options,
   });
-};
-
-export const showInfoToast = (message, options = {}) => {
-  toast(message, {
-    duration: 3000,
-    position: 'top-right',
-    style: {
-      background: '#3B82F6',
-      color: '#fff',
-    },
-    ...options,
-  });
-};
-
-export const showLoadingToast = (message) => {
-  return toast.loading(message, {
-    position: 'top-right',
-  });
-};
-
-export const dismissToast = (toastId) => {
-  toast.dismiss(toastId);
 }; 
