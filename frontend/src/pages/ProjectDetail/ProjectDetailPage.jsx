@@ -35,11 +35,11 @@ const ProjectDetailPage = () => {
         if (result.success) {
           setProject(result.project);
         } else {
-          showErrorToast(MESSAGES.PROJECT.LOAD_ERROR);
+          showErrorToast(MESSAGES.ERROR.PROJECT_LOAD_FAILED);
         }
       } catch (error) {
-        console.error('Error fetching project:', error);
-        showErrorToast(MESSAGES.PROJECT.LOAD_ERROR);
+        console.error('Error loading project:', error);
+        showErrorToast(MESSAGES.ERROR.PROJECT_LOAD_FAILED);
       } finally {
         setLoading(false);
       }
@@ -74,7 +74,7 @@ const ProjectDetailPage = () => {
             </Button>
           </header>
           <main className="rounded-lg bg-white p-8 shadow-sm text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.PROJECT.NOT_FOUND}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.ERROR.PROJECT_NOT_FOUND}</h2>
             <p className="text-gray-600">The requested project could not be found.</p>
           </main>
         </div>

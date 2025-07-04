@@ -34,32 +34,26 @@ export const useProjectSave = (messages, formValues) => {
       // Use message type to find roadmap instead of last assistant message
       const roadmapMessage = findRoadmapMessage();
       if (!roadmapMessage) {
-        throw new Error(MESSAGES.PROJECT.NO_ROADMAP);
+        throw new Error(MESSAGES.ERROR.NO_ROADMAP);
       }
 
-      const result = await saveProject({
-        title: formValues?.title || MESSAGES.PROJECT.DEFAULT_TITLE,
-        content: roadmapMessage.content,
-      });
+      const projectData = {
+        title: formValues?.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
+        roadmap: roadmapMessage.content,
+        created_at: new Date().toISOString(),
+      };
 
+      const result = await saveProject(projectData);
       if (result.success) {
+        showSuccessToast(MESSAGES.SUCCESS.PROJECT_SAVED);
         setSavedProjectId(result.projectId);
-        showSuccessToast(MESSAGES.PROJECT.SAVE_SUCCESS);
-        
-        console.log('Project saved successfully!', {
-          projectId: result.projectId,
-          title: formValues?.title || MESSAGES.PROJECT.DEFAULT_TITLE,
-          content: roadmapMessage.content.substring(0, 100) + '...',
-          savedAt: new Date().toISOString()
-        });
-        
-        return result.projectId;
+        return result;
       } else {
-        throw new Error(result.error || MESSAGES.PROJECT.SAVE_ERROR);
+        throw new Error(result.error || MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       }
     } catch (error) {
-      console.error('Failed to save project:', error);
-      showErrorToast(MESSAGES.PROJECT.SAVE_ERROR);
+      console.error('Error saving project:', error);
+      showErrorToast(MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       throw error;
     } finally {
       setSaving(false);
