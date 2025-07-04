@@ -7,6 +7,6 @@ export const ROUTES = {
   PROFILE: '/profile',
   PROJECT_DETAIL: '/project/:projectId',
 };
-
 // function to generate project detail URL with project ID
 export const getProjectDetailPath = (projectId) => `/project/${projectId}`;
+
