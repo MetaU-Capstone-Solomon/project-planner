@@ -35,6 +35,8 @@ import {
   PROJECT_SCOPE_OPTIONS,
   FORM_FIELDS 
 } from '@/constants/projectOptions';
+import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import { CheckCircle } from 'lucide-react';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
@@ -140,12 +142,16 @@ const NewProjectChatPage = () => {
             <FormField label="Upload Document">
               <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
               {fileLoading && (
-                <p className="mt-2 text-sm text-blue-600">{MESSAGES.LOADING.PROCESSING}</p>
+                <div className="flex items-center space-x-2 text-blue-600">
+                  <LoadingSpinner size="sm" />
+                  <p className="mt-2 text-sm text-blue-600">{MESSAGES.LOADING.PROCESSING_DOCUMENT}</p>
+                </div>
               )}
               {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
               {processedFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  <p>{MESSAGES.FILE.PROCESSED_SUCCESS}</p>
+                <div className="flex items-center space-x-2 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <p>{MESSAGES.SUCCESS.FILE_PROCESSED}</p>
                 </div>
               )}
             </FormField>
@@ -157,7 +163,7 @@ const NewProjectChatPage = () => {
                 size="md"
                 className="px-6 py-2"
               >
-                {chatLoading ? MESSAGES.LOADING.GENERATING : MESSAGES.LOADING.GENERATE_ROADMAP}
+                {chatLoading ? MESSAGES.LOADING.GENERATING_ROADMAP : MESSAGES.ACTIONS.GENERATE_ROADMAP}
               </Button>
             </div>
           </div>
@@ -192,7 +198,7 @@ const NewProjectChatPage = () => {
                     variant="secondary"
                     className="w-full"
                   >
-                    {MESSAGES.PROJECT.VIEW_ROADMAP}
+                    {MESSAGES.ACTIONS.VIEW_ROADMAP}
                   </Button>
                 </div>
               ) : (
@@ -202,7 +208,7 @@ const NewProjectChatPage = () => {
                     disabled={saving}
                     className="w-full"
                   >
-                    {saving ? MESSAGES.LOADING.SAVING : MESSAGES.PROJECT.SAVE_PROJECT}
+                    {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
                   </Button>
                 </div>
               )}
