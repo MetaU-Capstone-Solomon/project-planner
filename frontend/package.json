@@ -18,6 +18,7 @@
     "axios": "^1.10.0",
     "framer-motion": "^12.19.1",
     "lucide-react": "^0.522.0",
+    "luxon": "^3.6.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
