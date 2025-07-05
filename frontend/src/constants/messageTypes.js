@@ -9,8 +9,7 @@ export const MESSAGE_TYPES = {
   REQUEST: 'request',
   ROADMAP: 'roadmap', 
   ERROR: 'error',
-  EXPLANATION: 'explanation',
-  CONFIRMATION: 'confirmation'
+  EXPLANATION: 'explanation'
 };
 
 /**
@@ -20,6 +19,5 @@ export const MESSAGE_TYPE_DESCRIPTIONS = {
   [MESSAGE_TYPES.REQUEST]: 'User request or input',
   [MESSAGE_TYPES.ROADMAP]: 'Generated project roadmap',
   [MESSAGE_TYPES.ERROR]: 'Error message from AI or system',
-  [MESSAGE_TYPES.EXPLANATION]: 'General explanation or response',
-  [MESSAGE_TYPES.CONFIRMATION]: 'Confirmation question or response'
+  [MESSAGE_TYPES.EXPLANATION]: 'General explanation or response'
 }; 

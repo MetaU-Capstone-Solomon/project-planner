@@ -27,7 +27,7 @@ import useFileUpload from '@/hooks/useFileUpload';
 import useChat from '@/hooks/useChat';
 import { useProjectForm } from '@/hooks/useProjectForm';
 import { useProjectSave } from '@/hooks/useProjectSave';
-import { MESSAGES } from '@/constants/messages';
+import { MESSAGES, CHAT_STAGES } from '@/constants/messages';
 import { ROUTES } from '@/constants/routes';
 import { 
   TIMELINE_OPTIONS, 
@@ -188,7 +188,7 @@ const NewProjectChatPage = () => {
           </div>
           
           {/* Project saving section - show when roadmap is generated */}
-          {stage === 'done' && (
+          {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
             <div className="border-t border-gray-200 p-4">
               {savedProjectId ? (
                 <div className="text-center space-y-3">
