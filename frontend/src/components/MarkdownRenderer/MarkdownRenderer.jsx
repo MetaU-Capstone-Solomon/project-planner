@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import { MESSAGES } from '@/constants/messages';
 
 /**
  * Reusable MarkdownRenderer component
@@ -27,7 +28,7 @@ const MarkdownRenderer = ({
   const defaultClasses = 'prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded';
   
   if (!content) {
-    return <p className="text-gray-500 italic">No content available</p>;
+    return <p className="text-gray-500 italic">{MESSAGES.CONTENT.NO_CONTENT_AVAILABLE}</p>;
   }
 
   // Render markdown if detected, otherwise fallback to plain text
