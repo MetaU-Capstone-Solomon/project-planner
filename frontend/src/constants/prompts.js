@@ -33,7 +33,8 @@ INSTRUCTIONS:
 1. Use the provided project information. DO NOT ask for project details or repeat them in response.
 2. Create a structured roadmap with phases, milestones, and tasks.
 3. Structure response as:
-   - Start with: "Roadmap for [PROJECT_TITLE]"
+   - Start with: "Roadmap:[PROJECT_TITLE]"
+   - Add a brief executive summary (2-3 sentences) explaining the project scope and timeline
    - Use phase headings (e.g., "Phase 1: Backend Development")
    - Use numbered milestones and tasks
    - Include technology recommendations and learning resources for each task:
@@ -43,6 +44,7 @@ INSTRUCTIONS:
    - Intermediate: Balanced approach, industry best practices
    - Advanced: Advanced patterns, optimization strategies, shorter timeline
    - Expert: Enterprise patterns, advanced optimization, shortest timeline
+5. End with: "Happy coding! 🚀"
 ${ROADMAP_CONSTRAINTS}`;
 
 export const ROADMAP_MODIFICATION_PROMPT = `You are helping the user modify their project roadmap.
