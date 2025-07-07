@@ -14,7 +14,10 @@ export const MESSAGES = {
     PROJECT_SAVE_FAILED: 'Failed to save project. Please try again.',
     PROJECT_LOAD_FAILED: 'Failed to load project.',
     PROJECT_NOT_FOUND: 'The requested project could not be found.',
-    NO_ROADMAP: 'No AI roadmap found to save.'
+    NO_ROADMAP: 'No AI roadmap found to save.',
+    AI_GENERATION_FAILED: 'An error occurred during AI generation.',
+    BACKEND_API_FAILED: 'Failed to fetch from backend API.',
+    SUPABASE_INSERT_FAILED: 'Failed to save roadmap to database.'
   },
   LOADING: {
     DEFAULT: 'Loading...',
@@ -27,5 +30,14 @@ export const MESSAGES = {
     SAVE_PROJECT: 'Save Project',
     VIEW_ROADMAP: 'View Roadmap',
     DEFAULT_TITLE: 'Untitled Project'
+  },
+  CONTENT: {
+    NO_CONTENT_AVAILABLE: 'No content available'
   }
+};
+
+export const CHAT_STAGES = {
+  INITIAL: 'initial',
+  AWAITING_CONFIRMATION: 'awaiting_confirmation',
+  DONE: 'done'
 }; 
