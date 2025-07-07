@@ -22,13 +22,21 @@ export const DEFAULT_PHASE_COLOR = 'border-l-gray-500 bg-gray-50';
 // };
 // export const DEFAULT_VIEW_MODE = VIEW_MODES.ROADMAP;
 
-// TODO: Add progress and task count constants when milestones are implemented
-// export const PROGRESS = {
-//   DEFAULT: 0,
-//   MIN: 0,
-//   MAX: 100
-// };
-// export const TASK_COUNTS = {
-//   DEFAULT: 0,
-//   COMPLETED: 0
-// }; 
+// Task status constants
+export const TASK_STATUS = {
+  COMPLETED: 'completed',
+  PENDING: 'pending',
+  IN_PROGRESS: 'in-progress'
+};
+
+// Progress constants
+export const PROGRESS = {
+  DEFAULT: 0,
+  MIN: 0,
+  MAX: 100
+};
+
+// Markdown parsing constants
+export const MARKDOWN = {
+  JSON_CODE_BLOCK: '```json'
+}; 

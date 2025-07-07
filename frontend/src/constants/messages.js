@@ -17,7 +17,8 @@ export const MESSAGES = {
     NO_ROADMAP: 'No AI roadmap found to save.',
     AI_GENERATION_FAILED: 'An error occurred during AI generation.',
     BACKEND_API_FAILED: 'Failed to fetch from backend API.',
-    SUPABASE_INSERT_FAILED: 'Failed to save roadmap to database.'
+    SUPABASE_INSERT_FAILED: 'Failed to save roadmap to database.',
+    TASK_UPDATE_FAILED: 'Failed to update task status. Please try again.'
   },
   LOADING: {
     DEFAULT: 'Loading...',
