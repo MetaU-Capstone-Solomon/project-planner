@@ -1,14 +1,14 @@
 import React from 'react';
+import { calculateOverallProgress, calculatePhaseProgress } from '@/utils/roadmapUtils';
 
 /**
- * ProgressBar - Displays overall project progress 
+ * ProgressBar - Displays overall project progress with real calculations
  * 
  * Features:
  * - Shows overall project progress percentage
  * - Displays progress bar visualization
- * - Shows individual phase progress (placeholder values)
- * - TODO: Real progress calculations
- * - TODO: Task status tracking  
+ * - Shows individual phase progress with real calculations
+ * - Calculates progress based on completed tasks
  * 
  * @param {Object} props - Component props
  * @param {Array} props.phases - Array of phase objects
@@ -17,8 +17,7 @@ import React from 'react';
  * @param {Array} props.phases[].milestones - Array of milestone objects
  */
 const ProgressBar = ({ phases }) => {
-  // TODO: progress calculations
-  const overallProgress = 0;
+  const overallProgress = calculateOverallProgress(phases);
   
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -36,8 +35,7 @@ const ProgressBar = ({ phases }) => {
       
       <div className="mt-4 grid grid-cols-4 gap-4 text-center">
         {phases.map((phase, index) => {
-          // TODO: phase progress calculations 
-          const phaseProgress = 0;
+          const phaseProgress = calculatePhaseProgress(phase);
           
           return (
             <div key={phase.id} className="text-sm">

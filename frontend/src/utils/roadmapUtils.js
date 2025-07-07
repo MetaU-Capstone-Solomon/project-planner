@@ -39,10 +39,69 @@ export const parseRoadmapContent = (content) => {
   return null;
 };
 
-// TODO: Add progress and task count functions when milestones are implemented
-// export const calculatePhaseProgress = (phase) => {
-//   return 0;
-// };
-// export const getPhaseTaskCounts = (phase) => {
-//   return { total: 0, completed: 0 };
-// }; 
+/**
+ * Calculate overall project progress based on completed tasks
+ * 
+ * @param {Array} phases - Array of phase objects
+ * @returns {number} Overall progress percentage (0-100)
+ */
+export const calculateOverallProgress = (phases) => {
+  if (!phases || phases.length === 0) return 0;
+  
+  let totalTasks = 0;
+  let completedTasks = 0;
+
+  phases.forEach(phase => {
+    if (phase.milestones) {
+      phase.milestones.forEach(milestone => {
+        if (milestone.tasks) {
+          milestone.tasks.forEach(task => {
+            totalTasks++;
+            if (task.status === 'completed') {
+              completedTasks++;
+            }
+          });
+        }
+      });
+    }
+  });
+
+  return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+};
+
+/**
+ * Calculate phase progress based on completed tasks
+ * 
+ * @param {Object} phase - Phase object
+ * @returns {number} Phase progress percentage (0-100)
+ */
+export const calculatePhaseProgress = (phase) => {
+  if (!phase || !phase.milestones) return 0;
+  
+  const phaseTasks = phase.milestones.flatMap(milestone => 
+    milestone.tasks ? milestone.tasks : []
+  );
+  
+  if (phaseTasks.length === 0) return 0;
+  
+  const completedTasks = phaseTasks.filter(task => task.status === 'completed').length;
+  return Math.round((completedTasks / phaseTasks.length) * 100);
+};
+
+/**
+ * Calculate milestone progress based on completed tasks
+ * 
+ * @param {Object} milestone - Milestone object
+ * @returns {Object} Progress data with total, completed, and percentage
+ */
+export const calculateMilestoneProgress = (milestone) => {
+  if (!milestone || !milestone.tasks) {
+    return { total: 0, completed: 0, percentage: 0 };
+  }
+  
+  const totalTasks = milestone.tasks.length;
+  const completedTasks = milestone.tasks.filter(task => task.status === 'completed').length;
+  const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  
+  return { total: totalTasks, completed: completedTasks, percentage };
+};

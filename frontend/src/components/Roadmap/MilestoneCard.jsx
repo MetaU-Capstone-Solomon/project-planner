@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Target, Calendar } from 'lucide-react';
 import TaskCard from './TaskCard';
+import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 
 /**
  * MilestoneCard - Displays a milestone with expandable functionality
@@ -8,10 +9,10 @@ import TaskCard from './TaskCard';
  * Features:
  * - Shows milestone title and timeline
  * - Expandable/collapsible design with chevron indicators
- * - Progress bar visualization (placeholder - 0% progress)
- * - Task count display (placeholder - 0/0 tasks)
+ * - Progress bar visualization with real calculations
+ * - Task count display with real task counts
  * - Displays expandable task cards when milestone is expanded
- * - TODO: Progress tracking and calculations will be implemented in a separate PR
+ * - Calculates progress based on completed tasks
  * 
  * @param {Object} milestone - The milestone data object
  * @param {string} milestone.id - Unique identifier for the milestone
@@ -22,10 +23,7 @@ import TaskCard from './TaskCard';
  * @param {Function} onToggle - Callback function to toggle expansion state
  */
 const MilestoneCard = ({ milestone, isExpanded = false, onToggle }) => {
-  // TODO: Progress tracking and calculations will be implemented in a separate PR
-  const completedTasks = 0;
-  const totalTasks = 0;
-  const progress = 0;
+  const { total: totalTasks, completed: completedTasks, percentage: progress } = calculateMilestoneProgress(milestone);
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200">
