@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Target, Calendar } from 'lucide-react';
+import TaskCard from './TaskCard';
 
 /**
  * MilestoneCard - Displays a milestone with expandable functionality
@@ -9,8 +10,8 @@ import { ChevronDown, ChevronRight, Target, Calendar } from 'lucide-react';
  * - Expandable/collapsible design with chevron indicators
  * - Progress bar visualization (placeholder - 0% progress)
  * - Task count display (placeholder - 0/0 tasks)
+ * - Displays expandable task cards when milestone is expanded
  * - TODO: Progress tracking and calculations will be implemented in a separate PR
- * - TODO: Task cards will be implemented in a separate PR
  * 
  * @param {Object} milestone - The milestone data object
  * @param {string} milestone.id - Unique identifier for the milestone
@@ -68,10 +69,9 @@ const MilestoneCard = ({ milestone, isExpanded = false, onToggle }) => {
       {isExpanded && (
         <div className="px-4 pb-4">
           <div className="space-y-3">
-            {/* TODO: TaskCard components will be implemented in a separate PR */}
-            <div className="text-center text-gray-500 text-sm py-4">
-              Tasks
-            </div>
+            {milestone.tasks && milestone.tasks.map((task) => (
+              <TaskCard key={task.id} task={task} />
+            ))}
           </div>
         </div>
       )}
