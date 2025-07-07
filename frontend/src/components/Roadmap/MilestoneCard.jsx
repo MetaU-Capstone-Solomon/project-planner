@@ -4,26 +4,43 @@ import TaskCard from './TaskCard';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 
 /**
- * MilestoneCard - Displays a milestone with expandable functionality
+ * MilestoneCard - Displays a milestone with expandable functionality and task management
  * 
  * Features:
  * - Shows milestone title and timeline
  * - Expandable/collapsible design with chevron indicators
- * - Progress bar visualization with real calculations
- * - Task count display with real task counts
+ * - Progress percentage and task count display
  * - Displays expandable task cards when milestone is expanded
+ * - Handles task status updates and recalculates progress
+
  * - Calculates progress based on completed tasks
  * 
- * @param {Object} milestone - The milestone data object
- * @param {string} milestone.id - Unique identifier for the milestone
- * @param {string} milestone.title - Title of the milestone
- * @param {string} milestone.timeline - Timeline information
- * @param {Array} milestone.tasks - Array of task objects
- * @param {boolean} isExpanded - Whether the milestone is expanded (controlled by parent)
- * @param {Function} onToggle - Callback function to toggle expansion state
+ * @param {Object} props - Component props
+ * @param {Object} props.milestone - The milestone data object
+ * @param {string} props.milestone.id - Unique identifier for the milestone
+ * @param {string} props.milestone.title - Title of the milestone
+ * @param {string} props.milestone.timeline - Timeline information
+ * @param {Array} props.milestone.tasks - Array of task objects
+ * @param {boolean} props.isExpanded - Whether the milestone is expanded (controlled by parent)
+ * @param {Function} props.onToggle - Callback function to toggle expansion state
+ * @param {Function} props.onTaskUpdate - Callback function when task status changes
  */
-const MilestoneCard = ({ milestone, isExpanded = false, onToggle }) => {
+const MilestoneCard = ({ milestone, isExpanded = false, onToggle, onTaskUpdate }) => {
   const { total: totalTasks, completed: completedTasks, percentage: progress } = calculateMilestoneProgress(milestone);
+
+  const handleTaskUpdate = (taskId, newStatus) => {
+    // Create updated tasks without mutating the original milestone data
+    if (milestone.tasks) {
+      const updatedTasks = milestone.tasks.map(task => 
+        task.id === taskId ? { ...task, status: newStatus } : task
+      );
+      
+      // Notify parent components of the change with immutable data
+      if (onTaskUpdate) {
+        onTaskUpdate(milestone.id, taskId, newStatus, updatedTasks);
+      }
+    }
+  };
 
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200">
@@ -54,21 +71,14 @@ const MilestoneCard = ({ milestone, isExpanded = false, onToggle }) => {
           </div>
         </div>
 
-        <div className="mt-3">
-          <div className="w-full bg-gray-300 rounded-full h-1.5">
-            <div 
-              className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
+
       </div>
 
       {isExpanded && (
         <div className="px-4 pb-4">
           <div className="space-y-3">
             {milestone.tasks && milestone.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} onTaskUpdate={handleTaskUpdate} />
             ))}
           </div>
         </div>

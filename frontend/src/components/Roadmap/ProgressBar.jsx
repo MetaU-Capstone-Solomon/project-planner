@@ -7,7 +7,6 @@ import { calculateOverallProgress, calculatePhaseProgress } from '@/utils/roadma
  * Features:
  * - Shows overall project progress percentage
  * - Displays progress bar visualization
- * - Shows individual phase progress with real calculations
  * - Calculates progress based on completed tasks
  * 
  * @param {Object} props - Component props
@@ -31,19 +30,6 @@ const ProgressBar = ({ phases }) => {
           className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${overallProgress}%` }}
         ></div>
-      </div>
-      
-      <div className="mt-4 grid grid-cols-4 gap-4 text-center">
-        {phases.map((phase, index) => {
-          const phaseProgress = calculatePhaseProgress(phase);
-          
-          return (
-            <div key={phase.id} className="text-sm">
-              <div className="font-medium text-gray-900">Phase {index + 1}</div>
-              <div className="text-gray-600">{phaseProgress}%</div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
