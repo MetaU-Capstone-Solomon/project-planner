@@ -4,7 +4,7 @@
  * Utility functions for roadmap-related operations
  */
 
-import { PHASE_COLORS, DEFAULT_PHASE_COLOR } from '@/constants/roadmap';
+import { PHASE_COLORS, DEFAULT_PHASE_COLOR, TASK_STATUS } from '@/constants/roadmap';
 import { MESSAGES } from '@/constants/messages';
 
 /**
@@ -57,7 +57,7 @@ export const calculateOverallProgress = (phases) => {
         if (milestone.tasks) {
           milestone.tasks.forEach(task => {
             totalTasks++;
-            if (task.status === 'completed') {
+            if (task.status === TASK_STATUS.COMPLETED) {
               completedTasks++;
             }
           });
@@ -84,7 +84,7 @@ export const calculatePhaseProgress = (phase) => {
   
   if (phaseTasks.length === 0) return 0;
   
-  const completedTasks = phaseTasks.filter(task => task.status === 'completed').length;
+  const completedTasks = phaseTasks.filter(task => task.status === TASK_STATUS.COMPLETED).length;
   return Math.round((completedTasks / phaseTasks.length) * 100);
 };
 
@@ -100,7 +100,7 @@ export const calculateMilestoneProgress = (milestone) => {
   }
   
   const totalTasks = milestone.tasks.length;
-  const completedTasks = milestone.tasks.filter(task => task.status === 'completed').length;
+  const completedTasks = milestone.tasks.filter(task => task.status === TASK_STATUS.COMPLETED).length;
   const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   
   return { total: totalTasks, completed: completedTasks, percentage };
