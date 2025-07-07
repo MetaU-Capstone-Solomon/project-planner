@@ -3,11 +3,14 @@ import { supabase } from '@/lib/supabase';
 import { extractProjectInfo } from '@/utils/fileUtils';
 import { API_ENDPOINTS } from '@/config/api';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
+import { CHAT_STAGES, MESSAGES } from '@/constants/messages';
+import { buildRoadmapPrompt, validateProjectData } from '@/utils/promptBuilder';
+import { ROADMAP_MODIFICATION_PROMPT } from '@/constants/prompts';
 
 // Hook for managing AI chat interactions and roadmap generation
 const useChat = () => {
   const [messages, setMessages] = useState([]);
-  const [stage, setStage] = useState('initial');
+  const [stage, setStage] = useState(CHAT_STAGES.INITIAL);
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
@@ -28,7 +31,7 @@ const useChat = () => {
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error || 'Failed to fetch from backend API');
+      throw new Error(err.error || MESSAGES.ERROR.BACKEND_API_FAILED);
     }
 
     const data = await response.json();
@@ -62,7 +65,7 @@ const useChat = () => {
         }
 
         // Set project title
-        setProjectTitle(extractedTitle || 'Untitled Project');
+        setProjectTitle(extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE);
 
         // Start chat
         const userMessage = extractedTitle
@@ -74,56 +77,46 @@ const useChat = () => {
           type: MESSAGE_TYPES.REQUEST 
         });
 
-        // Build prompt
-        let prompt = `You are ProPlan, an expert AI technical project manager that helps developers create detailed project roadmaps.`;
+        // Build project data object
+        const projectData = {
+          title: extractedTitle,
+          description: extractedDescription,
+          timeline,
+          experienceLevel,
+          technologies,
+          scope: projectScope
+        };
 
-        if (extractedTitle) {
-          prompt += `\n\nProject Title: "${extractedTitle}"`;
+        // Validate project data
+        const validation = validateProjectData(projectData);
+        if (!validation.isValid) {
+          throw new Error(`Missing required fields: ${validation.missingFields.join(', ')}`);
         }
 
-        if (extractedDescription) {
-          prompt += `\n\nProject Description:\n"""\n${extractedDescription}\n"""`;
-        }
+        // Build comprehensive prompt using the prompt builder
+        let prompt = buildRoadmapPrompt(projectData);
 
-        // Add new project context
-        if (timeline) {
-          prompt += `\n\nTimeline: ${timeline}`;
-        }
-
-        if (experienceLevel) {
-          prompt += `\n\nExperience Level: ${experienceLevel}`;
-        }
-
-        if (technologies) {
-          prompt += `\n\nTechnologies/Frameworks: ${technologies}`;
-        }
-
-        if (projectScope) {
-          prompt += `\n\nProject Scope: ${projectScope}`;
-        }
-
+        // Add file content if available
         if (fileContent) {
-          prompt += `\n\nDocument content (${fileContent.length} characters):\n"""\n${fileContent}\n"""`;
+          prompt += `\n\nAdditional Document Content (${fileContent.length} characters):\n"""\n${fileContent}\n"""`;
 
           if (isSummarized) {
             prompt += `\n\nNote: Document was intelligently summarized to ${fileContent.length} characters to preserve important information.`;
           }
         }
 
-        prompt += `\n\nBased on all the information provided, provide a concise summary of the project (no more than 120 words) followed by a high-level draft roadmap of up to 8 numbered steps. Use proper markdown formatting with **bold** for emphasis, bullet points for lists, and clear structure. End with the question: "Does this look correct? Reply 'yes' to generate the full roadmap or tell me what to change."`;
-
         const aiResponse = await generateAiResponse(prompt);
         appendMessage({ 
           role: 'assistant', 
           content: aiResponse, 
-          type: MESSAGE_TYPES.CONFIRMATION 
+          type: MESSAGE_TYPES.ROADMAP 
         });
-        setStage('awaiting_confirmation');
+        setStage(CHAT_STAGES.AWAITING_CONFIRMATION);
       } catch (error) {
         console.error('AI generate error', error);
         appendMessage({ 
           role: 'assistant', 
-          content: `An error occurred: ${error.message}`, 
+          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${error.message}`, 
           type: MESSAGE_TYPES.ERROR 
         });
       } finally {
@@ -136,7 +129,7 @@ const useChat = () => {
   // Handles user messages and generates AI responses
   const sendMessage = useCallback(
     async (content) => {
-      if (stage === 'initial') {
+      if (stage === CHAT_STAGES.INITIAL) {
         return;
       }
 
@@ -155,13 +148,32 @@ const useChat = () => {
         let prompt = '';
         let responseType = MESSAGE_TYPES.EXPLANATION;
 
-        if (stage === 'awaiting_confirmation') {
-          if (content.trim().toLowerCase().startsWith('yes')) {
-            prompt = `${history}\n\nUser: yes\n\nThe user has confirmed the draft. Provide the full detailed roadmap using proper markdown formatting with headers, bullet points, sub-tasks, estimated durations, and milestones. Use **bold** for emphasis and structure it clearly with sections.`;
-            responseType = MESSAGE_TYPES.ROADMAP;
+        if (stage === CHAT_STAGES.AWAITING_CONFIRMATION) {
+          const userResponse = content.trim().toLowerCase();
+          if (userResponse === 'yes' || userResponse === 'y') {
+            // User confirmed - save the roadmap
+            const roadmapMessage = findRoadmapMessage();
+            if (roadmapMessage) {
+              const { error } = await supabase
+                .from('roadmap')
+                .insert([{ content: roadmapMessage.content, title: projectTitle }]);
+
+              if (error) {
+                console.error('Supabase insert error', error);
+                throw new Error(`${MESSAGES.ERROR.SUPABASE_INSERT_FAILED} ${error.message}`);
+              }
+
+              setStage(CHAT_STAGES.DONE);
+              return; // Don't generate new AI response
+            }
           } else {
-            prompt = `${history}\n\nUser: ${content}\n\nThe user provided feedback. Revise the summary and draft roadmap accordingly and again end with the confirmation question.`;
-            responseType = MESSAGE_TYPES.CONFIRMATION;
+            // User wants modifications - only include the current roadmap, not full history
+            const roadmapMessage = findRoadmapMessage();
+            const currentRoadmap = roadmapMessage ? roadmapMessage.content : '';
+            
+            prompt = `Current Roadmap:\n${currentRoadmap}\n\n${ROADMAP_MODIFICATION_PROMPT.replace('[USER_MESSAGE]', content)}`;
+            
+            responseType = MESSAGE_TYPES.ROADMAP; // Always ROADMAP type for roadmap responses
           }
         } else {
           prompt = content;
@@ -174,24 +186,11 @@ const useChat = () => {
           content: aiText, 
           type: responseType 
         });
-
-        if (stage === 'awaiting_confirmation' && content.trim().toLowerCase().startsWith('yes')) {
-          const { error } = await supabase
-            .from('roadmap')
-            .insert([{ content: aiText, title: projectTitle }]);
-
-          if (error) {
-            console.error('Supabase insert error', error);
-            throw new Error(`Failed to save roadmap: ${error.message}`);
-          }
-
-          setStage('done');
-        }
       } catch (err) {
         console.error('AI generate error', err);
         appendMessage({ 
           role: 'assistant', 
-          content: `An error occurred: ${err.message}`, 
+          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${err.message}`, 
           type: MESSAGE_TYPES.ERROR 
         });
       } finally {
