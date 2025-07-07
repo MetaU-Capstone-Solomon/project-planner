@@ -3,11 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCard from '@/components/Roadmap/PhaseCard';
+import ProgressBar from '@/components/Roadmap/ProgressBar';
 import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { formatDate } from '@/utils/dateUtils';
+import { MARKDOWN } from '@/constants/roadmap';
 
 /**
  * ProjectDetailPage - Displays project details with phase-based roadmap visualization
@@ -15,8 +17,10 @@ import { formatDate } from '@/utils/dateUtils';
  * Features:
  * - Always shows project header with title and creation date
  * - Parses JSON roadmap content with markdown code block support
- * - Displays structured phase cards with progress tracking
- * - Handles phase expansion/collapse functionality
+ * - Displays overall progress bar with real-time calculations
+ * - Shows structured phase cards with progress tracking
+ * - Handles phase and milestone expansion/collapse functionality
+ * - Immutable state updates for task completion tracking
  * - Shows friendly error messages for invalid roadmap data
  * - Clean minimal design when no roadmap data is available
  * - Provides navigation back to dashboard
@@ -28,6 +32,7 @@ const ProjectDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [roadmapData, setRoadmapData] = useState(null);
   const [expandedPhases, setExpandedPhases] = useState(new Set());
+  const [expandedMilestones, setExpandedMilestones] = useState(new Set());
 
   // Fetch project data when component mounts or projectId changes
   useEffect(() => {
@@ -44,7 +49,7 @@ const ProjectDetailPage = () => {
           try {
             // Remove markdown code block formatting if present
             let jsonContent = result.project.content.trim();
-            if (jsonContent.startsWith('```json')) {
+            if (jsonContent.startsWith(MARKDOWN.JSON_CODE_BLOCK)) {
               jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
             }
             
@@ -89,6 +94,35 @@ const ProjectDetailPage = () => {
       newExpanded.add(phaseId);
     }
     setExpandedPhases(newExpanded);
+  };
+
+  const toggleMilestone = (milestoneId) => {
+    const newExpanded = new Set(expandedMilestones);
+    if (newExpanded.has(milestoneId)) {
+      newExpanded.delete(milestoneId);
+    } else {
+      newExpanded.add(milestoneId);
+    }
+    setExpandedMilestones(newExpanded);
+  };
+
+  const handleTaskUpdate = (phaseId, milestoneId, taskId, newStatus, updatedMilestones) => {
+    // Update the phase data in roadmapData using immutable updates
+    if (roadmapData && roadmapData.phases) {
+      const updatedPhases = roadmapData.phases.map(phase => 
+        phase.id === phaseId 
+          ? { ...phase, milestones: updatedMilestones }
+          : phase
+      );
+      
+      // Update roadmapData with the correct updated phases
+      setRoadmapData(prevData => ({
+        ...prevData,
+        phases: updatedPhases
+      }));
+    }
+    
+    // TODO: Save updated roadmap data to backend for persistence
   };
 
   if (loading) {
@@ -146,15 +180,22 @@ const ProjectDetailPage = () => {
           </div>
 
           {roadmapData && (
-            <div className="space-y-4">
-              {roadmapData.phases.map((phase) => (
-                <PhaseCard
-                  key={phase.id}
-                  phase={phase}
-                  isExpanded={expandedPhases.has(phase.id)}
-                  onToggle={() => togglePhase(phase.id)}
-                />
-              ))}
+            <div className="space-y-6">
+              <ProgressBar phases={roadmapData.phases} />
+              
+              <div className="space-y-4">
+                {roadmapData.phases.map((phase) => (
+                  <PhaseCard
+                    key={phase.id}
+                    phase={phase}
+                    isExpanded={expandedPhases.has(phase.id)}
+                    onToggle={() => togglePhase(phase.id)}
+                    onTaskUpdate={handleTaskUpdate}
+                    expandedMilestones={expandedMilestones}
+                    onMilestoneToggle={toggleMilestone}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </main>
