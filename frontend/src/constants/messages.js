@@ -33,6 +33,13 @@ export const MESSAGES = {
   },
   CONTENT: {
     NO_CONTENT_AVAILABLE: 'No content available'
+  },
+  VALIDATION: {
+    INVALID_DATE: 'Invalid Date',
+    NO_DATE: 'N/A',
+    INVALID_ROADMAP_CONTENT: 'Failed to parse roadmap content',
+    ROADMAP_PARSE_FAILED: 'Roadmap data could not be parsed. Please regenerate your project roadmap.',
+    ROADMAP_INCOMPLETE: 'Roadmap data is incomplete. Please regenerate your project roadmap.'
   }
 };
 
