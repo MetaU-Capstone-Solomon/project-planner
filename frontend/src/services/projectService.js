@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { MESSAGES } from '@/constants/messages';
 
 /**
  *  Project Service
@@ -30,8 +31,9 @@ export const saveProject = async (projectData) => {
     const { data, error } = await supabase
       .from('roadmap')
       .insert({
-        title: projectData.title || 'Untitled Project',
+        title: projectData.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
         content: projectData.content,
+        user_id: user.id,
       })
       .select();
 
