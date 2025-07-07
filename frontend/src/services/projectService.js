@@ -17,10 +17,15 @@ import { MESSAGES } from '@/constants/messages';
  * @param {string} projectData.content - Project roadmap content
  * @returns {Promise<Object>} - Result with success status and project ID or error
  */
+
+
+
 export const saveProject = async (projectData) => {
   // TODO: Add validation for projectData (PR feedback: data integrity)
   // TODO: Add user_id to the saved project
   // TODO: Add project metadata (timeline, technologies, scope) to database
+// TODO: Add task status update API endpoint integration
+// TODO: Add project progress persistence functionality
   try {
     // Get current authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();

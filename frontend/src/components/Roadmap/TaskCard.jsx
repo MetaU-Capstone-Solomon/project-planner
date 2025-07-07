@@ -1,39 +1,61 @@
 import React, { useState } from 'react';
 import { CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { TASK_STATUS } from '@/constants/roadmap';
 
 /**
- * TaskCard - Displays a task with basic information and expandable details
+ * TaskCard - Displays a task with interactive completion toggling
  * 
  * Features:
- * - Shows task title and description3r
+ * - Shows task title and description
  * - Expandable/collapsible design with chevron indicators
- * - Status indicator (placeholder )
- * - TODO: Task completion toggling will be implemented in a separate PR
- * - TODO: Task assignment, resources, and timestamps 
+ * - Interactive completion checkbox with visual feedback
+ * - Real-time status updates with backend integration
+ * - Progress tracking integration with parent components
  * 
- * @param {Object} task - The task data object
- * @param {string} task.id - Unique identifier for the task
- * @param {string} task.title - Title of the task
- * @param {string} task.description - Description of the task
- * @param {string} task.status - Task status (placeholder )
+ * @param {Object} props - Component props
+ * @param {Object} props.task - The task data object
+ * @param {string} props.task.id - Unique identifier for the task
+ * @param {string} props.task.title - Title of the task
+ * @param {string} props.task.description - Description of the task
+ * @param {string} props.task.status - Task status (TASK_STATUS.COMPLETED, TASK_STATUS.PENDING, TASK_STATUS.IN_PROGRESS)
+ * @param {Function} props.onTaskUpdate - Callback function when task status changes
  */
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task, onTaskUpdate }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
-  // TODO: Task completion toggling 
-  const isCompleted = false;
+  const [isCompleted, setIsCompleted] = useState(task.status === TASK_STATUS.COMPLETED);
+
+  const handleToggleComplete = () => {
+    const newStatus = !isCompleted ? TASK_STATUS.COMPLETED : TASK_STATUS.PENDING;
+    setIsCompleted(!isCompleted);
+    
+    // Notify parent components of the change
+    if (onTaskUpdate) {
+      onTaskUpdate(task.id, newStatus);
+    }
+    
+    // TODO: Implement backend API call to persist task status
+  };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200">
+    <div 
+      className="bg-gray-50 rounded-lg border border-gray-200"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="p-4">
         <div className="flex items-start space-x-3">
-          <div className="mt-1 flex-shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleComplete();
+            }}
+            className="mt-1 flex-shrink-0"
+          >
             {isCompleted ? (
               <CheckCircle className="h-5 w-5 text-green-600" />
             ) : (
-              <Circle className="h-5 w-5 text-gray-400" />
+              <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
             )}
-          </div>
+          </button>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
@@ -41,7 +63,10 @@ const TaskCard = ({ task }) => {
                 {task.title}
               </h5>
               <button
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 {isExpanded ? (

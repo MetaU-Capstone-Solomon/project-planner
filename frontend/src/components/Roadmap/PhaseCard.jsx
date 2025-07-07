@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import MilestoneCard from './MilestoneCard';
 import { ChevronDown, ChevronRight, Calendar, Clock } from 'lucide-react';
-import { getPhaseColor } from '@/utils/roadmapUtils';
+import { getPhaseColor, calculatePhaseProgress } from '@/utils/roadmapUtils';
+import { TASK_STATUS } from '@/constants/roadmap';
 
 /**
  * PhaseCard Component
  * 
- * Displays a project phase with milestone expansion functionality.
+ * Displays a project phase with milestone expansion functionality and real progress tracking.
  * 
  * @param {Object} props - Component props
  * @param {Object} props.phase - Phase data object
@@ -17,27 +18,42 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {Array} props.phase.milestones - Array of milestone objects
  * @param {boolean} props.isExpanded - Whether the phase is expanded
  * @param {Function} props.onToggle - Callback function to toggle phase expansion
+ * @param {Set} props.expandedMilestones - Set of expanded milestone IDs
+ * @param {Function} props.onMilestoneToggle - Callback function to toggle milestone expansion
  * 
- * @returns {JSX.Element} Phase card with title, timeline, and expandable milestones
+ * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and real progress
  */
-const PhaseCard = ({ phase, isExpanded, onToggle }) => {
-  const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMilestones, onMilestoneToggle }) => {
   
-  // TODO: Calculate progress when milestones are added
-  const progress = 0;
-  const totalTasks = 0;
-  const completedTasks = 0;
+  const progress = calculatePhaseProgress(phase);
   const phaseColorClasses = getPhaseColor(phase.order);
+  
+  // Calculate task counts for display
+  const totalTasks = phase.milestones ? 
+    phase.milestones.reduce((total, milestone) => 
+      total + (milestone.tasks ? milestone.tasks.length : 0), 0) : 0;
+  
+  const completedTasks = phase.milestones ? 
+    phase.milestones.reduce((total, milestone) => 
+      total + (milestone.tasks ? milestone.tasks.filter(task => task.status === TASK_STATUS.COMPLETED).length : 0), 0) : 0;
 
-  const toggleMilestone = (milestoneId) => {
-    const newExpanded = new Set(expandedMilestones);
-    if (newExpanded.has(milestoneId)) {
-      newExpanded.delete(milestoneId);
-    } else {
-      newExpanded.add(milestoneId);
+  const handleTaskUpdate = (milestoneId, taskId, newStatus, updatedTasks) => {
+    // Create updated milestones without mutating the original phase data
+    if (phase.milestones) {
+      const updatedMilestones = phase.milestones.map(milestone => 
+        milestone.id === milestoneId 
+          ? { ...milestone, tasks: updatedTasks }
+          : milestone
+      );
+      
+      // Notify parent components of the change with immutable data
+      if (onTaskUpdate) {
+        onTaskUpdate(phase.id, milestoneId, taskId, newStatus, updatedMilestones);
+      }
     }
-    setExpandedMilestones(newExpanded);
   };
+
+
 
   return (
     <div className={`bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 ${phaseColorClasses} mb-4`}>
@@ -93,7 +109,8 @@ const PhaseCard = ({ phase, isExpanded, onToggle }) => {
                 key={milestone.id}
                 milestone={milestone}
                 isExpanded={expandedMilestones.has(milestone.id)}
-                onToggle={() => toggleMilestone(milestone.id)}
+                onToggle={() => onMilestoneToggle(milestone.id)}
+                onTaskUpdate={handleTaskUpdate}
               />
             ))}
           </div>
