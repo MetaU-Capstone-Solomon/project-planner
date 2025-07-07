@@ -1,3 +1,5 @@
+import { MESSAGES } from '@/constants/messages';
+
 // Configuration
 const MAX_DESCRIPTION_LENGTH = parseInt(import.meta.env.VITE_MAX_DESCRIPTION_LENGTH) || 500;
 
@@ -5,7 +7,10 @@ const MAX_DESCRIPTION_LENGTH = parseInt(import.meta.env.VITE_MAX_DESCRIPTION_LEN
 export const extractProjectInfo = (content, fileName = '') => {
   if (!content) {
     const cleanFileName = fileName.replace(/\.[^/.]+$/, '');
-    return { title: cleanFileName || 'Untitled Project', description: 'No content available' };
+    return { 
+      title: cleanFileName || MESSAGES.ACTIONS.DEFAULT_TITLE, 
+      description: MESSAGES.CONTENT.NO_CONTENT_AVAILABLE 
+    };
   }
 
   // Clean the content
@@ -20,7 +25,7 @@ export const extractProjectInfo = (content, fileName = '') => {
     title = firstLine;
   } else {
     const cleanFileName = fileName.replace(/\.[^/.]+$/, '');
-    title = cleanFileName || 'Untitled Project';
+    title = cleanFileName || MESSAGES.ACTIONS.DEFAULT_TITLE;
   }
 
   // Extract description from remaining content
@@ -28,7 +33,7 @@ export const extractProjectInfo = (content, fileName = '') => {
   const description =
     remainingContent.length > MAX_DESCRIPTION_LENGTH
       ? remainingContent.substring(0, MAX_DESCRIPTION_LENGTH) + '...'
-      : remainingContent || 'No description available';
+      : remainingContent || MESSAGES.CONTENT.NO_CONTENT_AVAILABLE;
 
   return { title, description };
 };
