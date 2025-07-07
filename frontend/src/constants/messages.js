@@ -17,7 +17,8 @@ export const MESSAGES = {
     NO_ROADMAP: 'No AI roadmap found to save.',
     AI_GENERATION_FAILED: 'An error occurred during AI generation.',
     BACKEND_API_FAILED: 'Failed to fetch from backend API.',
-    SUPABASE_INSERT_FAILED: 'Failed to save roadmap to database.'
+    SUPABASE_INSERT_FAILED: 'Failed to save roadmap to database.',
+    TASK_UPDATE_FAILED: 'Failed to update task status. Please try again.'
   },
   LOADING: {
     DEFAULT: 'Loading...',
@@ -33,6 +34,13 @@ export const MESSAGES = {
   },
   CONTENT: {
     NO_CONTENT_AVAILABLE: 'No content available'
+  },
+  VALIDATION: {
+    INVALID_DATE: 'Invalid Date',
+    NO_DATE: 'N/A',
+    INVALID_ROADMAP_CONTENT: 'Failed to parse roadmap content',
+    ROADMAP_PARSE_FAILED: 'Roadmap data could not be parsed. Please regenerate your project roadmap.',
+    ROADMAP_INCOMPLETE: 'Roadmap data is incomplete. Please regenerate your project roadmap.'
   }
 };
 
