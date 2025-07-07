@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
@@ -108,8 +107,10 @@ const ProjectDetailPage = () => {
           {/* Separator line */}
           <div className="mb-6 h-px bg-gray-200"></div>
 
-          {/* Project content with reusable markdown renderer */}
-          <MarkdownRenderer content={project.content} />
+          {/* Project content displayed as plain text */}
+          <div className="whitespace-pre-wrap font-mono text-sm text-gray-800 bg-gray-50 p-4 rounded-lg border">
+            {project.content}
+          </div>
         </main>
       </div>
     </div>

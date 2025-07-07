@@ -19,7 +19,8 @@ export const ROADMAP_CONSTRAINTS = `
 - If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
 `;
 
-export const ROADMAP_GENERATION_PROMPT = `Generate a detailed, actionable technical roadmap for [PROJECT_TITLE].
+export const ROADMAP_GENERATION_PROMPT = `
+Generate a structured JSON roadmap for [PROJECT_TITLE].
 
 PROJECT DETAILS:
 - Title: [PROJECT_TITLE]
@@ -31,24 +32,76 @@ PROJECT DETAILS:
 
 INSTRUCTIONS:
 1. Use the provided project information. DO NOT ask for project details or repeat them in response.
-2. Create a structured roadmap with phases, milestones, and tasks.
-3. Structure response as:
-   - Start with: "Roadmap:[PROJECT_TITLE]"
-   - Add a brief executive summary (2-3 sentences) explaining the project scope and timeline
-   - Use phase headings (e.g., "Phase 1: Backend Development")
-   - Use numbered milestones and tasks
-   - Include technology recommendations and learning resources for each task:
-     • Resources: [resource name](URL) and [additional resource name](URL)
-4. Adapt complexity based on experience level:
-   - Beginner: Detailed explanations, simpler tech stack, longer timeline
-   - Intermediate: Balanced approach, industry best practices
-   - Advanced: Advanced patterns, optimization strategies, shorter timeline
-   - Expert: Enterprise patterns, advanced optimization, shortest timeline
-5. End with: "Happy coding! 🚀"
-${ROADMAP_CONSTRAINTS}`;
+2. Generate a valid JSON object with the following structure:
+   {
+     "metadata": {
+       "title": "[PROJECT_TITLE]",
+       "description": "[PROJECT_DESCRIPTION]",
+       "timeline": "[TIMELINE]",
+       "experienceLevel": "[EXPERIENCE_LEVEL]",
+       "technologies": "[TECHNOLOGIES]",
+       "scope": "[PROJECT_SCOPE]",
+       "version": "1.0"
+     },
+     "summary": "Brief 2-3 sentence summary of the project scope and timeline",
+     "phases": [
+       {
+         "id": "phase-1",
+         "title": "Phase Title",
+         "timeline": "Appropriate timeline format (days/weeks/months based on project duration)",
+         "order": 1,
+         "milestones": [
+           {
+             "id": "milestone-1-1",
+             "title": "Milestone Title",
+             "timeline": "Specific timeline within phase",
+             "order": 1,
+             "tasks": [
+               {
+                 "id": "task-1-1-1",
+                 "title": "Task Title",
+                 "description": "Detailed task description",
+                 "resources": [
+                   {
+                     "name": "Technology or learning resource name",
+                     "url": "https://actual-resource-url.com"
+                   }
+                 ],
+                 "status": "pending",
+                 "completedAt": null,
+                 "assignedTo": null,
+                 "estimatedHours": "Realistic hours based on task complexity and experience level"
+               }
+             ]
+           }
+         ]
+       }
+     ]
+   }
+
+3. Adapt complexity based on experience level:
+   - Beginner: More detailed descriptions, simpler tech stack, longer timeline, higher hour estimates
+   - Intermediate: Balanced approach, industry best practices, moderate hour estimates
+   - Advanced: Advanced patterns, optimization strategies, shorter timeline, lower hour estimates
+   - Expert: Enterprise patterns, advanced optimization, shortest timeline, lowest hour estimates
+
+4. Ensure valid JSON format with proper escaping
+5. Create appropriate number of phases based on project complexity (typically 3-6 phases)
+6. Include realistic number of milestones per phase (typically 2-5 milestones)
+7. Include sufficient tasks per milestone (typically 3-8 tasks)
+8. Use timeline format appropriate to project duration:
+   - Short projects (1-2 weeks): Use days (Day 1, Day 2, etc.)
+   - Medium projects (1-3 months): Use weeks (Week 1, Week 2, etc.)
+   - Long projects (3+ months): Use months or quarters
+10. Assign proper order numbers (1, 2, 3, etc.) for phases, milestones, and tasks
+11. Include relevant technologies and learning resources in the resources array with real URLs
+
+- ONLY respond to roadmap-related questions (timeline, tech stack, scope, milestones, tasks)
+- If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
+`;
 
 export const ROADMAP_MODIFICATION_PROMPT = `You are helping the user modify their project roadmap.
 
 User request: [USER_MESSAGE]
 
-${ROADMAP_CONSTRAINTS}`; 
+${ROADMAP_CONSTRAINTS}`;
