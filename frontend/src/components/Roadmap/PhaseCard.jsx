@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import MilestoneCard from './MilestoneCard';
 import { ChevronDown, ChevronRight, Calendar, Clock } from 'lucide-react';
-import { getPhaseColor } from '@/utils/roadmapUtils';
+import { getPhaseColor, calculatePhaseProgress } from '@/utils/roadmapUtils';
 
 /**
  * PhaseCard Component
  * 
- * Displays a project phase with milestone expansion functionality.
+ * Displays a project phase with milestone expansion functionality and real progress tracking.
  * 
  * @param {Object} props - Component props
  * @param {Object} props.phase - Phase data object
@@ -18,16 +18,22 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {boolean} props.isExpanded - Whether the phase is expanded
  * @param {Function} props.onToggle - Callback function to toggle phase expansion
  * 
- * @returns {JSX.Element} Phase card with title, timeline, and expandable milestones
+ * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and real progress
  */
 const PhaseCard = ({ phase, isExpanded, onToggle }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
   
-  // TODO: Calculate progress when milestones are added
-  const progress = 0;
-  const totalTasks = 0;
-  const completedTasks = 0;
+  const progress = calculatePhaseProgress(phase);
   const phaseColorClasses = getPhaseColor(phase.order);
+  
+  // Calculate task counts for display
+  const totalTasks = phase.milestones ? 
+    phase.milestones.reduce((total, milestone) => 
+      total + (milestone.tasks ? milestone.tasks.length : 0), 0) : 0;
+  
+  const completedTasks = phase.milestones ? 
+    phase.milestones.reduce((total, milestone) => 
+      total + (milestone.tasks ? milestone.tasks.filter(task => task.status === 'completed').length : 0), 0) : 0;
 
   const toggleMilestone = (milestoneId) => {
     const newExpanded = new Set(expandedMilestones);
