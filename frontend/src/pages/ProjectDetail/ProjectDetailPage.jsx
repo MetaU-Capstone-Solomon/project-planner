@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCard from '@/components/Roadmap/PhaseCard';
+import ProgressBar from '@/components/Roadmap/ProgressBar';
 import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
@@ -15,7 +16,8 @@ import { formatDate } from '@/utils/dateUtils';
  * Features:
  * - Always shows project header with title and creation date
  * - Parses JSON roadmap content with markdown code block support
- * - Displays structured phase cards with progress tracking
+ * - Displays overall progress bar with phase breakdown
+ * - Shows structured phase cards with progress tracking
  * - Handles phase expansion/collapse functionality
  * - Shows friendly error messages for invalid roadmap data
  * - Clean minimal design when no roadmap data is available
@@ -146,15 +148,19 @@ const ProjectDetailPage = () => {
           </div>
 
           {roadmapData && (
-            <div className="space-y-4">
-              {roadmapData.phases.map((phase) => (
-                <PhaseCard
-                  key={phase.id}
-                  phase={phase}
-                  isExpanded={expandedPhases.has(phase.id)}
-                  onToggle={() => togglePhase(phase.id)}
-                />
-              ))}
+            <div className="space-y-6">
+              <ProgressBar phases={roadmapData.phases} />
+              
+              <div className="space-y-4">
+                {roadmapData.phases.map((phase) => (
+                  <PhaseCard
+                    key={phase.id}
+                    phase={phase}
+                    isExpanded={expandedPhases.has(phase.id)}
+                    onToggle={() => togglePhase(phase.id)}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </main>
