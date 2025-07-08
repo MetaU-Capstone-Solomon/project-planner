@@ -9,7 +9,7 @@ import { TASK_STATUS } from '@/constants/roadmap';
  * - Shows task title and description
  * - Expandable/collapsible design with chevron indicators
  * - Interactive completion checkbox with visual feedback
- * - Real-time status updates with backend integration
+ * - Status updates with backend integration
  * - Progress tracking integration with parent components
  * 
  * @param {Object} props - Component props

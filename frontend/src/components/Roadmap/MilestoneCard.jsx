@@ -12,8 +12,6 @@ import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
  * - Progress percentage and task count display
  * - Displays expandable task cards when milestone is expanded
  * - Handles task status updates and recalculates progress
-
- * - Calculates progress based on completed tasks
  * 
  * @param {Object} props - Component props
  * @param {Object} props.milestone - The milestone data object

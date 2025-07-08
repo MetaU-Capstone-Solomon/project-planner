@@ -7,7 +7,7 @@ import { TASK_STATUS } from '@/constants/roadmap';
 /**
  * PhaseCard Component
  * 
- * Displays a project phase with milestone expansion functionality and real progress tracking.
+ * Displays a project phase with milestone expansion functionality and progress tracking.
  * 
  * @param {Object} props - Component props
  * @param {Object} props.phase - Phase data object
@@ -21,7 +21,7 @@ import { TASK_STATUS } from '@/constants/roadmap';
  * @param {Set} props.expandedMilestones - Set of expanded milestone IDs
  * @param {Function} props.onMilestoneToggle - Callback function to toggle milestone expansion
  * 
- * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and real progress
+ * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and progress
  */
 const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMilestones, onMilestoneToggle }) => {
   

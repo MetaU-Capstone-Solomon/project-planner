@@ -5,8 +5,6 @@ import toast from 'react-hot-toast';
  * 
  * Provides standardized toast notifications with consistent styling
  * and configuration
- * 
- * TODO: Add theme.js and refactor all toasts to use centralized theme configuration
  */
 
 export const showSuccessToast = (message, options = {}) => {

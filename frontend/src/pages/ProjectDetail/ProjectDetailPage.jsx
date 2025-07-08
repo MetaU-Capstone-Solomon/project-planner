@@ -17,7 +17,7 @@ import { MARKDOWN } from '@/constants/roadmap';
  * Features:
  * - Always shows project header with title and creation date
  * - Parses JSON roadmap content with markdown code block support
- * - Displays overall progress bar with real-time calculations
+ * - Displays overall progress bar with calculations
  * - Shows structured phase cards with progress tracking
  * - Handles phase and milestone expansion/collapse functionality
  * - Immutable state updates for task completion tracking

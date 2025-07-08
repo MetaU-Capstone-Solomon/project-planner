@@ -2,7 +2,7 @@ import React from 'react';
 import { calculateOverallProgress, calculatePhaseProgress } from '@/utils/roadmapUtils';
 
 /**
- * ProgressBar - Displays overall project progress with real calculations
+ * ProgressBar - Displays overall project progress
  * 
  * Features:
  * - Shows overall project progress percentage
