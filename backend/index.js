@@ -19,6 +19,24 @@ if (!GEMINI_API_KEY) {
 const fileProcessingService = new FileProcessingService();
 const prioritizationService = new RoadmapPrioritizationService();
 
+// Helper function to parse request body
+const parseRequestBody = (req, res) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body);
+        resolve(parsed);
+      } catch (error) {
+        reject(new Error('Invalid JSON in request body'));
+      }
+    });
+  });
+};
+
 // Config_multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -178,43 +196,29 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  //POST requests: /api/prioritize
+  // Prioritization endpoint
   if (req.url === '/api/prioritize' && req.method === 'POST') {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk.toString();
-    });
-
-    req.on('end', async () => {
-      try {
-        const { roadmap, userConstraints } = JSON.parse(body);
-        
-        if (!roadmap) {
+    parseRequestBody(req, res)
+      .then(async ({ roadmap, userConstraints }) => {
+        if (!roadmap || !userConstraints) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Roadmap is required' }));
-          return;
-        }
-
-        if (!userConstraints) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'User constraints are required' }));
+          res.end(JSON.stringify({ error: 'Roadmap and user constraints are required' }));
           return;
         }
 
         const optimizedRoadmap = await prioritizationService.prioritizeRoadmap(roadmap, userConstraints);
-        
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ 
           success: true, 
           optimizedRoadmap,
           message: 'Roadmap optimized successfully'
         }));
-      } catch (error) {
+      })
+      .catch(error => {
         console.error('Prioritization error:', error);
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: error.message }));
-      }
-    });
+      });
     return;
   }
 
