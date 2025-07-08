@@ -2,8 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { MESSAGES } from '@/constants/messages';
 
 /**
- *  Project Service
- * Save a new project to the database
+ * Project Service
  * 
  * Handles all project-related database operations including:
  * - Saving new projects with roadmap content
@@ -12,20 +11,17 @@ import { MESSAGES } from '@/constants/messages';
  * - Error handling and response formatting
  * 
  * All functions return response objects with success/error status.
+ */
+
+/**
+ * Save a new project to the database
+ * 
  * @param {Object} projectData - Project data to save
  * @param {string} projectData.title - Project title
  * @param {string} projectData.content - Project roadmap content
- * @returns {Promise<Object>} - Result with success status and project ID or error
+ * @returns {Promise<Object>} Result with success status and project ID or error
  */
-
-
-
 export const saveProject = async (projectData) => {
-  // TODO: Add validation for projectData (PR feedback: data integrity)
-  // TODO: Add user_id to the saved project
-  // TODO: Add project metadata (timeline, technologies, scope) to database
-// TODO: Add task status update API endpoint integration
-// TODO: Add project progress persistence functionality
   try {
     // Get current authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -57,8 +53,9 @@ export const saveProject = async (projectData) => {
 
 /**
  * Retrieve a project by ID
+ * 
  * @param {string} projectId - Project ID to retrieve
- * @returns {Promise<Object>} - Result with project data or error
+ * @returns {Promise<Object>} Result with project data or error
  */
 export const getProject = async (projectId) => {
   try {
