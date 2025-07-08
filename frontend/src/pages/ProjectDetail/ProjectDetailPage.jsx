@@ -4,6 +4,7 @@ import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCard from '@/components/Roadmap/PhaseCard';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
+import Summary from '@/components/Roadmap/Summary';
 import { ROUTES } from '@/constants/routes';
 import { getProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
@@ -17,7 +18,7 @@ import { MARKDOWN } from '@/constants/roadmap';
  * Features:
  * - Always shows project header with title and creation date
  * - Parses JSON roadmap content with markdown code block support
- * - Displays overall progress bar with real-time calculations
+ * - Displays overall progress bar with calculations
  * - Shows structured phase cards with progress tracking
  * - Handles phase and milestone expansion/collapse functionality
  * - Immutable state updates for task completion tracking
@@ -169,32 +170,34 @@ const ProjectDetailPage = () => {
         </header>
 
         <main>
-          {/* Project header */}
-          <div className="rounded-lg bg-white p-8 shadow-sm mb-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
-              <div className="text-sm text-gray-500">
-                Created: {formatDate(project.created_at)}
+          {roadmapData ? (
+            <>
+              <div className="space-y-6">
+                <ProgressBar phases={roadmapData.phases} />
+                <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
+                
+                <div className="space-y-4">
+                  {roadmapData.phases.map((phase) => (
+                    <PhaseCard
+                      key={phase.id}
+                      phase={phase}
+                      isExpanded={expandedPhases.has(phase.id)}
+                      onToggle={() => togglePhase(phase.id)}
+                      onTaskUpdate={handleTaskUpdate}
+                      expandedMilestones={expandedMilestones}
+                      onMilestoneToggle={toggleMilestone}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-
-          {roadmapData && (
-            <div className="space-y-6">
-              <ProgressBar phases={roadmapData.phases} />
-              
-              <div className="space-y-4">
-                {roadmapData.phases.map((phase) => (
-                  <PhaseCard
-                    key={phase.id}
-                    phase={phase}
-                    isExpanded={expandedPhases.has(phase.id)}
-                    onToggle={() => togglePhase(phase.id)}
-                    onTaskUpdate={handleTaskUpdate}
-                    expandedMilestones={expandedMilestones}
-                    onMilestoneToggle={toggleMilestone}
-                  />
-                ))}
+            </>
+          ) : (
+            <div className="rounded-lg bg-white p-8 shadow-sm mb-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
+                <div className="text-sm text-gray-500">
+                  Created: {formatDate(project.created_at)}
+                </div>
               </div>
             </div>
           )}
