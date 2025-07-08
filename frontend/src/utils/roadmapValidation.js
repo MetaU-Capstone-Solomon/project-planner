@@ -166,9 +166,34 @@ export const validateRoadmapContent = (content) => {
 };
 
 /**
- *error message for validation failures
+ * Get parsed roadmap JSON from validated content
  * 
- * Converts technical validation errors into user-readable messages.
+ * Extracts the parsed JSON object from validated roadmap content.
+ * This avoids redundant parsing since validation already handles markdown stripping.
+ * 
+ * @param {string} content - Raw AI response content
+ * @returns {Object|null} Parsed roadmap object or null if invalid
+ */
+export const getParsedRoadmap = (content) => {
+  if (!content || typeof content !== 'string') {
+    return null;
+  }
+
+  // Strip markdown code blocks (same logic as validation)
+  const cleanedContent = stripMarkdownCodeBlocks(content);
+
+  try {
+    return JSON.parse(cleanedContent);
+  } catch (error) {
+    console.warn('Failed to parse roadmap JSON:', error);
+    return null;
+  }
+};
+
+/**
+ * Error message for validation failures
+ * 
+ * Converts technical validation errors into  readable messages.
  * Limits the number of errors shown to avoid overwhelming the user.
  * 
  * @param {Object} validationResult - Result from validateRoadmapContent
@@ -186,6 +211,6 @@ export const getValidationErrorMessage = (validationResult) => {
     return MESSAGES.VALIDATION.ROADMAP_INCOMPLETE;
   }
 
-  //  validation message 
+  // Validation message 
   return MESSAGES.VALIDATION.ROADMAP_VALIDATION_FAILED;
 }; 

@@ -3,6 +3,7 @@ const https = require('https');
 const multer = require('multer');
 require('dotenv').config();
 const FileProcessingService = require('./services/fileProcessingService');
+const RoadmapPrioritizationService = require('./services/prioritizationService');
 
 // Environment variables
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -16,6 +17,7 @@ if (!GEMINI_API_KEY) {
 }
 
 const fileProcessingService = new FileProcessingService();
+const prioritizationService = new RoadmapPrioritizationService();
 
 // Config_multer for file uploads
 const upload = multer({
@@ -173,10 +175,52 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ error: 'Invalid JSON in request body' }));
       }
     });
-  } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not Found' }));
+    return;
   }
+
+  //POST requests: /api/prioritize
+  if (req.url === '/api/prioritize' && req.method === 'POST') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', async () => {
+      try {
+        const { roadmap, userConstraints } = JSON.parse(body);
+        
+        if (!roadmap) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Roadmap is required' }));
+          return;
+        }
+
+        if (!userConstraints) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'User constraints are required' }));
+          return;
+        }
+
+        const optimizedRoadmap = await prioritizationService.prioritizeRoadmap(roadmap, userConstraints);
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          success: true, 
+          optimizedRoadmap,
+          message: 'Roadmap optimized successfully'
+        }));
+      } catch (error) {
+        console.error('Prioritization error:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
+      }
+    });
+    return;
+  }
+
+  // Default route
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Not Found' }));
 });
 
 server.listen(port, () => {

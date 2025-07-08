@@ -49,7 +49,7 @@ const NewProjectChatPage = () => {
     fileLoading
   );
 
-  const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, { title: values[FORM_FIELDS.TITLE] });
+  const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
 
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);

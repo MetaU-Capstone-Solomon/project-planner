@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { saveProject } from '@/services/projectService';
+import { optimizeRoadmap } from '@/services/prioritizationService';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { createISOTimestamp } from '@/utils/dateUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
-import { validateRoadmapContent, getValidationErrorMessage } from '@/utils/roadmapValidation';
+import { validateRoadmapContent, getValidationErrorMessage, getParsedRoadmap } from '@/utils/roadmapValidation';
 
 /**
  * Custom hook for project saving functionality
@@ -43,13 +44,37 @@ export const useProjectSave = (messages, formValues) => {
       const validationResult = validateRoadmapContent(roadmapMessage.content);
       if (!validationResult.isValid) {
         const errorMessage = getValidationErrorMessage(validationResult);
-        console.error('Roadmap validation failed:', validationResult);
         throw new Error(errorMessage || MESSAGES.VALIDATION.ROADMAP_PARSE_FAILED);
+      }
+
+      // Parse the validated roadmap (no redundant markdown stripping)
+      let optimizedContent = roadmapMessage.content;
+      
+      try {
+        // Get parsed roadmap using the helper function
+        const roadmap = getParsedRoadmap(roadmapMessage.content);
+        
+        if (roadmap) {
+          // Apply prioritization algorithm if user constraints are available
+          if (formValues?.timeline && formValues?.experienceLevel && formValues?.projectScope) {
+            const userConstraints = {
+              timeline: formValues.timeline,
+              experienceLevel: formValues.experienceLevel,
+              scope: formValues.projectScope
+            };
+            
+                  const optimizedRoadmap = await optimizeRoadmap(roadmap, userConstraints);
+      optimizedContent = JSON.stringify(optimizedRoadmap, null, 2);
+      console.log('✅ Prioritization successful - roadmap optimized');
+          }
+        }
+      } catch (error) {
+        // Continue with original content if prioritization fails
       }
 
       const projectData = {
         title: formValues?.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
-        content: roadmapMessage.content,
+        content: optimizedContent,
         created_at: createISOTimestamp(),
       };
 
@@ -62,7 +87,6 @@ export const useProjectSave = (messages, formValues) => {
         throw new Error(result.error || MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       }
     } catch (error) {
-      console.error('Error saving project:', error);
       showErrorToast(error.message || MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       throw error;
     } finally {
