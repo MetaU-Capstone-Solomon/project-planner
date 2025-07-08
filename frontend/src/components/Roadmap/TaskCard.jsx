@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, Circle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { TASK_STATUS } from '@/constants/roadmap';
 
 /**
@@ -11,12 +11,14 @@ import { TASK_STATUS } from '@/constants/roadmap';
  * - Interactive completion checkbox with visual feedback
  * - Real-time status updates with backend integration
  * - Progress tracking integration with parent components
+ * - Resources display with links when available
  * 
  * @param {Object} props - Component props
  * @param {Object} props.task - The task data object
  * @param {string} props.task.id - Unique identifier for the task
  * @param {string} props.task.title - Title of the task
  * @param {string} props.task.description - Description of the task
+ * @param {Array} props.task.resources - Array of resource objects with name and optional url
  * @param {string} props.task.status - Task status (TASK_STATUS.COMPLETED, TASK_STATUS.PENDING, TASK_STATUS.IN_PROGRESS)
  * @param {Function} props.onTaskUpdate - Callback function when task status changes
  */
@@ -78,13 +80,36 @@ const TaskCard = ({ task, onTaskUpdate }) => {
             </div>
 
             {isExpanded && (
-              <div className="mt-4">
+              <div className="mt-4 space-y-4">
                 <div>
                   <h6 className="font-medium text-gray-900 mb-2">Description</h6>
                   <p className="text-gray-700 text-sm leading-relaxed">{task.description}</p>
                 </div>
                 
-                {/* TODO: Task assignment, resources, and timestamps */}
+                {task.resources && task.resources.length > 0 && (
+                  <div>
+                    <h6 className="font-medium text-gray-900 mb-2">Resources</h6>
+                    <div className="space-y-2">
+                      {task.resources.map((resource, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          {resource.url ? (
+                            <a
+                              href={resource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              <span>{resource.name}</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span className="text-gray-700 text-sm">{resource.name}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
