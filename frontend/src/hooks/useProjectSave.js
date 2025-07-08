@@ -4,6 +4,7 @@ import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { createISOTimestamp } from '@/utils/dateUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
+import { validateRoadmapContent, getValidationErrorMessage } from '@/utils/roadmapValidation';
 
 /**
  * Custom hook for project saving functionality
@@ -38,6 +39,14 @@ export const useProjectSave = (messages, formValues) => {
         throw new Error(MESSAGES.ERROR.NO_ROADMAP);
       }
 
+      // Validate roadmap content before saving
+      const validationResult = validateRoadmapContent(roadmapMessage.content);
+      if (!validationResult.isValid) {
+        const errorMessage = getValidationErrorMessage(validationResult);
+        console.error('Roadmap validation failed:', validationResult);
+        throw new Error(errorMessage || MESSAGES.VALIDATION.ROADMAP_PARSE_FAILED);
+      }
+
       const projectData = {
         title: formValues?.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
         content: roadmapMessage.content,
@@ -54,7 +63,7 @@ export const useProjectSave = (messages, formValues) => {
       }
     } catch (error) {
       console.error('Error saving project:', error);
-      showErrorToast(MESSAGES.ERROR.PROJECT_SAVE_FAILED);
+      showErrorToast(error.message || MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       throw error;
     } finally {
       setSaving(false);

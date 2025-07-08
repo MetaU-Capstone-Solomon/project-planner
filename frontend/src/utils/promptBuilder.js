@@ -1,14 +1,14 @@
 /**
  * Prompt Builder Utility
  * 
- * Handles dynamic prompt generation by replacing variables
- * with actual project data
+ * Handles dynamic prompt generation by replacing variables with project data
  */
 
 import { PROMPT_VARIABLES, ROADMAP_GENERATION_PROMPT } from '@/constants/prompts';
 
 /**
  * Builds a roadmap generation prompt with actual project data
+ * 
  * @param {Object} projectData - Project information
  * @param {string} projectData.title - Project title
  * @param {string} projectData.description - Project description
@@ -16,7 +16,7 @@ import { PROMPT_VARIABLES, ROADMAP_GENERATION_PROMPT } from '@/constants/prompts
  * @param {string} projectData.experienceLevel - Developer experience level
  * @param {string} projectData.technologies - Technologies to use
  * @param {string} projectData.scope - Project scope
- * @returns {string} - Formatted prompt with actual values
+ * @returns {string} Formatted prompt with actual values
  */
 export const buildRoadmapPrompt = (projectData) => {
   const {
@@ -55,8 +55,9 @@ export const buildRoadmapPrompt = (projectData) => {
 
 /**
  * Validates if all required project data is present
+ * 
  * @param {Object} projectData - Project information
- * @returns {Object} - Validation result with isValid boolean and missing fields array
+ * @returns {Object} Validation result with isValid boolean and missing fields array
  */
 export const validateProjectData = (projectData) => {
   const requiredFields = ['title', 'description', 'timeline', 'experienceLevel'];
