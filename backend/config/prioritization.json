@@ -1,0 +1,107 @@
+{
+  "weights": {
+    "default": {
+      "logical_order": 0.35,
+      "timeline_optimization": 0.25,
+      "experience_alignment": 0.20,
+      "scope_relevance": 0.15,
+      "risk_assessment": 0.05
+    },
+    "mvp": {
+      "logical_order": 0.40,
+      "timeline_optimization": 0.30,
+      "experience_alignment": 0.20,
+      "scope_relevance": 0.10,
+      "risk_assessment": 0.00
+    },
+    "full-featured": {
+      "logical_order": 0.35,
+      "timeline_optimization": 0.25,
+      "experience_alignment": 0.20,
+      "scope_relevance": 0.15,
+      "risk_assessment": 0.05
+    },
+    "enterprise-level": {
+      "logical_order": 0.30,
+      "timeline_optimization": 0.20,
+      "experience_alignment": 0.15,
+      "scope_relevance": 0.20,
+      "risk_assessment": 0.15
+    }
+  },
+  "risk_matrices": {
+    "web-app": {
+      "setup": { "risk": 1, "impact": 3, "complexity": 1 },
+      "planning": { "risk": 1, "impact": 3, "complexity": 1 },
+      "foundation": { "risk": 1, "impact": 3, "complexity": 1 },
+      "development": { "risk": 2, "impact": 3, "complexity": 2 },
+      "build": { "risk": 2, "impact": 3, "complexity": 2 },
+      "implementation": { "risk": 2, "impact": 3, "complexity": 2 },
+      "testing": { "risk": 1, "impact": 2, "complexity": 1 },
+      "test": { "risk": 1, "impact": 2, "complexity": 1 },
+      "deployment": { "risk": 2, "impact": 3, "complexity": 2 },
+      "deploy": { "risk": 2, "impact": 3, "complexity": 2 },
+      "optimization": { "risk": 2, "impact": 2, "complexity": 3 },
+      "documentation": { "risk": 1, "impact": 1, "complexity": 1 },
+      "maintenance": { "risk": 1, "impact": 1, "complexity": 1 },
+      "security": { "risk": 3, "impact": 4, "complexity": 3 }
+    },
+    "mobile-app": {
+      "setup": { "risk": 1, "impact": 3, "complexity": 1 },
+      "planning": { "risk": 1, "impact": 3, "complexity": 1 },
+      "foundation": { "risk": 1, "impact": 3, "complexity": 1 },
+      "development": { "risk": 2, "impact": 3, "complexity": 2 },
+      "build": { "risk": 2, "impact": 3, "complexity": 2 },
+      "implementation": { "risk": 2, "impact": 3, "complexity": 2 },
+      "testing": { "risk": 1, "impact": 2, "complexity": 1 },
+      "test": { "risk": 1, "impact": 2, "complexity": 1 },
+      "deployment": { "risk": 3, "impact": 4, "complexity": 3 },
+      "deploy": { "risk": 3, "impact": 4, "complexity": 3 },
+      "optimization": { "risk": 2, "impact": 2, "complexity": 3 },
+      "documentation": { "risk": 1, "impact": 1, "complexity": 1 },
+      "maintenance": { "risk": 1, "impact": 1, "complexity": 1 },
+      "platform": { "risk": 2, "impact": 3, "complexity": 2 }
+    },
+    "ai-project": {
+      "setup": { "risk": 1, "impact": 3, "complexity": 1 },
+      "planning": { "risk": 1, "impact": 3, "complexity": 1 },
+      "foundation": { "risk": 1, "impact": 3, "complexity": 1 },
+      "development": { "risk": 2, "impact": 3, "complexity": 2 },
+      "build": { "risk": 2, "impact": 3, "complexity": 2 },
+      "implementation": { "risk": 2, "impact": 3, "complexity": 2 },
+      "testing": { "risk": 1, "impact": 2, "complexity": 1 },
+      "test": { "risk": 1, "impact": 2, "complexity": 1 },
+      "deployment": { "risk": 3, "impact": 3, "complexity": 3 },
+      "deploy": { "risk": 3, "impact": 3, "complexity": 3 },
+      "optimization": { "risk": 2, "impact": 2, "complexity": 3 },
+      "documentation": { "risk": 1, "impact": 1, "complexity": 1 },
+      "maintenance": { "risk": 1, "impact": 1, "complexity": 1 },
+      "data": { "risk": 3, "impact": 4, "complexity": 3 },
+      "model": { "risk": 4, "impact": 4, "complexity": 4 }
+    }
+  },
+  "learning_patterns": {
+    "beginner": ["foundation", "basic-concepts", "simple-implementation", "testing", "deployment"],
+    "intermediate": ["foundation", "core-development", "advanced-features", "testing", "optimization", "deployment"],
+    "advanced": ["foundation", "development", "advanced-patterns", "optimization", "testing", "deployment"],
+    "expert": ["foundation", "development", "advanced-optimization", "testing", "deployment"]
+  },
+  "timeline_parsers": {
+    "day": { "pattern": "/day[s]? (\\d+)/i", "multiplier": 1 },
+    "week": { "pattern": "/week[s]? (\\d+)/i", "multiplier": 7 },
+    "month": { "pattern": "/month[s]? (\\d+)/i", "multiplier": 30 },
+    "year": { "pattern": "/year[s]? (\\d+)/i", "multiplier": 365 }
+  },
+  "task_patterns": {
+    "setup": { "keywords": ["setup", "install", "configure"], "score": 100 },
+    "development": { "keywords": ["development", "build", "create"], "score": 80 },
+    "testing": { "keywords": ["testing", "test"], "score": 60 },
+    "deployment": { "keywords": ["deploy", "deployment"], "score": 40 }
+  },
+  "phase_patterns": {
+    "setup": { "keywords": ["setup", "planning", "foundation"], "score": 100 },
+    "development": { "keywords": ["development", "build", "implementation"], "score": 80 },
+    "testing": { "keywords": ["testing", "test", "deploy"], "score": 60 },
+    "documentation": { "keywords": ["documentation", "maintenance"], "score": 40 }
+  }
+} 

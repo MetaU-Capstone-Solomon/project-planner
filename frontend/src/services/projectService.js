@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { MESSAGES } from '@/constants/messages';
 
 /**
  * Project Service
