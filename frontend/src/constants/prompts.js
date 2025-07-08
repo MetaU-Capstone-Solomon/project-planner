@@ -68,8 +68,6 @@ INSTRUCTIONS:
                    }
                  ],
                  "status": "pending",
-                 "completedAt": null,
-                 "assignedTo": null,
                  "estimatedHours": "Realistic hours based on task complexity and experience level"
                }
              ]
