@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { saveProject } from '@/services/projectService';
 import { optimizeRoadmap } from '@/services/prioritizationService';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { createISOTimestamp } from '@/utils/dateUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
+import { ROUTES } from '@/constants/routes';
 import { validateRoadmapContent, getValidationErrorMessage, getParsedRoadmap } from '@/utils/roadmapValidation';
 
 /**
@@ -15,12 +17,14 @@ import { validateRoadmapContent, getValidationErrorMessage, getParsedRoadmap } f
  * - Saves project to database
  * - Shows appropriate toast notifications
  * - Manages loading and success states
+ * - Auto-redirects to project detail page after save
  * 
  * @param {Array} messages - Chat messages to extract roadmap from
  * @param {Object} formValues - Form values for project title
  * @returns {Object} - Project saving state and handlers
  */
 export const useProjectSave = (messages, formValues) => {
+  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState(null);
 
@@ -28,6 +32,20 @@ export const useProjectSave = (messages, formValues) => {
   const findRoadmapMessage = useCallback(() => {
     return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
   }, [messages]);
+
+  // Clear localStorage after successful save
+  const clearLocalStorage = useCallback(() => {
+    try {
+      localStorage.removeItem('chatMessages');
+      localStorage.removeItem('chatStage');
+      localStorage.removeItem('projectTitle');
+      localStorage.removeItem('projectForm');
+      localStorage.removeItem('projectFile');
+      localStorage.removeItem('processedFile');
+    } catch (error) {
+      console.warn('Failed to clear localStorage:', error);
+    }
+  }, []);
 
   const handleSaveProject = useCallback(async () => {
     if (saving || savedProjectId) return;
@@ -63,9 +81,8 @@ export const useProjectSave = (messages, formValues) => {
               scope: formValues.projectScope
             };
             
-                  const optimizedRoadmap = await optimizeRoadmap(roadmap, userConstraints);
-      optimizedContent = JSON.stringify(optimizedRoadmap, null, 2);
-      console.log('✅ Prioritization successful - roadmap optimized');
+            const optimizedRoadmap = await optimizeRoadmap(roadmap, userConstraints);
+            optimizedContent = JSON.stringify(optimizedRoadmap, null, 2);
           }
         }
       } catch (error) {
@@ -82,6 +99,15 @@ export const useProjectSave = (messages, formValues) => {
       if (result.success) {
         showSuccessToast(MESSAGES.SUCCESS.PROJECT_SAVED);
         setSavedProjectId(result.projectId);
+        
+        // Clear localStorage immediately before redirect
+        clearLocalStorage();
+        
+        // Small delay to ensure localStorage is cleared before navigation
+        setTimeout(() => {
+          navigate(ROUTES.PROJECT_DETAIL.replace(':projectId', result.projectId));
+        }, 100);
+        
         return result;
       } else {
         throw new Error(result.error || MESSAGES.ERROR.PROJECT_SAVE_FAILED);
@@ -92,7 +118,7 @@ export const useProjectSave = (messages, formValues) => {
     } finally {
       setSaving(false);
     }
-  }, [saving, savedProjectId, messages, formValues, findRoadmapMessage]);
+  }, [saving, savedProjectId, messages, formValues, findRoadmapMessage, navigate, clearLocalStorage]);
 
   const resetSaveState = useCallback(() => {
     setSavedProjectId(null);
