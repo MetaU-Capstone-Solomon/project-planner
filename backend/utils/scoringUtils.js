@@ -1,28 +1,55 @@
 /**
  * Scoring Utilities for Roadmap Prioritization
  * 
- * Provides reusable functions for calculating scores based on configuration patterns.
+ * Core scoring functions that calculate priority scores for phases and tasks
+ * based on various factors like logical order, timeline, experience level,
+ * scope, and risk. These utilities implement the weighted scoring algorithm
+ * used by the prioritization service.
+ * 
+ * Scoring Algorithm:
+ * - Each function returns a score from 0-100 (higher = higher priority)
+ * - Neutral scores (50) are returned when no patterns match (safe fallback)
+ * - Scores are combined using weighted averages in calculateWeightedScore()
+ * 
+ * Key Functions:
+ * - getLogicalOrderScore(): Prioritizes phases by development sequence
+ * - getTimelineScore(): Aligns phases with project duration
+ * - getExperienceScore(): Adapts to user skill level and learning curve
+ * - getScopeScore(): Prioritizes based on project type (MVP vs Enterprise)
+ * - getRiskScore(): Considers complexity and uncertainty factors
+ * 
+ * @example
+ * // Complete scoring example for a "Development" phase:
+ * // logicalOrder: 80 (development comes after setup)
+ * // timeline: 70 (fits 3-month project timeline)
+ * // experience: 60 (moderate complexity for intermediate user)
+ * // scope: 70 (important for full-featured project)
+ * // risk: 50 (moderate risk, neutral score)
+ * // Final weighted score: (80*0.3 + 70*0.2 + 60*0.2 + 70*0.2 + 50*0.1) = 68
+ * 
+ * @module scoringUtils
  */
 
 /**
- * Calculates a weighted score from multiple factors
- * @param {Object} scores - Individual scores for each factor
- * @param {Object} weights - Weight configuration for each factor
- * @returns {number} Weighted score
+ * Calculates weighted score from multiple factors using configuration weights.
+ * @param {Object} scores - Individual scores for each factor (0-100 range).
+ * @param {Object} weights - Weight configuration for each factor (sums to 1.0).
+ * @returns {number} Weighted score (0-100 range).
  */
 function calculateWeightedScore(scores, weights) {
   return Object.entries(scores).reduce((total, [key, score]) => {
-    const weightKey = key.toUpperCase();
+    // Convert variable names to match config file format
+    const weightKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
     const weight = weights[weightKey] || weights[key] || 0;
     return total + (score * weight);
   }, 0);
 }
 
 /**
- * Scores a phase based on logical order using configuration patterns
- * @param {Object} phase - Phase object
- * @param {Object} phasePatterns - Phase pattern configuration
- * @returns {number} Logical order score
+ * Scores a phase based on logical order using configuration patterns.
+ * @param {Object} phase - Phase object with title and description.
+ * @param {Object} phasePatterns - Configuration patterns for different phase types.
+ * @returns {number} Logical order score (0-100, higher = earlier in sequence).
  */
 function getLogicalOrderScore(phase, phasePatterns) {
   const phaseTitle = phase.title.toLowerCase();
@@ -37,11 +64,11 @@ function getLogicalOrderScore(phase, phasePatterns) {
 }
 
 /**
- * Scores a phase based on timeline position
- * @param {Object} phase - Phase object
- * @param {number} timelineDays - Total timeline in days
- * @param {Object} timelineParsers - Timeline parser configuration
- * @returns {number} Timeline score
+ * Scores a phase based on timeline position and project duration.
+ * @param {Object} phase - Phase object with timeline property.
+ * @param {number} timelineDays - Total project timeline in days.
+ * @param {Object} timelineParsers - Configuration for parsing timeline strings.
+ * @returns {number} Timeline score (0-100, higher = better timeline fit).
  */
 function getTimelineScore(phase, timelineDays, timelineParsers) {
   const phaseDay = extractDayFromTimeline(phase.timeline, timelineParsers);
@@ -58,10 +85,10 @@ function getTimelineScore(phase, timelineDays, timelineParsers) {
 }
 
 /**
- * Scores a phase based on user experience level
- * @param {Object} phase - Phase object
- * @param {Array} learningPattern - Learning pattern for experience level
- * @returns {number} Experience alignment score
+ * Scores a phase based on user experience level and learning progression.
+ * @param {Object} phase - Phase object with title and description.
+ * @param {Array} learningPattern - Array of keywords ordered by learning difficulty.
+ * @returns {number} Experience alignment score (0-100, higher = better for user level).
  */
 function getExperienceScore(phase, learningPattern) {
   const phaseTitle = phase.title.toLowerCase();
@@ -76,10 +103,10 @@ function getExperienceScore(phase, learningPattern) {
 }
 
 /**
- * Scores a phase based on project scope
- * @param {Object} phase - Phase object
- * @param {string} scope - Project scope
- * @returns {number} Scope relevance score
+ * Scores a phase based on project scope and feature complexity.
+ * @param {Object} phase - Phase object with title and description.
+ * @param {string} scope - Project scope ("mvp", "full-featured", "enterprise-level").
+ * @returns {number} Scope relevance score (0-100, higher = better scope match).
  */
 function getScopeScore(phase, scope) {
   const phaseTitle = phase.title.toLowerCase();
@@ -105,10 +132,10 @@ function getScopeScore(phase, scope) {
 }
 
 /**
- * Returns a risk score for a phase based on risk matrix
- * @param {Object} phase - Phase object
- * @param {Object} riskMatrix - Risk matrix configuration
- * @returns {number} Risk score
+ * Returns a risk score for a phase based on risk matrix configuration.
+ * @param {Object} phase - Phase object with title and description.
+ * @param {Object} riskMatrix - Risk matrix with keywords and risk profiles.
+ * @returns {number} Risk score (0-100, higher = lower risk, higher priority).
  */
 function getRiskScore(phase, riskMatrix) {
   const phaseTitle = phase.title.toLowerCase();
@@ -119,7 +146,7 @@ function getRiskScore(phase, riskMatrix) {
     }
   }
   
-  return 50; // Default neutral score
+  return 50; // Default for neutral score
 }
 
 /**

@@ -1,8 +1,36 @@
 /**
  * Roadmap Prioritization Service
  * 
- * Optimizes project roadmap structure using configuration weighted scoring algorithms.
- * Reorders phases and tasks based on user constraints, dependencies, and project type detection.
+ * Reorders project roadmap phases and tasks based on user constraints
+ * using a weighted scoring algorithm. The service analyzes project characteristics
+ * and user inputs to optimize the development sequence for better efficiency and
+ * learning progression.
+ * 
+ * Key Features:
+ * - Phase reordering based on logical dependencies and project timeline
+ * - Task reordering within milestones for optimal learning flow
+ * - Experience-level adaptive prioritization (beginner vs expert)
+ * - Risk-aware scheduling for complex vs simple features
+ * - Timeline-constrained optimization for MVP vs enterprise projects
+ * 
+ * Algorithm Overview:
+ * 1. Analyzes project scope and user experience level
+ * 2. Calculates weighted scores for each phase using 5 factors:
+ *    - Logical order (30%): Respects development dependencies
+ *    - Timeline fit (20%): Aligns with project duration
+ *    - Experience match (20%): Adapts to user skill level
+ *    - Scope alignment (20%): Prioritizes based on project type
+ *    - Risk assessment (10%): Considers complexity and uncertainty
+ * 3. Reorders phases by score while preserving important dependencies
+ * 4. Optimizes task order within each milestone for learning efficiency
+ * 
+ * @example
+ * // Complete prioritization example:
+ * // Input: 3-month project, intermediate user, full-featured scope
+ * // Phases: ["Setup", "Development", "Testing", "Deployment"]
+ * // Scores: Setup(85), Development(78), Testing(72), Deployment(68)
+ * // Result: ["Setup", "Development", "Testing", "Deployment"] (optimized order)
+ * // Tasks within each phase are also reordered for optimal learning flow
  * 
  * @module prioritizationService
  */
@@ -24,8 +52,13 @@ const {
 /**
  * RoadmapPrioritizationService
  *
- * Optimizes the order of phases and tasks in a software project roadmap using configuration scoring.
- * detects project type and domain to apply appropriate opt strategies.
+ * This service implements the roadmap optimization algorithm. Takes a validated
+ * roadmap and user constraints, then returns an optimized version with reordered
+ * phases and tasks for better development efficiency and learning progression.
+ * 
+ * The service uses a configuration approach where scoring weights and
+ * patterns are defined externally, making the algorithm adaptable to different
+ * project types and user preferences.
  */
 class RoadmapPrioritizationService {
   /**
@@ -36,11 +69,13 @@ class RoadmapPrioritizationService {
   }
 
   /**
-   * Returns a new roadmap object with phases and tasks reordered .
-   *
-   * @param {Object} roadmap - The validated roadmap JSON.
-   * @param {Object} userConstraints - User's timeline, experience, and scope.
-   * @returns {Object} Optimized roadmap.
+   * Returns a new roadmap object with phases and tasks reordered based on user constraints.
+   * @param {Object} roadmap - The validated roadmap JSON with phases and milestones.
+   * @param {Object} userConstraints - User's project constraints.
+   * @param {string} userConstraints.timeline - Project timeline (e.g., "1 month", "6 weeks").
+   * @param {string} userConstraints.experienceLevel - User experience level ("beginner", "intermediate", "expert").
+   * @param {string} userConstraints.scope - Project scope ("mvp", "full-featured", "enterprise-level").
+   * @returns {Object} Optimized roadmap with reordered phases and tasks.
    */
   async prioritizeRoadmap(roadmap, userConstraints) {
     try {
@@ -78,10 +113,10 @@ class RoadmapPrioritizationService {
 
   /**
    * Orders phases by weighted score based on project constraints and configuration.
-   * @param {Array} phases
-   * @param {Object} constraints
-   * @param {Object} projectConfig
-   * @returns {Array} Reordered phases
+   * @param {Array} phases - Array of phase objects with milestones and tasks.
+   * @param {Object} constraints - Parsed user constraints (timeline, experience, scope).
+   * @param {Object} projectConfig - Configuration with weights and scoring patterns.
+   * @returns {Array} Reordered phases with updated order property.
    */
   optimizePhaseOrder(phases, constraints, projectConfig) {
     const scoredPhases = phases.map((phase, index) => ({
@@ -98,11 +133,11 @@ class RoadmapPrioritizationService {
 
   /**
    * Calculates a weighted score for a phase using configuration scoring.
-   * @param {Object} phase
-   * @param {Object} constraints
-   * @param {Object} projectConfig
-   * @param {number} originalIndex
-   * @returns {number}
+   * @param {Object} phase - Phase object with name, description, and milestones.
+   * @param {Object} constraints - User constraints (timeline, experience, scope).
+   * @param {Object} projectConfig - Configuration with weights and patterns.
+   * @param {number} originalIndex - Original position of the phase (for tie-breaking).
+   * @returns {number} Weighted score (higher = higher priority).
    */
   calculatePhaseScore(phase, constraints, projectConfig, originalIndex) {
     const scores = {
@@ -120,14 +155,12 @@ class RoadmapPrioritizationService {
     return weightedScore + orderBias;
   }
 
-
-
   /**
    * Reorders tasks within each milestone for logical flow using configuration.
-   * @param {Array} phases
-   * @param {Object} constraints
-   * @param {Object} projectConfig
-   * @returns {Array}
+   * @param {Array} phases - Array of phases with milestones and tasks.
+   * @param {Object} constraints - User constraints (timeline, experience, scope).
+   * @param {Object} projectConfig - Configuration with task patterns and weights.
+   * @returns {Array} Phases with reordered tasks within each milestone.
    */
   optimizeTaskOrder(phases, constraints, projectConfig) {
     return phases.map(phase => ({
@@ -141,10 +174,10 @@ class RoadmapPrioritizationService {
 
   /**
    * Orders tasks within a milestone by type and original order using configuration.
-   * @param {Array} tasks
-   * @param {Object} constraints
-   * @param {Object} projectConfig
-   * @returns {Array}
+   * @param {Array} tasks - Array of task objects with name, description, and resources.
+   * @param {Object} constraints - User constraints (timeline, experience, scope).
+   * @param {Object} projectConfig - Configuration with task patterns and scoring.
+   * @returns {Array} Reordered tasks based on priority scoring.
    */
   reorderTasks(tasks, constraints, projectConfig) {
     const taskScores = tasks.map((task, index) => ({
@@ -156,13 +189,11 @@ class RoadmapPrioritizationService {
     return taskScores.map(({ task }) => task);
   }
 
-
-
   /**
    * Parses and normalizes user constraints using configuration.
-   * @param {Object} userConstraints
-   * @param {Object} timelineParsers
-   * @returns {Object}
+   * @param {Object} userConstraints - Raw user input constraints.
+   * @param {Object} timelineParsers - Configuration for parsing timeline strings.
+   * @returns {Object} Normalized constraints object.
    */
   parseConstraints(userConstraints, timelineParsers) {
     return {
@@ -170,26 +201,6 @@ class RoadmapPrioritizationService {
       experience: userConstraints.experienceLevel || 'beginner',
       scope: userConstraints.scope || 'mvp'
     };
-  }
-
-  /**
-   * Converts a timeline string to a number of days.
-   * @param {string} timeline
-   * @returns {number}
-   */
-  parseTimeline(timeline) {
-    if (!timeline) return 30;
-    const dayMatch = timeline.match(/day[s]? (\d+)/i);
-    const weekMatch = timeline.match(/week[s]? (\d+)/i);
-    const monthMatch = timeline.match(/month[s]? (\d+)/i);
-    const yearMatch = timeline.match(/year[s]? (\d+)/i);
-    if (dayMatch) return parseInt(dayMatch[1]);
-    if (weekMatch) return parseInt(weekMatch[1]) * 7;
-    if (monthMatch) return parseInt(monthMatch[1]) * 30;
-    if (yearMatch) return parseInt(yearMatch[1]) * 365;
-    const numMatch = timeline.match(/(\d+)/);
-    if (numMatch) return parseInt(numMatch[1]);
-    return 30;
   }
 
   /**

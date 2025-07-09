@@ -1,4 +1,19 @@
 {
+  "domain_keywords": {
+    "mobile-app": [
+      "react native", "flutter", "ios", "android", "mobile", "app store",
+      "xcode", "android studio", "swift", "kotlin", "mobile app", "native app"
+    ],
+    "ai-project": [
+      "tensorflow", "pytorch", "machine learning", "ml", "ai", "neural",
+      "model training", "data science", "deep learning", "artificial intelligence",
+      "natural language processing", "nlp", "computer vision", "cv"
+    ],
+    "web-app": [
+      "react", "angular", "vue", "node.js", "express", "frontend", "backend",
+      "api", "javascript", "html", "css", "web app", "website", "web application"
+    ]
+  },
   "weights": {
     "default": {
       "logical_order": 0.35,
