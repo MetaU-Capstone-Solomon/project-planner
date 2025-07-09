@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
  * Handles all project-related database operations including:
  * - Saving new projects with roadmap content
  * - Retrieving projects by ID
+ * - Updating project content for persistence
  * - User authentication validation
  * - Error handling and response formatting
  * 
@@ -46,6 +47,29 @@ export const saveProject = async (projectData) => {
     }
   } catch (error) {
     console.error('Failed to save project:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Update existing project content for persistence
+ * 
+ * @param {string} projectId - Project ID to update
+ * @param {string} content - JSON string representing the updated roadmap
+ * @returns {Promise<Object>} Result with success status or error
+ */
+export const updateProject = async (projectId, content) => {
+  try {
+    const { error } = await supabase
+      .from('roadmap')
+      .update({ content })
+      .eq('id', projectId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update project:', error);
     return { success: false, error: error.message };
   }
 };
