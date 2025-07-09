@@ -42,6 +42,21 @@ class PrioritizationConfig {
           risk_assessment: 0.05
         }
       },
+      domain_keywords: {
+        'mobile-app': [
+          'react native', 'flutter', 'ios', 'android', 'mobile', 'app store',
+          'xcode', 'android studio', 'swift', 'kotlin', 'mobile app', 'native app'
+        ],
+        'ai-project': [
+          'tensorflow', 'pytorch', 'machine learning', 'ml', 'ai', 'neural',
+          'model training', 'data science', 'deep learning', 'artificial intelligence',
+          'natural language processing', 'nlp', 'computer vision', 'cv'
+        ],
+        'web-app': [
+          'react', 'angular', 'vue', 'node.js', 'express', 'frontend', 'backend',
+          'api', 'javascript', 'html', 'css', 'web app', 'website', 'web application'
+        ]
+      },
       risk_matrices: {
         'web-app': {
           setup: { risk: 1, impact: 3, complexity: 1 },
@@ -105,37 +120,63 @@ class PrioritizationConfig {
   }
 
   /**
-   * Detects project domain based on roadmap content
+   * Detects project domain based on keyword frequency analysis
    * @param {Object} roadmap - The roadmap to analyze
    * @returns {string} Domain (web-app, mobile-app, ai-project, default)
    */
   detectDomain(roadmap) {
     const content = JSON.stringify(roadmap).toLowerCase();
     
-    // Check for mobile app indicators
-    if (content.includes('react native') || content.includes('flutter') || 
-        content.includes('ios') || content.includes('android') || 
-        content.includes('mobile') || content.includes('app store')) {
-      return 'mobile-app';
-    }
+    // Get domain keywords from configuration
+    const domainKeywords = this.config.domain_keywords || this.getDefaultDomainKeywords();
     
-    // Check for AI/ML indicators
-    if (content.includes('tensorflow') || content.includes('pytorch') || 
-        content.includes('machine learning') || content.includes('ml') || 
-        content.includes('ai') || content.includes('neural') || 
-        content.includes('model training') || content.includes('data science')) {
-      return 'ai-project';
-    }
+    // Initialize domain scores
+    const domainScores = {};
+    Object.keys(domainKeywords).forEach(domain => {
+      domainScores[domain] = 0;
+    });
     
-    // Check for web app indicators
-    if (content.includes('react') || content.includes('angular') || 
-        content.includes('vue') || content.includes('node.js') || 
-        content.includes('express') || content.includes('frontend') || 
-        content.includes('backend') || content.includes('api')) {
-      return 'web-app';
-    }
+    // Count keyword frequency for each domain
+    Object.entries(domainKeywords).forEach(([domain, keywords]) => {
+      keywords.forEach(keyword => {
+        const regex = new RegExp(keyword, 'gi');
+        const matches = content.match(regex);
+        if (matches) {
+          domainScores[domain] += matches.length;
+        }
+      });
+    });
     
-    return 'web-app'; // Default to web-app
+    // Find domain with highest score
+    const maxScore = Math.max(...Object.values(domainScores));
+    const detectedDomain = Object.keys(domainScores).find(domain => 
+      domainScores[domain] === maxScore
+    );
+    
+    // Return detected domain or default
+    return detectedDomain || 'web-app';
+  }
+
+  /**
+   * Returns default domain keywords configuration
+   * @returns {Object} Default domain keywords
+   */
+  getDefaultDomainKeywords() {
+    return {
+      'mobile-app': [
+        'react native', 'flutter', 'ios', 'android', 'mobile', 'app store',
+        'xcode', 'android studio', 'swift', 'kotlin', 'mobile app', 'native app'
+      ],
+      'ai-project': [
+        'tensorflow', 'pytorch', 'machine learning', 'ml', 'ai', 'neural',
+        'model training', 'data science', 'deep learning', 'artificial intelligence',
+        'natural language processing', 'nlp', 'computer vision', 'cv'
+      ],
+      'web-app': [
+        'react', 'angular', 'vue', 'node.js', 'express', 'frontend', 'backend',
+        'api', 'javascript', 'html', 'css', 'web app', 'website', 'web application'
+      ]
+    };
   }
 
   /**
