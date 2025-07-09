@@ -12,10 +12,6 @@ const Dashboard = () => {
     navigate(ROUTES.NEW_PROJECT_CHAT);
   };
 
-  const handleProfile = () => {
-    navigate(ROUTES.PROFILE);
-  };
-
   const handleSignOut = () => {
     signOut();
   };
@@ -29,20 +25,26 @@ const Dashboard = () => {
             <Button onClick={handleNewProject} variant="primary" aria-label="Create new project">
               New Project
             </Button>
-            <Button onClick={handleProfile} variant="secondary" aria-label="View profile">
-              Profile
+            <Button onClick={handleSignOut} variant="danger" aria-label="Sign out of application">
+              Sign Out
             </Button>
           </div>
         </header>
 
-        {/* TODO: Add project cards with "View Details" button*/}
-
         <main className="flex items-center justify-center">
           <div className="text-center">
-            <h2 className="mb-4 text-4xl font-bold text-gray-900">Welcome to your dashboard</h2>
-            <p className="mb-6 text-gray-600">You have successfully logged in with Google OAuth!</p>
-            <Button onClick={handleSignOut} variant="danger" aria-label="Sign out of application">
-              Sign Out
+            <h2 className="mb-4 text-4xl font-bold text-gray-900">
+              Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
+            </h2>
+            <p className="mb-6 text-gray-600">
+              Track your learning journey and achieve your goals with personalized roadmaps
+            </p>
+            <Button
+              onClick={handleNewProject}
+              variant="primary"
+              aria-label="Create new roadmap"
+            >
+              Create New Roadmap
             </Button>
           </div>
         </main>
