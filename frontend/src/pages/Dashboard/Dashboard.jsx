@@ -6,13 +6,13 @@
  * Components:
  * - Welcome section with personalized greeting and create button
  * - Stats cards showing project metrics (Total, Completed, Progress, Milestones)
- * - Project list section (placeholder for next PR)
+ * - Project list section with ProjectCard components
  * 
- * TODO (Next PRs):
- * - Backend integration: getUserProjects() service function
- * - ProjectCard component for individual project display
- * - stats calculation from project data
- * - Navigation to project detail pages
+ * Features:
+ * - Real-time project data from backend
+ * - Progress tracking and statistics
+ * - Navigation to project details
+ * - Error handling and loading states
  */
 
 import React from 'react';
@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import StatsCard from '@/components/StatsCard';
+import ProjectCard from '@/components/ProjectCard';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import useDashboardData from '@/hooks/useDashboardData';
 import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
@@ -28,7 +29,7 @@ import { ROUTES } from '@/constants/routes';
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { projects, loading, stats } = useDashboardData();
+  const { projects, loading, error, stats } = useDashboardData();
 
   const handleNewProject = () => {
     navigate(ROUTES.NEW_PROJECT_CHAT);
@@ -88,17 +89,29 @@ const Dashboard = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Roadmaps</h3>
             
             {loading ? (
-              <LoadingSpinner size="lg" />
+              <div className="flex justify-center py-8">
+                <LoadingSpinner size="lg" />
+              </div>
+            ) : error ? (
+              <div className="text-center text-red-600 py-8">
+                <p>Failed to load projects. Please try again.</p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  variant="secondary" 
+                  className="mt-4"
+                >
+                  Retry
+                </Button>
+              </div>
             ) : projects.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 {DASHBOARD_MESSAGES.NO_PROJECTS}
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {/* TODO: Add ProjectCard component and map through projects */}
-                <div className="text-center text-gray-500 py-8">
-                  {DASHBOARD_MESSAGES.PROJECT_CARDS_PLACEHOLDER}
-                </div>
+                {projects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
               </div>
             )}
           </div>
