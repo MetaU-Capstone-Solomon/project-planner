@@ -16,7 +16,7 @@
 export const calculateProjectStats = (projects) => {
   // TODO: Calculate these stats from actual project data in the next PR
   return {
-    totalProjects: projects.length,
+    totalProjects: 0, // TODO: Calculate from projects.length
     completedProjects: 0, // TODO: Calculate from project data
     overallProgress: '0%', // TODO: Calculate average progress
     activeMilestones: '0/0' // TODO: Calculate from milestone data
