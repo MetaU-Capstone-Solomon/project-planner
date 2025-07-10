@@ -14,8 +14,11 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
+    target: 'esnext',
     rollupOptions: {
-      external: [],
+      output: {
+        manualChunks: undefined,
+      },
     },
   },
   define: {
