@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { extractProjectInfo } from '@/utils/fileUtils';
 import { API_ENDPOINTS } from '@/config/api';
@@ -14,10 +14,40 @@ const useChat = () => {
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
+  // Save messages to localStorage
+  const saveMessages = useCallback((newMessages) => {
+    localStorage.setItem('chatMessages', JSON.stringify(newMessages));
+  }, []);
+
+  // Save stage to localStorage
+  const saveStage = useCallback((newStage) => {
+    localStorage.setItem('chatStage', newStage);
+  }, []);
+
+  // Save project title to localStorage
+  const saveProjectTitle = useCallback((title) => {
+    localStorage.setItem('projectTitle', title);
+  }, []);
+
+  // Load saved chat data on mount
+  useEffect(() => {
+    const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+    const savedStage = localStorage.getItem('chatStage') || CHAT_STAGES.INITIAL;
+    const savedTitle = localStorage.getItem('projectTitle') || '';
+    
+    if (savedMessages.length > 0) {
+      setMessages(savedMessages);
+      setStage(savedStage);
+      setProjectTitle(savedTitle);
+    }
+  }, []);
+
   // Adds a new message to the chat history
   const appendMessage = useCallback((msg) => {
-    setMessages((prev) => [...prev, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }]);
-  }, []);
+    const newMessages = [...messages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
+    setMessages(newMessages);
+    saveMessages(newMessages);
+  }, [messages, saveMessages]);
 
   // Fetches AI response from the backend
   const generateAiResponse = useCallback(async (prompt) => {
@@ -65,7 +95,9 @@ const useChat = () => {
         }
 
         // Set project title
-        setProjectTitle(extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE);
+        const finalTitle = extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE;
+        setProjectTitle(finalTitle);
+        saveProjectTitle(finalTitle);
 
         // Start chat
         const userMessage = extractedTitle
@@ -111,7 +143,9 @@ const useChat = () => {
           content: aiResponse, 
           type: MESSAGE_TYPES.ROADMAP 
         });
-        setStage(CHAT_STAGES.AWAITING_CONFIRMATION);
+        const newStage = CHAT_STAGES.AWAITING_CONFIRMATION;
+        setStage(newStage);
+        saveStage(newStage);
       } catch (error) {
         console.error('AI generate error', error);
         appendMessage({ 
@@ -123,7 +157,7 @@ const useChat = () => {
         setLoading(false);
       }
     },
-    [appendMessage, generateAiResponse]
+    [appendMessage, generateAiResponse, saveProjectTitle, saveStage]
   );
 
   // Handles user messages and generates AI responses
@@ -163,7 +197,9 @@ const useChat = () => {
                 throw new Error(`${MESSAGES.ERROR.SUPABASE_INSERT_FAILED} ${error.message}`);
               }
 
-              setStage(CHAT_STAGES.DONE);
+              const newStage = CHAT_STAGES.DONE;
+              setStage(newStage);
+              saveStage(newStage);
               return; // Don't generate new AI response
             }
           } else {
@@ -197,7 +233,7 @@ const useChat = () => {
         setLoading(false);
       }
     },
-    [stage, appendMessage, generateAiResponse, messages, projectTitle]
+    [stage, appendMessage, generateAiResponse, messages, projectTitle, saveStage]
   );
 
   // Utility function to find roadmap message
