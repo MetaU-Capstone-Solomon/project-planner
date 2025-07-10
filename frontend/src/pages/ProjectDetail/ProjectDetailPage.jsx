@@ -4,12 +4,14 @@ import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCard from '@/components/Roadmap/PhaseCard';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
+import Summary from '@/components/Roadmap/Summary';
 import { ROUTES } from '@/constants/routes';
-import { getProject } from '@/services/projectService';
+import { getProject, updateProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { formatDate } from '@/utils/dateUtils';
 import { MARKDOWN } from '@/constants/roadmap';
+import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
 /**
  * ProjectDetailPage - Displays project details with phase-based roadmap visualization
@@ -17,10 +19,11 @@ import { MARKDOWN } from '@/constants/roadmap';
  * Features:
  * - Always shows project header with title and creation date
  * - Parses JSON roadmap content with markdown code block support
- * - Displays overall progress bar with real-time calculations
+ * - Displays overall progress bar with calculations
  * - Shows structured phase cards with progress tracking
  * - Handles phase and milestone expansion/collapse functionality
  * - Immutable state updates for task completion tracking
+ * - Persists user interactions to database for refresh recovery
  * - Shows friendly error messages for invalid roadmap data
  * - Clean minimal design when no roadmap data is available
  * - Provides navigation back to dashboard
@@ -33,6 +36,16 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [expandedPhases, setExpandedPhases] = useState(new Set());
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+
+  // Debounced persist function to minimize network overhead during rapid interactions
+  const persistRoadmap = useDebouncedCallback(async (updatedRoadmap) => {
+    if (!projectId) return;
+    const payload = JSON.stringify(updatedRoadmap);
+    const result = await updateProject(projectId, payload);
+    if (!result.success) {
+      console.error('Error saving roadmap:', result.error);
+    }
+  }, 800, [projectId]);
 
   // Fetch project data when component mounts or projectId changes
   useEffect(() => {
@@ -120,9 +133,16 @@ const ProjectDetailPage = () => {
         ...prevData,
         phases: updatedPhases
       }));
+
+      // Persist after local state update (debounced)
+      const updatedRoadmap = roadmapData
+        ? {
+            ...roadmapData,
+            phases: updatedPhases,
+          }
+        : null;
+      if (updatedRoadmap) persistRoadmap(updatedRoadmap);
     }
-    
-    // TODO: Save updated roadmap data to backend for persistence
   };
 
   if (loading) {
@@ -169,32 +189,34 @@ const ProjectDetailPage = () => {
         </header>
 
         <main>
-          {/* Project header */}
-          <div className="rounded-lg bg-white p-8 shadow-sm mb-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
-              <div className="text-sm text-gray-500">
-                Created: {formatDate(project.created_at)}
+          {roadmapData ? (
+            <>
+              <div className="space-y-6">
+                <ProgressBar phases={roadmapData.phases} />
+                <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
+                
+                <div className="space-y-4">
+                  {roadmapData.phases.map((phase) => (
+                    <PhaseCard
+                      key={phase.id}
+                      phase={phase}
+                      isExpanded={expandedPhases.has(phase.id)}
+                      onToggle={() => togglePhase(phase.id)}
+                      onTaskUpdate={handleTaskUpdate}
+                      expandedMilestones={expandedMilestones}
+                      onMilestoneToggle={toggleMilestone}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-
-          {roadmapData && (
-            <div className="space-y-6">
-              <ProgressBar phases={roadmapData.phases} />
-              
-              <div className="space-y-4">
-                {roadmapData.phases.map((phase) => (
-                  <PhaseCard
-                    key={phase.id}
-                    phase={phase}
-                    isExpanded={expandedPhases.has(phase.id)}
-                    onToggle={() => togglePhase(phase.id)}
-                    onTaskUpdate={handleTaskUpdate}
-                    expandedMilestones={expandedMilestones}
-                    onMilestoneToggle={toggleMilestone}
-                  />
-                ))}
+            </>
+          ) : (
+            <div className="rounded-lg bg-white p-8 shadow-sm mb-6">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
+                <div className="text-sm text-gray-500">
+                  Created: {formatDate(project.created_at)}
+                </div>
               </div>
             </div>
           )}
