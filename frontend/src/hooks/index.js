@@ -4,6 +4,8 @@
  * Centralized export for all custom hooks
  */
 
+export { default as useDebouncedCallback } from './useDebouncedCallback';
+
 // TODO: Add roadmap hooks when timeline view is implemented
 // export { usePhaseExpansion } from './usePhaseExpansion';
 // export { useRoadmapData } from './useRoadmapData';

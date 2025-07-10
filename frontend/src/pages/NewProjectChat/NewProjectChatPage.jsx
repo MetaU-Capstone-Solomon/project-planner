@@ -49,16 +49,10 @@ const NewProjectChatPage = () => {
     fileLoading
   );
 
-  const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, { title: values[FORM_FIELDS.TITLE] });
+  const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
 
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);
-  };
-
-  const handleViewRoadmap = () => {
-    if (savedProjectId) {
-      navigate(ROUTES.PROJECT_DETAIL.replace(':projectId', savedProjectId));
-    }
   };
 
   return (
@@ -190,28 +184,15 @@ const NewProjectChatPage = () => {
           {/* Project saving section - show when roadmap is generated */}
           {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
             <div className="border-t border-gray-200 p-4">
-              {savedProjectId ? (
-                <div className="text-center space-y-3">
-                  <p className="text-sm text-green-600">✓ Project saved successfully!</p>
-                  <Button
-                    onClick={handleViewRoadmap}
-                    variant="secondary"
-                    className="w-full"
-                  >
-                    {MESSAGES.ACTIONS.VIEW_ROADMAP}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <Button
-                    onClick={handleSaveProject}
-                    disabled={saving}
-                    className="w-full"
-                  >
-                    {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
-                  </Button>
-                </div>
-              )}
+              <div className="text-center">
+                <Button
+                  onClick={handleSaveProject}
+                  disabled={saving}
+                  className="w-full"
+                >
+                  {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
+                </Button>
+              </div>
             </div>
           )}
         </div>
