@@ -1,3 +1,29 @@
+import { calculateOverallProgress } from '@/utils/roadmapUtils';
+
+/**
+ * Dashboard Statistics Calculator
+ * 
+ * Calculates real-time statistics from user's roadmap projects for dashboard display.
+ * 
+ * STATISTICS CALCULATED:
+ * - Total Projects: Count of all user projects
+ * - Completed Projects: Projects with 100% progress
+ * - Overall Progress: Average progress across all projects
+ * - Active Milestones: Completed milestones vs total milestones
+ * 
+ * CALCULATION LOGIC:
+ * - Parses JSON roadmap content from each project
+ * - Uses existing roadmap utilities for progress calculation
+ * - Handles missing/invalid data gracefully
+ * - Provides meaningful insights for user progress tracking
+ * 
+ * EXAMPLE RESULTS:
+ * - 3 projects (60%, 80%, 100% progress) → Overall Progress: 80%
+ * - 10 total milestones, 3 completed → Active Milestones: 3/10
+ * 
+ * @module dashboardUtils
+ */
+
 /**
  * Dashboard utility functions
  * 
@@ -14,12 +40,64 @@
  * @returns {Object} Calculated statistics
  */
 export const calculateProjectStats = (projects) => {
-  // TODO: Calculate these stats from actual project data in the next PR
+  if (!projects || projects.length === 0) {
+    return {
+      totalProjects: 0,
+      completedProjects: 0,
+      overallProgress: '0%',
+      activeMilestones: '0/0'
+    };
+  }
+
+  let totalMilestones = 0;
+  let completedMilestones = 0;
+  let totalProgress = 0;
+  let completedProjects = 0;
+
+  projects.forEach(project => {
+    try {
+      const roadmapData = JSON.parse(project.content);
+      if (roadmapData?.phases) {
+        // Calculate project progress
+        const projectProgress = calculateOverallProgress(roadmapData.phases);
+        totalProgress += projectProgress;
+        
+        // Count as completed if progress is 100%
+        if (projectProgress >= 100) {
+          completedProjects++;
+        }
+
+        // Calculate milestone stats
+        roadmapData.phases.forEach(phase => {
+          if (phase.milestones) {
+            totalMilestones += phase.milestones.length;
+            
+            // Count completed milestones (all tasks completed)
+            phase.milestones.forEach(milestone => {
+              if (milestone.tasks) {
+                const allTasksCompleted = milestone.tasks.every(task => 
+                  task.status === 'completed'
+                );
+                if (allTasksCompleted) {
+                  completedMilestones++;
+                }
+              }
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to parse project content:', error);
+    }
+  });
+
+  const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : 0;
+
   return {
     totalProjects: projects.length,
-    completedProjects: 0, // TODO: Calculate from project data
-    overallProgress: '0%', // TODO: Calculate average progress
-    activeMilestones: '0/0' // TODO: Calculate from milestone data
+    completedProjects,
+    overallProgress: `${averageProgress}%`,
+    activeMilestones: `${completedMilestones}/${totalMilestones}`
   };
 };
 
@@ -30,7 +108,14 @@ export const calculateProjectStats = (projects) => {
  * @returns {number} Completion percentage (0-100)
  */
 export const calculateProjectCompletion = (project) => {
-  // TODO: Implement when we have project data structure
+  try {
+    const roadmapData = JSON.parse(project.content);
+    if (roadmapData?.phases) {
+      return calculateOverallProgress(roadmapData.phases);
+    }
+  } catch (error) {
+    console.warn('Failed to parse project content:', error);
+  }
   return 0;
 };
 
@@ -41,10 +126,41 @@ export const calculateProjectCompletion = (project) => {
  * @returns {Object} Milestone statistics
  */
 export const calculateMilestoneStats = (projects) => {
-  // TODO: Implement when we have project data structure
-  return {
-    total: 0,
-    completed: 0,
-    active: 0
-  };
+  let total = 0;
+  let completed = 0;
+  let active = 0;
+
+  projects.forEach(project => {
+    try {
+      const roadmapData = JSON.parse(project.content);
+      if (roadmapData?.phases) {
+        roadmapData.phases.forEach(phase => {
+          if (phase.milestones) {
+            total += phase.milestones.length;
+            
+            phase.milestones.forEach(milestone => {
+              if (milestone.tasks) {
+                const allTasksCompleted = milestone.tasks.every(task => 
+                  task.status === 'completed'
+                );
+                const hasCompletedTasks = milestone.tasks.some(task => 
+                  task.status === 'completed'
+                );
+                
+                if (allTasksCompleted) {
+                  completed++;
+                } else if (hasCompletedTasks) {
+                  active++;
+                }
+              }
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to parse project content:', error);
+    }
+  });
+
+  return { total, completed, active };
 }; 

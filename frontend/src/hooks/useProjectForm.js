@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
-import useForm from '@/hooks/useForm';
+import useProjectDetail from '@/hooks/useProjectDetail';
 import { FORM_FIELDS } from '@/constants/projectOptions';
 import { hasRequiredFields, getFinalTimeline } from '@/utils/formValidation';
 
 // Hook for managing project form state and validation
 export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) => {
   // Initialize form with all project fields
-  const { values, handleChange } = useForm({
+  const { values, handleChange } = useProjectDetail({
     [FORM_FIELDS.TITLE]: '',
     [FORM_FIELDS.DESCRIPTION]: '',
     [FORM_FIELDS.TIMELINE]: '',
