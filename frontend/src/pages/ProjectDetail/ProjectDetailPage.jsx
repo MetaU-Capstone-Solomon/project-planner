@@ -6,11 +6,12 @@ import PhaseCard from '@/components/Roadmap/PhaseCard';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import { ROUTES } from '@/constants/routes';
-import { getProject } from '@/services/projectService';
+import { getProject, updateProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { formatDate } from '@/utils/dateUtils';
 import { MARKDOWN } from '@/constants/roadmap';
+import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
 /**
  * ProjectDetailPage - Displays project details with phase-based roadmap visualization
@@ -22,6 +23,7 @@ import { MARKDOWN } from '@/constants/roadmap';
  * - Shows structured phase cards with progress tracking
  * - Handles phase and milestone expansion/collapse functionality
  * - Immutable state updates for task completion tracking
+ * - Persists user interactions to database for refresh recovery
  * - Shows friendly error messages for invalid roadmap data
  * - Clean minimal design when no roadmap data is available
  * - Provides navigation back to dashboard
@@ -34,6 +36,16 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [expandedPhases, setExpandedPhases] = useState(new Set());
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+
+  // Debounced persist function to minimize network overhead during rapid interactions
+  const persistRoadmap = useDebouncedCallback(async (updatedRoadmap) => {
+    if (!projectId) return;
+    const payload = JSON.stringify(updatedRoadmap);
+    const result = await updateProject(projectId, payload);
+    if (!result.success) {
+      console.error('Error saving roadmap:', result.error);
+    }
+  }, 800, [projectId]);
 
   // Fetch project data when component mounts or projectId changes
   useEffect(() => {
@@ -121,9 +133,16 @@ const ProjectDetailPage = () => {
         ...prevData,
         phases: updatedPhases
       }));
+
+      // Persist after local state update (debounced)
+      const updatedRoadmap = roadmapData
+        ? {
+            ...roadmapData,
+            phases: updatedPhases,
+          }
+        : null;
+      if (updatedRoadmap) persistRoadmap(updatedRoadmap);
     }
-    
-    // TODO: Save updated roadmap data to backend for persistence
   };
 
   if (loading) {

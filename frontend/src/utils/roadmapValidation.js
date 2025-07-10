@@ -78,7 +78,7 @@ const MetadataSchema = z.object({
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   experienceLevel: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  technologies: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
+  technologies: z.string().optional().default(""),
   scope: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   version: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE)
 });
