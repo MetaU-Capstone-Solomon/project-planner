@@ -24,6 +24,12 @@ import { calculateOverallProgress } from '@/utils/roadmapUtils';
  * @module dashboardUtils
  */
 
+// Dashboard Calculation Constants
+const DASHBOARD_CONSTANTS = {
+  COMPLETION_THRESHOLD: 100,
+  MIN_PERCENTAGE: 0
+};
+
 /**
  * Dashboard utility functions
  * 
@@ -44,7 +50,7 @@ export const calculateProjectStats = (projects) => {
     return {
       totalProjects: 0,
       completedProjects: 0,
-      overallProgress: '0%',
+      overallProgress: `${DASHBOARD_CONSTANTS.MIN_PERCENTAGE}%`,
       activeMilestones: '0/0'
     };
   }
@@ -63,7 +69,7 @@ export const calculateProjectStats = (projects) => {
         totalProgress += projectProgress;
         
         // Count as completed if progress is 100%
-        if (projectProgress >= 100) {
+        if (projectProgress >= DASHBOARD_CONSTANTS.COMPLETION_THRESHOLD) {
           completedProjects++;
         }
 
@@ -91,7 +97,7 @@ export const calculateProjectStats = (projects) => {
     }
   });
 
-  const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : 0;
+  const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : DASHBOARD_CONSTANTS.MIN_PERCENTAGE;
 
   return {
     totalProjects: projects.length,
@@ -116,7 +122,7 @@ export const calculateProjectCompletion = (project) => {
   } catch (error) {
     console.warn('Failed to parse project content:', error);
   }
-  return 0;
+  return DASHBOARD_CONSTANTS.MIN_PERCENTAGE;
 };
 
 /**

@@ -30,6 +30,34 @@
  * @module scoringUtils
  */
 
+// Scoring Constants
+const SCORING_CONSTANTS = {
+  // Score ranges
+  MAX_SCORE: 100,
+  MIN_SCORE: 0,
+  NEUTRAL_SCORE: 50,
+  
+  // Scope-specific scores
+  MVP_CORE_FEATURE_SCORE: 100,
+  MVP_ADVANCED_FEATURE_SCORE: 30,
+  FULL_FEATURED_SCOPE_SCORE: 70,
+  ENTERPRISE_SCOPE_SCORE: 80,
+  
+  // Timeline scoring
+  TIMELINE_SCORE_MULTIPLIER: 10,
+  EARLY_PHASE_BONUS_MULTIPLIER: 1.2,
+  EARLY_PHASE_THRESHOLD: 0.3,
+  
+  // Task scoring
+  TASK_ORDER_BIAS_MULTIPLIER: 0.1,
+  
+  // Default values
+  DEFAULT_TIMELINE_DAYS: 30,
+  
+  // Risk scoring
+  RISK_SCORE_MULTIPLIER: 10
+};
+
 /**
  * Calculates weighted score from multiple factors using configuration weights.
  * @param {Object} scores - Individual scores for each factor (0-100 range).
@@ -60,7 +88,7 @@ function getLogicalOrderScore(phase, phasePatterns) {
     }
   }
   
-  return 50; // Default neutral score
+  return SCORING_CONSTANTS.NEUTRAL_SCORE; // Default neutral score
 }
 
 /**
@@ -72,13 +100,13 @@ function getLogicalOrderScore(phase, phasePatterns) {
  */
 function getTimelineScore(phase, timelineDays, timelineParsers) {
   const phaseDay = extractDayFromTimeline(phase.timeline, timelineParsers);
-  if (!phaseDay) return 50;
+  if (!phaseDay) return SCORING_CONSTANTS.NEUTRAL_SCORE;
   
-  const timelineScore = Math.max(0, timelineDays - phaseDay + 1) * 10;
+  const timelineScore = Math.max(SCORING_CONSTANTS.MIN_SCORE, timelineDays - phaseDay + 1) * SCORING_CONSTANTS.TIMELINE_SCORE_MULTIPLIER;
   
   // Early phases get bonus points
-  if (phaseDay <= timelineDays * 0.3) {
-    return timelineScore * 1.2;
+  if (phaseDay <= timelineDays * SCORING_CONSTANTS.EARLY_PHASE_THRESHOLD) {
+    return timelineScore * SCORING_CONSTANTS.EARLY_PHASE_BONUS_MULTIPLIER;
   }
   
   return timelineScore;
@@ -97,9 +125,9 @@ function getExperienceScore(phase, learningPattern) {
     phaseTitle.includes(keyword)
   );
   
-  if (patternIndex === -1) return 50; // Neutral score if no match
+  if (patternIndex === -1) return SCORING_CONSTANTS.NEUTRAL_SCORE; // Neutral score if no match
   
-  return (learningPattern.length - patternIndex) * 10;
+  return (learningPattern.length - patternIndex) * SCORING_CONSTANTS.TIMELINE_SCORE_MULTIPLIER;
 }
 
 /**
@@ -114,21 +142,21 @@ function getScopeScore(phase, scope) {
   switch (scope) {
     case 'mvp':
       if (phaseTitle.includes('core') || phaseTitle.includes('basic') || phaseTitle.includes('foundation')) {
-        return 100;
+        return SCORING_CONSTANTS.MVP_CORE_FEATURE_SCORE;
       }
       if (phaseTitle.includes('advanced') || phaseTitle.includes('optimization')) {
-        return 30;
+        return SCORING_CONSTANTS.MVP_ADVANCED_FEATURE_SCORE;
       }
       break;
     case 'full-featured':
-      return 70;
+      return SCORING_CONSTANTS.FULL_FEATURED_SCOPE_SCORE;
     case 'enterprise-level':
-      return 80;
+      return SCORING_CONSTANTS.ENTERPRISE_SCOPE_SCORE;
     default:
-      return 50;
+      return SCORING_CONSTANTS.NEUTRAL_SCORE;
   }
   
-  return 50;
+  return SCORING_CONSTANTS.NEUTRAL_SCORE;
 }
 
 /**
@@ -142,11 +170,11 @@ function getRiskScore(phase, riskMatrix) {
   
   for (const [keyword, riskProfile] of Object.entries(riskMatrix)) {
     if (phaseTitle.includes(keyword)) {
-      return (riskProfile.impact - riskProfile.risk) * 10;
+      return (riskProfile.impact - riskProfile.risk) * SCORING_CONSTANTS.RISK_SCORE_MULTIPLIER;
     }
   }
   
-  return 50; // Default for neutral score
+  return SCORING_CONSTANTS.NEUTRAL_SCORE; // Default for neutral score
 }
 
 /**
@@ -168,7 +196,7 @@ function getTaskScore(task, taskPatterns, originalIndex) {
   }
   
   // Add bias to preserve original order for ties
-  score += (100 - originalIndex) * 0.1;
+  score += (SCORING_CONSTANTS.MAX_SCORE - originalIndex) * SCORING_CONSTANTS.TASK_ORDER_BIAS_MULTIPLIER;
   
   return score;
 }
@@ -206,10 +234,10 @@ function extractDayFromTimeline(timeline, timelineParsers) {
  * @returns {number} Number of days
  */
 function parseTimeline(timeline, timelineParsers) {
-  if (!timeline) return 30; // Default 30 days
+  if (!timeline) return SCORING_CONSTANTS.DEFAULT_TIMELINE_DAYS; // Default 30 days
   
   const days = extractDayFromTimeline(timeline, timelineParsers);
-  return days || 30;
+  return days || SCORING_CONSTANTS.DEFAULT_TIMELINE_DAYS;
 }
 
 /**

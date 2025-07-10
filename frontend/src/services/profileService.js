@@ -1,5 +1,12 @@
 import { PASSWORD_MIN_LENGTH, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/validation';
 
+// File Upload Constants
+const FILE_UPLOAD_CONSTANTS = {
+  MAX_FILE_SIZE_BYTES: 2 * 1024 * 1024, // 2MB in bytes
+  CACHE_CONTROL_SECONDS: 3600,
+  ALLOWED_IMAGE_TYPES: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
+};
+
 export const validatePassword = (newPassword, confirmPassword) => {
   if (newPassword !== confirmPassword) {
     return { isValid: false, error: ERROR_MESSAGES.PASSWORDS_DONT_MATCH };
@@ -28,11 +35,10 @@ export const updateUserPassword = async (updatePassword, newPassword) => {
 // User can upload avatar
 export const uploadAvatar = async (supabase, userId, file) => {
   // Validate image type & size (<=2MB)
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
-  if (!allowedTypes.includes(file.type)) {
+  if (!FILE_UPLOAD_CONSTANTS.ALLOWED_IMAGE_TYPES.includes(file.type)) {
     return { success: false, error: 'Unsupported file type' };
   }
-  if (file.size > 2 * 1024 * 1024) {
+  if (file.size > FILE_UPLOAD_CONSTANTS.MAX_FILE_SIZE_BYTES) {
     return { success: false, error: 'File too large (max 2MB)' };
   }
 
@@ -43,7 +49,7 @@ export const uploadAvatar = async (supabase, userId, file) => {
   const { error: uploadError } = await supabase.storage
     .from('avatars')
     .upload(filePath, file, {
-      cacheControl: '3600',
+      cacheControl: `${FILE_UPLOAD_CONSTANTS.CACHE_CONTROL_SECONDS}`,
       upsert: true,
       contentType: file.type,
     });
