@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { calculateProjectStats } from '@/utils/dashboardUtils';
+import { getUserProjects } from '@/services/projectService';
+import { showErrorToast } from '@/utils/toastUtils';
+import { MESSAGES } from '@/constants/messages';
 
 /**
  * Custom hook for managing dashboard data
  * 
  * Handles:
- * - Project data fetching
+ * - Project data fetching from backend
  * - Loading states
+ * - Error handling
  * - Stats calculations
  * 
  * @returns {Object} Dashboard data and functions
@@ -14,17 +18,32 @@ import { calculateProjectStats } from '@/utils/dashboardUtils';
 const useDashboardData = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // TODO: Implement getUserProjects service function
+  // Fetch projects from backend
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true);
-      // TODO: Replace with API call
+      setError(null);
       
-      // Mock data for now
-      setProjects([]);
-      setLoading(false);
+      try {
+        const result = await getUserProjects();
+        
+        if (result.success) {
+          setProjects(result.projects);
+        } else {
+          setError(result.error);
+          showErrorToast(MESSAGES.ERROR.PROJECTS_LOAD_FAILED);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        setError(error.message);
+        showErrorToast(MESSAGES.ERROR.PROJECTS_LOAD_FAILED);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchProjects();
   }, []);
 
@@ -34,6 +53,7 @@ const useDashboardData = () => {
   return {
     projects,
     loading,
+    error,
     stats
   };
 };

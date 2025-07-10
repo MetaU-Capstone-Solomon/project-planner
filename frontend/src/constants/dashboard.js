@@ -39,6 +39,5 @@ export const STATS_CONFIG = {
 
 export const DASHBOARD_MESSAGES = {
   WELCOME: "Track your learning journey and achieve your goals with personalized roadmaps",
-  NO_PROJECTS: "No projects yet. Start by creating a new roadmap.",
-  PROJECT_CARDS_PLACEHOLDER: "Project cards will be implemented in the next PR"
+  NO_PROJECTS: "No projects yet. Start by creating a new roadmap."
 }; 
