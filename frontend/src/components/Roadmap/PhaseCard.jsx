@@ -3,6 +3,7 @@ import MilestoneCard from './MilestoneCard';
 import { ChevronDown, ChevronRight, Calendar, Clock } from 'lucide-react';
 import { getPhaseColor, calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * PhaseCard Component
@@ -56,7 +57,7 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
 
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 border-l-4 ${phaseColorClasses} mb-4`}>
+    <div className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 ${phaseColorClasses} mb-4`}>
       <div 
         className="p-6 cursor-pointer"
         onClick={onToggle}
@@ -64,15 +65,15 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {isExpanded ? (
-              <ChevronDown className="h-5 w-5 text-gray-500" />
+              <ChevronDown className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary}`} />
             ) : (
-              <ChevronRight className="h-5 w-5 text-gray-500" />
+              <ChevronRight className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary}`} />
             )}
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary}`}>
                 Phase {phase.order}: {phase.title}
               </h3>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+              <div className={`flex items-center space-x-4 mt-2 text-sm ${COLOR_CLASSES.text.secondary}`}>
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
                   <span>{phase.timeline}</span>
@@ -86,15 +87,15 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
           </div>
           
           <div className="text-right">
-            <div className="text-2xl font-bold text-gray-900">{progress}%</div>
-            <div className="text-sm text-gray-500">{completedTasks}/{totalTasks} completed</div>
+            <div className={`text-2xl font-bold ${COLOR_CLASSES.text.primary}`}>{progress}%</div>
+            <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>{completedTasks}/{totalTasks} completed</div>
           </div>
         </div>
 
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
