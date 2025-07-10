@@ -9,6 +9,11 @@ import { MESSAGE_TYPES } from '@/constants/messageTypes';
 import { ROUTES } from '@/constants/routes';
 import { validateRoadmapContent, getValidationErrorMessage, getParsedRoadmap } from '@/utils/roadmapValidation';
 
+// Navigation Constants
+const NAVIGATION_CONSTANTS = {
+  REDIRECT_DELAY_MS: 100
+};
+
 /**
  * Custom hook for project saving functionality
  * 
@@ -106,7 +111,7 @@ export const useProjectSave = (messages, formValues) => {
         // Small delay to ensure localStorage is cleared before navigation
         setTimeout(() => {
           navigate(ROUTES.PROJECT_DETAIL.replace(':projectId', result.projectId));
-        }, 100);
+        }, NAVIGATION_CONSTANTS.REDIRECT_DELAY_MS);
         
         return result;
       } else {

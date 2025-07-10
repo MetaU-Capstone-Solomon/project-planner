@@ -9,13 +9,23 @@ import toast from 'react-hot-toast';
  * TODO: Add theme.js and refactor all toasts to use centralized theme configuration
  */
 
+// Toast Configuration Constants
+const TOAST_CONFIG = {
+  SUCCESS_DURATION: 3000,
+  ERROR_DURATION: 4000,
+  POSITION: 'top-right',
+  SUCCESS_BACKGROUND: '#10B981',
+  ERROR_BACKGROUND: '#EF4444',
+  TEXT_COLOR: '#fff'
+};
+
 export const showSuccessToast = (message, options = {}) => {
   toast.success(message, {
-    duration: 3000,
-    position: 'top-right',
+    duration: TOAST_CONFIG.SUCCESS_DURATION,
+    position: TOAST_CONFIG.POSITION,
     style: {
-      background: '#10B981',
-      color: '#fff',
+      background: TOAST_CONFIG.SUCCESS_BACKGROUND,
+      color: TOAST_CONFIG.TEXT_COLOR,
     },
     ...options,
   });
@@ -23,11 +33,11 @@ export const showSuccessToast = (message, options = {}) => {
 
 export const showErrorToast = (message, options = {}) => {
   toast.error(message, {
-    duration: 4000,
-    position: 'top-right',
+    duration: TOAST_CONFIG.ERROR_DURATION,
+    position: TOAST_CONFIG.POSITION,
     style: {
-      background: '#EF4444',
-      color: '#fff',
+      background: TOAST_CONFIG.ERROR_BACKGROUND,
+      color: TOAST_CONFIG.TEXT_COLOR,
     },
     ...options,
   });

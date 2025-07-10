@@ -7,6 +7,13 @@
 import { PHASE_COLORS, DEFAULT_PHASE_COLOR, TASK_STATUS } from '@/constants/roadmap';
 import { MESSAGES } from '@/constants/messages';
 
+// Progress Calculation Constants
+const PROGRESS_CONSTANTS = {
+  MAX_PERCENTAGE: 100,
+  MIN_PERCENTAGE: 0,
+  PERCENTAGE_MULTIPLIER: 100
+};
+
 /**
  * Get phase color based on order
  * 
@@ -46,7 +53,7 @@ export const parseRoadmapContent = (content) => {
  * @returns {number} Overall progress percentage (0-100)
  */
 export const calculateOverallProgress = (phases) => {
-  if (!phases || phases.length === 0) return 0;
+  if (!phases || phases.length === 0) return PROGRESS_CONSTANTS.MIN_PERCENTAGE;
   
   let totalTasks = 0;
   let completedTasks = 0;
@@ -66,7 +73,7 @@ export const calculateOverallProgress = (phases) => {
     }
   });
 
-  return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * PROGRESS_CONSTANTS.PERCENTAGE_MULTIPLIER) : PROGRESS_CONSTANTS.MIN_PERCENTAGE;
 };
 
 /**
@@ -76,16 +83,16 @@ export const calculateOverallProgress = (phases) => {
  * @returns {number} Phase progress percentage (0-100)
  */
 export const calculatePhaseProgress = (phase) => {
-  if (!phase || !phase.milestones) return 0;
+  if (!phase || !phase.milestones) return PROGRESS_CONSTANTS.MIN_PERCENTAGE;
   
   const phaseTasks = phase.milestones.flatMap(milestone => 
     milestone.tasks ? milestone.tasks : []
   );
   
-  if (phaseTasks.length === 0) return 0;
+  if (phaseTasks.length === 0) return PROGRESS_CONSTANTS.MIN_PERCENTAGE;
   
   const completedTasks = phaseTasks.filter(task => task.status === TASK_STATUS.COMPLETED).length;
-  return Math.round((completedTasks / phaseTasks.length) * 100);
+  return Math.round((completedTasks / phaseTasks.length) * PROGRESS_CONSTANTS.PERCENTAGE_MULTIPLIER);
 };
 
 /**
@@ -96,12 +103,12 @@ export const calculatePhaseProgress = (phase) => {
  */
 export const calculateMilestoneProgress = (milestone) => {
   if (!milestone || !milestone.tasks) {
-    return { total: 0, completed: 0, percentage: 0 };
+    return { total: 0, completed: 0, percentage: PROGRESS_CONSTANTS.MIN_PERCENTAGE };
   }
   
   const totalTasks = milestone.tasks.length;
   const completedTasks = milestone.tasks.filter(task => task.status === TASK_STATUS.COMPLETED).length;
-  const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * PROGRESS_CONSTANTS.PERCENTAGE_MULTIPLIER) : PROGRESS_CONSTANTS.MIN_PERCENTAGE;
   
   return { total: totalTasks, completed: completedTasks, percentage };
 };
