@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Target, Calendar } from 'lucide-react';
 import TaskCard from './TaskCard';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
+import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * MilestoneCard - Displays a milestone with expandable functionality and task management
@@ -43,22 +44,22 @@ const MilestoneCard = ({ milestone, isExpanded = false, onToggle, onTaskUpdate }
   };
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200">
+    <div className={`${COLOR_CLASSES.surface.tertiary} rounded-lg ${COLOR_CLASSES.border.primary}`}>
       <div 
-        className="p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+        className={`p-4 cursor-pointer ${COLOR_CLASSES.surface.cardHover} transition-colors duration-200`}
         onClick={onToggle}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
+              <ChevronDown className={`h-4 w-4 ${COLOR_CLASSES.text.tertiary}`} />
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-500" />
+              <ChevronRight className={`h-4 w-4 ${COLOR_CLASSES.text.tertiary}`} />
             )}
-            <Target className="h-5 w-5 text-blue-600" />
+            <Target className="h-5 w-5 text-status-info-main" />
             <div>
-              <h4 className="font-semibold text-gray-900">{milestone.title}</h4>
-              <div className="flex items-center space-x-1 mt-1 text-sm text-gray-600">
+              <h4 className={`font-semibold ${COLOR_CLASSES.text.primary}`}>{milestone.title}</h4>
+              <div className={`flex items-center space-x-1 mt-1 text-sm ${COLOR_CLASSES.text.secondary}`}>
                 <Calendar className="h-3 w-3" />
                 <span>{milestone.timeline}</span>
               </div>
@@ -66,8 +67,8 @@ const MilestoneCard = ({ milestone, isExpanded = false, onToggle, onTaskUpdate }
           </div>
           
           <div className="text-right">
-            <div className="text-lg font-semibold text-gray-900">{progress}%</div>
-            <div className="text-xs text-gray-500">{completedTasks}/{totalTasks}</div>
+            <div className={`text-lg font-semibold ${COLOR_CLASSES.text.primary}`}>{progress}%</div>
+            <div className={`text-xs ${COLOR_CLASSES.text.tertiary}`}>{completedTasks}/{totalTasks}</div>
           </div>
         </div>
 
