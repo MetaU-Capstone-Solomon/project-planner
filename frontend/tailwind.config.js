@@ -43,6 +43,85 @@ export default {
           900: '#7c2d12',
           950: '#431407',
         },
+        // Semantic color tokens for consistent theming
+        surface: {
+          primary: '#ffffff',
+          secondary: '#f9fafb',
+          tertiary: '#f3f4f6',
+          card: '#ffffff',
+          cardHover: '#f9fafb',
+        },
+        text: {
+          primary: '#111827',
+          secondary: '#6b7280',
+          tertiary: '#9ca3af',
+          inverse: '#ffffff',
+          link: '#3b82f6',
+          linkHover: '#2563eb',
+        },
+        border: {
+          primary: '#e5e7eb',
+          secondary: '#d1d5db',
+          focus: '#3b82f6',
+        },
+        status: {
+          success: {
+            light: '#dcfce7',
+            main: '#22c55e',
+            dark: '#15803d',
+            text: '#166534',
+          },
+          warning: {
+            light: '#fef3c7',
+            main: '#f59e0b',
+            dark: '#d97706',
+            text: '#92400e',
+          },
+          error: {
+            light: '#fee2e2',
+            main: '#ef4444',
+            dark: '#dc2626',
+            text: '#991b1b',
+          },
+          info: {
+            light: '#dbeafe',
+            main: '#3b82f6',
+            dark: '#2563eb',
+            text: '#1e40af',
+          },
+        },
+        experience: {
+          beginner: {
+            bg: '#dcfce7',
+            text: '#166534',
+          },
+          intermediate: {
+            bg: '#fef3c7',
+            text: '#92400e',
+          },
+          advanced: {
+            bg: '#fed7aa',
+            text: '#9a3412',
+          },
+          expert: {
+            bg: '#fee2e2',
+            text: '#991b1b',
+          },
+        },
+        scope: {
+          mvp: {
+            bg: '#dbeafe',
+            text: '#1e40af',
+          },
+          fullFeatured: {
+            bg: '#e9d5ff',
+            text: '#7c3aed',
+          },
+          enterprise: {
+            bg: '#c7d2fe',
+            text: '#4338ca',
+          },
+        },
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],

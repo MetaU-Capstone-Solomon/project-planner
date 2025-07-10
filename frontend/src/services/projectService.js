@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
  * Handles all project-related database operations including:
  * - Saving new projects with roadmap content
  * - Retrieving projects by ID
+ * - Retrieving all user projects for dashboard
  * - Updating project content for persistence
  * - User authentication validation
  * - Error handling and response formatting
@@ -47,6 +48,34 @@ export const saveProject = async (projectData) => {
     }
   } catch (error) {
     console.error('Failed to save project:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Retrieve all projects for the current user
+ * 
+ * @returns {Promise<Object>} Result with projects array or error
+ */
+export const getUserProjects = async () => {
+  try {
+    // Get current authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    if (!user) throw new Error('You must be logged in to view projects.');
+
+    // Fetch user's projects ordered by most recent
+    const { data, error } = await supabase
+      .from('roadmap')
+      .select('id, title, content, created_at, updated_at')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, projects: data || [] };
+  } catch (error) {
+    console.error('Failed to fetch user projects:', error);
     return { success: false, error: error.message };
   }
 };
