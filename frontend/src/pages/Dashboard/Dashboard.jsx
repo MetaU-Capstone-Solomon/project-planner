@@ -25,6 +25,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import useDashboardData from '@/hooks/useDashboardData';
 import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
 import { ROUTES } from '@/constants/routes';
+import { COLOR_CLASSES } from '@/constants/colors';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
@@ -40,10 +41,10 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className={`min-h-screen ${COLOR_CLASSES.surface.secondary}`}>
       <div className="p-6">
         <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className={`text-3xl font-bold ${COLOR_CLASSES.text.primary}`}>Dashboard</h1>
           <div className="flex space-x-3">
             <Button onClick={handleNewProject} variant="primary" aria-label="Create new project">
               New Project
@@ -57,10 +58,10 @@ const Dashboard = () => {
         <main>
           {/* Welcome section */}
           <div className="text-center mb-8">
-            <h2 className="mb-4 text-4xl font-bold text-gray-900">
+            <h2 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
               Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
             </h2>
-            <p className="mb-6 text-gray-600">
+            <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>
               {DASHBOARD_MESSAGES.WELCOME}
             </p>
             <Button
@@ -86,14 +87,14 @@ const Dashboard = () => {
 
           {/* Project list section */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Roadmaps</h3>
+            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary} mb-4`}>Your Roadmaps</h3>
             
             {loading ? (
               <div className="flex justify-center py-8">
                 <LoadingSpinner size="lg" />
               </div>
             ) : error ? (
-              <div className="text-center text-red-600 py-8">
+              <div className={`text-center ${COLOR_CLASSES.status.error.text} py-8`}>
                 <p>Failed to load projects. Please try again.</p>
                 <Button 
                   onClick={() => window.location.reload()} 
@@ -104,7 +105,7 @@ const Dashboard = () => {
                 </Button>
               </div>
             ) : projects.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className={`text-center ${COLOR_CLASSES.text.tertiary} py-8`}>
                 {DASHBOARD_MESSAGES.NO_PROJECTS}
               </div>
             ) : (

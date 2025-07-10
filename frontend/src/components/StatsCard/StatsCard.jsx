@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * StatsCard Component
@@ -13,14 +14,14 @@ import React from 'react';
  */
 const StatsCard = ({ title, value, icon: Icon }) => {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div className={`rounded-lg ${COLOR_CLASSES.border.primary} ${COLOR_CLASSES.surface.card} p-6 shadow-sm`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className={`text-sm font-medium ${COLOR_CLASSES.text.secondary}`}>{title}</p>
+          <p className={`text-2xl font-bold ${COLOR_CLASSES.text.primary}`}>{value}</p>
         </div>
-        <div className="text-blue-600 p-2 rounded-lg bg-blue-50">
-          <Icon className="h-6 w-6" />
+        <div className={`${COLOR_CLASSES.status.info.bg} p-2 rounded-lg`}>
+          <Icon className="h-6 w-6 text-status-info-main" />
         </div>
       </div>
     </div>
