@@ -1,4 +1,5 @@
 import { calculateOverallProgress } from '@/utils/roadmapUtils';
+import { getParsedRoadmap } from '@/utils/roadmapValidation';
 
 /**
  * Dashboard Statistics Calculator
@@ -24,6 +25,12 @@ import { calculateOverallProgress } from '@/utils/roadmapUtils';
  * @module dashboardUtils
  */
 
+// Dashboard Calculation Constants
+const DASHBOARD_CONSTANTS = {
+  COMPLETION_THRESHOLD: 100,
+  MIN_PERCENTAGE: 0
+};
+
 /**
  * Dashboard utility functions
  * 
@@ -44,7 +51,7 @@ export const calculateProjectStats = (projects) => {
     return {
       totalProjects: 0,
       completedProjects: 0,
-      overallProgress: '0%',
+      overallProgress: `${DASHBOARD_CONSTANTS.MIN_PERCENTAGE}%`,
       activeMilestones: '0/0'
     };
   }
@@ -56,14 +63,15 @@ export const calculateProjectStats = (projects) => {
 
   projects.forEach(project => {
     try {
-      const roadmapData = JSON.parse(project.content);
+      // Use the helper function that handles markdown code blocks
+      const roadmapData = getParsedRoadmap(project.content);
       if (roadmapData?.phases) {
         // Calculate project progress
         const projectProgress = calculateOverallProgress(roadmapData.phases);
         totalProgress += projectProgress;
         
         // Count as completed if progress is 100%
-        if (projectProgress >= 100) {
+        if (projectProgress >= DASHBOARD_CONSTANTS.COMPLETION_THRESHOLD) {
           completedProjects++;
         }
 
@@ -91,7 +99,7 @@ export const calculateProjectStats = (projects) => {
     }
   });
 
-  const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : 0;
+  const averageProgress = projects.length > 0 ? Math.round(totalProgress / projects.length) : DASHBOARD_CONSTANTS.MIN_PERCENTAGE;
 
   return {
     totalProjects: projects.length,
@@ -109,14 +117,15 @@ export const calculateProjectStats = (projects) => {
  */
 export const calculateProjectCompletion = (project) => {
   try {
-    const roadmapData = JSON.parse(project.content);
+    // Use the helper function that handles markdown code blocks
+    const roadmapData = getParsedRoadmap(project.content);
     if (roadmapData?.phases) {
       return calculateOverallProgress(roadmapData.phases);
     }
   } catch (error) {
     console.warn('Failed to parse project content:', error);
   }
-  return 0;
+  return DASHBOARD_CONSTANTS.MIN_PERCENTAGE;
 };
 
 /**
@@ -132,7 +141,8 @@ export const calculateMilestoneStats = (projects) => {
 
   projects.forEach(project => {
     try {
-      const roadmapData = JSON.parse(project.content);
+      // Use the helper function that handles markdown code blocks
+      const roadmapData = getParsedRoadmap(project.content);
       if (roadmapData?.phases) {
         roadmapData.phases.forEach(phase => {
           if (phase.milestones) {
