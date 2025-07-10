@@ -1,4 +1,5 @@
 import { calculateOverallProgress } from '@/utils/roadmapUtils';
+import { getParsedRoadmap } from '@/utils/roadmapValidation';
 
 /**
  * Dashboard Statistics Calculator
@@ -62,7 +63,8 @@ export const calculateProjectStats = (projects) => {
 
   projects.forEach(project => {
     try {
-      const roadmapData = JSON.parse(project.content);
+      // Use the helper function that handles markdown code blocks
+      const roadmapData = getParsedRoadmap(project.content);
       if (roadmapData?.phases) {
         // Calculate project progress
         const projectProgress = calculateOverallProgress(roadmapData.phases);
@@ -115,7 +117,8 @@ export const calculateProjectStats = (projects) => {
  */
 export const calculateProjectCompletion = (project) => {
   try {
-    const roadmapData = JSON.parse(project.content);
+    // Use the helper function that handles markdown code blocks
+    const roadmapData = getParsedRoadmap(project.content);
     if (roadmapData?.phases) {
       return calculateOverallProgress(roadmapData.phases);
     }
@@ -138,7 +141,8 @@ export const calculateMilestoneStats = (projects) => {
 
   projects.forEach(project => {
     try {
-      const roadmapData = JSON.parse(project.content);
+      // Use the helper function that handles markdown code blocks
+      const roadmapData = getParsedRoadmap(project.content);
       if (roadmapData?.phases) {
         roadmapData.phases.forEach(phase => {
           if (phase.milestones) {
