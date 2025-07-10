@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, Circle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * TaskCard - Displays a task with interactive completion toggling
@@ -40,7 +41,7 @@ const TaskCard = ({ task, onTaskUpdate }) => {
 
   return (
     <div 
-      className="bg-gray-50 rounded-lg border border-gray-200"
+      className={`${COLOR_CLASSES.surface.tertiary} rounded-lg ${COLOR_CLASSES.border.primary}`}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="p-4">
@@ -53,15 +54,15 @@ const TaskCard = ({ task, onTaskUpdate }) => {
             className="mt-1 flex-shrink-0"
           >
             {isCompleted ? (
-              <CheckCircle className="h-5 w-5 text-green-600" />
+              <CheckCircle className="h-5 w-5 text-status-success-main" />
             ) : (
-              <Circle className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              <Circle className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary} hover:${COLOR_CLASSES.text.secondary}`} />
             )}
           </button>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h5 className={`font-medium ${isCompleted ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+              <h5 className={`font-medium ${isCompleted ? `line-through ${COLOR_CLASSES.text.tertiary}` : COLOR_CLASSES.text.primary}`}>
                 {task.title}
               </h5>
               <button
@@ -69,7 +70,7 @@ const TaskCard = ({ task, onTaskUpdate }) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className={`${COLOR_CLASSES.text.tertiary} hover:${COLOR_CLASSES.text.secondary}`}
               >
                 {isExpanded ? (
                   <ChevronUp className="h-4 w-4" />
@@ -82,13 +83,13 @@ const TaskCard = ({ task, onTaskUpdate }) => {
             {isExpanded && (
               <div className="mt-4 space-y-4">
                 <div>
-                  <h6 className="font-medium text-gray-900 mb-2">Description</h6>
-                  <p className="text-gray-700 text-sm leading-relaxed">{task.description}</p>
+                  <h6 className={`font-medium ${COLOR_CLASSES.text.primary} mb-2`}>Description</h6>
+                  <p className={`${COLOR_CLASSES.text.secondary} text-sm leading-relaxed`}>{task.description}</p>
                 </div>
                 
                 {task.resources && task.resources.length > 0 && (
                   <div>
-                    <h6 className="font-medium text-gray-900 mb-2">Resources</h6>
+                    <h6 className={`font-medium ${COLOR_CLASSES.text.primary} mb-2`}>Resources</h6>
                     <div className="space-y-2">
                       {task.resources.map((resource, index) => (
                         <div key={index} className="flex items-center space-x-2">
@@ -97,13 +98,13 @@ const TaskCard = ({ task, onTaskUpdate }) => {
                               href={resource.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm"
+                              className={`flex items-center space-x-2 ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover} text-sm`}
                             >
                               <span>{resource.name}</span>
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           ) : (
-                            <span className="text-gray-700 text-sm">{resource.name}</span>
+                            <span className={`${COLOR_CLASSES.text.secondary} text-sm`}>{resource.name}</span>
                           )}
                         </div>
                       ))}
