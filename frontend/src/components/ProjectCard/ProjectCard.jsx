@@ -5,6 +5,7 @@ import { getProjectDetailPath } from '@/constants/routes';
 import { getProgressColor } from '@/constants/projectCard';
 import { calculateOverallProgress } from '@/utils/roadmapUtils';
 import { formatDate } from '@/utils/dateUtils';
+import { COLOR_CLASSES } from '@/constants/colors';
 
 /**
  * ProjectCard Component
@@ -54,23 +55,23 @@ const ProjectCard = ({ project }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} hover:shadow-md transition-shadow duration-200 cursor-pointer`}
       onClick={handleCardClick}
     >
       <div className="p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
+            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.primary} truncate`}>
               {project.title}
             </h3>
           </div>
-          <ArrowRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
+          <ArrowRight className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary} flex-shrink-0 ml-2`} />
         </div>
 
         {/* Summary */}
         {roadmapData?.summary && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className={`${COLOR_CLASSES.text.secondary} text-sm mb-4 line-clamp-2`}>
             {roadmapData.summary}
           </p>
         )}
@@ -78,8 +79,8 @@ const ProjectCard = ({ project }) => {
         {/* Progress */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Progress</span>
-            <span className="text-sm font-semibold text-gray-900">{progress}%</span>
+            <span className={`text-sm font-medium ${COLOR_CLASSES.text.secondary}`}>Progress</span>
+            <span className={`text-sm font-semibold ${COLOR_CLASSES.text.primary}`}>{progress}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
@@ -92,13 +93,13 @@ const ProjectCard = ({ project }) => {
         {/* Metadata */}
         <div className="space-y-2">
           {roadmapData?.metadata?.timeline && (
-            <div className="flex items-center text-sm text-gray-600">
+            <div className={`flex items-center text-sm ${COLOR_CLASSES.text.secondary}`}>
               <Calendar className="h-4 w-4 mr-2" />
               <span>{roadmapData.metadata.timeline}</span>
             </div>
           )}
           
-          <div className="flex items-center text-sm text-gray-600">
+          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.secondary}`}>
             <Clock className="h-4 w-4 mr-2" />
             <span>Updated {formatDate(project.updated_at || project.created_at)}</span>
           </div>
