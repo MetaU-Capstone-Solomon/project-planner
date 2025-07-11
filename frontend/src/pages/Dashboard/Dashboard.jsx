@@ -17,60 +17,29 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import Button from '@/components/Button/Button';
 import StatsCard from '@/components/StatsCard';
 import ProjectCard from '@/components/ProjectCard';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import useDashboardData from '@/hooks/useDashboardData';
 import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
-import { ROUTES } from '@/constants/routes';
 import { COLOR_CLASSES } from '@/constants/colors';
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { projects, loading, error, stats } = useDashboardData();
-
-  const handleNewProject = () => {
-    navigate(ROUTES.NEW_PROJECT_CHAT);
-  };
-
-  const handleSignOut = () => {
-    signOut();
-  };
 
   return (
     <div className={`min-h-screen ${COLOR_CLASSES.surface.secondary}`}>
       <div className="p-6">
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className={`text-3xl font-bold ${COLOR_CLASSES.text.primary}`}>Dashboard</h1>
-          <div className="flex space-x-3">
-            <Button onClick={handleNewProject} variant="primary" aria-label="Create new project">
-              New Project
-            </Button>
-            <Button onClick={handleSignOut} variant="danger" aria-label="Sign out of application">
-              Sign Out
-            </Button>
-          </div>
-        </header>
-
         <main>
           {/* Welcome section */}
           <div className="text-center mb-8">
-            <h2 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
+            <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
               Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
-            </h2>
+            </h1>
             <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>
               {DASHBOARD_MESSAGES.WELCOME}
             </p>
-            <Button
-              onClick={handleNewProject}
-              variant="primary"
-              aria-label="Create new roadmap"
-            >
-              Create New Roadmap
-            </Button>
           </div>
 
           {/* Statistics */}
