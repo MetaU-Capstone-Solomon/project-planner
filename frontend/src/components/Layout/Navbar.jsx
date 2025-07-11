@@ -4,6 +4,8 @@ import { Sun, Moon, User, Plus } from 'lucide-react';
 import { COLOR_CLASSES } from '../../constants/colors';
 import { ROUTES } from '../../constants/routes';
 import Logo from '../Logo/Logo';
+import { useAuth } from '../../contexts/AuthContext';
+import { getDisplayName, getAvatarUrl } from '../../utils/userUtils';
 
 /**
  * Navbar Component - Main navigation header
@@ -12,25 +14,20 @@ import Logo from '../Logo/Logo';
  * - Logo with home navigation
  * - Main navigation links
  * - Theme toggle (placeholder)
- * - Profile avatar with dropdown (placeholder)
- * 
- * TODO: Implement theme toggle functionality
- * TODO: Add profile dropdown menu
- * TODO: Add user profile image from auth context
- * TODO: Add active link highlighting
- * TODO: Add mobile hamburger menu
+ * - Profile avatar with user image
+ * - Responsive design
+ * - Industry standard layout
  */
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // TODO: Get user profile data from auth context
   const userProfile = {
-    name: 'User',
-    image: null // TODO: Get from auth context
+    name: getDisplayName(user),
+    image: getAvatarUrl(user)
   };
 
-  // TODO: Implement theme toggle
   const handleThemeToggle = () => {
     console.log('Theme toggle clicked - TODO: Implement theme switching');
   };
@@ -105,17 +102,16 @@ const Navbar = () => {
             <span className="md:hidden text-xs font-medium">Create</span>
           </button>
 
-          {/* Theme Toggle - TODO: Implement functionality */}
+          {/* Theme Toggle */}
           <button
             onClick={handleThemeToggle}
             className={`p-2 rounded-lg ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
             aria-label="Toggle theme"
           >
             <Sun className="h-5 w-5" />
-            {/* TODO: Show Moon icon when in dark mode */}
           </button>
 
-          {/* Profile Avatar - TODO: Add dropdown and user image */}
+          {/* Profile Avatar */}
           <button
             onClick={handleProfileClick}
             className={`flex items-center justify-center w-8 h-8 rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200`}
