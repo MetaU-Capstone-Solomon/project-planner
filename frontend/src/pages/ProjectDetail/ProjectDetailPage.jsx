@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
-import PhaseCard from '@/components/Roadmap/PhaseCard';
+import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import { ROUTES } from '@/constants/routes';
@@ -14,19 +14,13 @@ import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
 /**
- * ProjectDetailPage - Displays project details with phase-based roadmap visualization
+ * ProjectDetailPage - Card-based project details layout
  * 
  * Features:
- * - Always shows project header with title and creation date
- * - Parses JSON roadmap content with markdown code block support
- * - Displays overall progress bar with calculations
- * - Shows structured phase cards with progress tracking
- * - Handles phase and milestone expansion/collapse functionality
- * - Immutable state updates for task completion tracking
- * - Persists user interactions to database for refresh recovery
- * - Shows friendly error messages for invalid roadmap data
- * - Clean minimal design when no roadmap data is available
- * - Provides navigation back to dashboard
+ * - Card-based phase layout similar to dashboard
+ * - Responsive grid layout for phase cards
+ * - Clean, modern UI with consistent styling
+ * - Maintains existing functionality for data display
  */
 const ProjectDetailPage = () => {
   const navigate = useNavigate();
@@ -34,8 +28,6 @@ const ProjectDetailPage = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [roadmapData, setRoadmapData] = useState(null);
-  const [expandedPhases, setExpandedPhases] = useState(new Set());
-  const [expandedMilestones, setExpandedMilestones] = useState(new Set());
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(async (updatedRoadmap) => {
@@ -70,8 +62,6 @@ const ProjectDetailPage = () => {
             
             if (parsedContent.metadata && parsedContent.phases) {
               setRoadmapData(parsedContent);
-              // Expand first phase by default
-              setExpandedPhases(new Set([parsedContent.phases[0]?.id]));
             } else {
               setRoadmapData(null);
               showErrorToast(MESSAGES.VALIDATION.ROADMAP_INCOMPLETE);
@@ -97,52 +87,6 @@ const ProjectDetailPage = () => {
 
   const handleBackToDashboard = () => {
     navigate(ROUTES.DASHBOARD);
-  };
-
-  const togglePhase = (phaseId) => {
-    const newExpanded = new Set(expandedPhases);
-    if (newExpanded.has(phaseId)) {
-      newExpanded.delete(phaseId);
-    } else {
-      newExpanded.add(phaseId);
-    }
-    setExpandedPhases(newExpanded);
-  };
-
-  const toggleMilestone = (milestoneId) => {
-    const newExpanded = new Set(expandedMilestones);
-    if (newExpanded.has(milestoneId)) {
-      newExpanded.delete(milestoneId);
-    } else {
-      newExpanded.add(milestoneId);
-    }
-    setExpandedMilestones(newExpanded);
-  };
-
-  const handleTaskUpdate = (phaseId, milestoneId, taskId, newStatus, updatedMilestones) => {
-    // Update the phase data in roadmapData using immutable updates
-    if (roadmapData && roadmapData.phases) {
-      const updatedPhases = roadmapData.phases.map(phase => 
-        phase.id === phaseId 
-          ? { ...phase, milestones: updatedMilestones }
-          : phase
-      );
-      
-      // Update roadmapData with the correct updated phases
-      setRoadmapData(prevData => ({
-        ...prevData,
-        phases: updatedPhases
-      }));
-
-      // Persist after local state update (debounced)
-      const updatedRoadmap = roadmapData
-        ? {
-            ...roadmapData,
-            phases: updatedPhases,
-          }
-        : null;
-      if (updatedRoadmap) persistRoadmap(updatedRoadmap);
-    }
   };
 
   if (loading) {
@@ -195,29 +139,24 @@ const ProjectDetailPage = () => {
                 <ProgressBar phases={roadmapData.phases} />
                 <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
                 
-                <div className="space-y-4">
-                  {roadmapData.phases.map((phase) => (
-                    <PhaseCard
-                      key={phase.id}
-                      phase={phase}
-                      isExpanded={expandedPhases.has(phase.id)}
-                      onToggle={() => togglePhase(phase.id)}
-                      onTaskUpdate={handleTaskUpdate}
-                      expandedMilestones={expandedMilestones}
-                      onMilestoneToggle={toggleMilestone}
-                    />
-                  ))}
+                {/* Phase Cards Grid */}
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Project Phases</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {roadmapData.phases.map((phase) => (
+                      <PhaseCardNew
+                        key={phase.id}
+                        phase={phase}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </>
           ) : (
-            <div className="rounded-lg bg-white p-8 shadow-sm mb-6">
-              <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
-                <div className="text-sm text-gray-500">
-                  Created: {formatDate(project.created_at)}
-                </div>
-              </div>
+            <div className="rounded-lg bg-white p-8 shadow-sm text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">No Roadmap Data</h2>
+              <p className="text-gray-600">This project doesn't have any roadmap data available.</p>
             </div>
           )}
         </main>

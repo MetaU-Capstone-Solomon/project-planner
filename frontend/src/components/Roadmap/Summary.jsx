@@ -30,19 +30,19 @@ const Summary = ({ metadata, summary }) => {
         )}
       </div>
 
-      {/* Project Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-5 w-5 text-status-info-main" />
-          <div>
+      {/* Project Details - Horizontal on mobile, Grid on larger screens */}
+      <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
+          <Calendar className="h-5 w-5 text-status-info-main flex-shrink-0" />
+          <div className="min-w-0">
             <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>Timeline</div>
-            <div className={`font-medium ${COLOR_CLASSES.text.primary}`}>{metadata.timeline}</div>
+            <div className={`font-medium ${COLOR_CLASSES.text.primary} truncate`}>{metadata.timeline}</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <User className="h-5 w-5 text-status-success-main" />
-          <div>
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
+          <User className="h-5 w-5 text-status-success-main flex-shrink-0" />
+          <div className="min-w-0">
             <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>Experience</div>
             <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getExperienceColor(metadata.experienceLevel).bg} ${getExperienceColor(metadata.experienceLevel).text}`}>
               {metadata.experienceLevel}
@@ -50,9 +50,9 @@ const Summary = ({ metadata, summary }) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Target className="h-5 w-5 text-primary-600" />
-          <div>
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
+          <Target className="h-5 w-5 text-primary-600 flex-shrink-0" />
+          <div className="min-w-0">
             <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>Scope</div>
             <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getScopeColor(metadata.scope).bg} ${getScopeColor(metadata.scope).text}`}>
               {metadata.scope}
