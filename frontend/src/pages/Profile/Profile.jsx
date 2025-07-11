@@ -1,15 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import Button from '@/components/Button/Button';
-import { ROUTES } from '@/constants/routes';
 
 const Profile = () => {
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
   const {
     user,
     displayName,
@@ -32,16 +29,9 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100 p-6">
       <div className="mx-auto max-w-3xl">
-        {/* Header with back button */}
-        <div className="mb-8 flex items-center justify-between">
+        {/* Header */}
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <Button
-            onClick={() => navigate(ROUTES.DASHBOARD)}
-            variant="secondary"
-            aria-label="Navigate back to dashboard"
-          >
-            Back to Dashboard
-          </Button>
         </div>
 
         {/* Error and success messages */}

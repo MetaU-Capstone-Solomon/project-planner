@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
-import { ROUTES } from '@/constants/routes';
 import { getProject, updateProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
-import { formatDate } from '@/utils/dateUtils';
 import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
@@ -88,9 +86,7 @@ const ProjectDetailPage = () => {
     fetchProject();
   }, [projectId]);
 
-  const handleBackToDashboard = () => {
-    navigate(ROUTES.DASHBOARD);
-  };
+
 
   // Handler to open modal with selected phase
   const handlePhaseClick = (phase) => {
@@ -124,7 +120,7 @@ const ProjectDetailPage = () => {
       });
 
       const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
-      
+
       // Update selectedPhase with the updated phase data
       if (selectedPhase && selectedPhase.id === phaseId) {
         const updatedPhase = newPhases.find(phase => phase.id === phaseId);
@@ -152,15 +148,6 @@ const ProjectDetailPage = () => {
     return (
       <div className="min-h-screen bg-gray-100">
         <div className="p-6">
-          <header className="mb-6">
-            <Button
-              onClick={handleBackToDashboard}
-              variant="secondary"
-              aria-label="Navigate back to dashboard"
-            >
-              ← Dashboard
-            </Button>
-          </header>
           <main className="rounded-lg bg-white p-8 shadow-sm text-center">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.ERROR.PROJECT_NOT_FOUND}</h2>
             <p className="text-gray-600">The project could not be found.</p>
@@ -173,16 +160,6 @@ const ProjectDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
-        <header className="mb-6 flex items-center justify-between">
-          <Button
-            onClick={handleBackToDashboard}
-            variant="secondary"
-            aria-label="Navigate back to dashboard"
-          >
-            ← Dashboard
-          </Button>
-        </header>
-
         <main>
           {roadmapData ? (
             <>
@@ -194,13 +171,13 @@ const ProjectDetailPage = () => {
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-gray-900">Project Phases</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {roadmapData.phases.map((phase) => (
+                  {roadmapData.phases.map((phase) => (
                       <PhaseCardNew
-                        key={phase.id}
-                        phase={phase}
+                      key={phase.id}
+                      phase={phase}
                         onClick={() => handlePhaseClick(phase)}
-                      />
-                    ))}
+                    />
+                  ))}
                   </div>
                 </div>
               </div>

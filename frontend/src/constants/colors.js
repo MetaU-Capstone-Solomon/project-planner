@@ -19,6 +19,8 @@ export const COLOR_CLASSES = {
     tertiary: 'bg-surface-tertiary',
     card: 'bg-surface-card',
     cardHover: 'hover:bg-surface-cardHover',
+    navbar: 'bg-surface-navbar',
+    footer: 'bg-surface-footer',
   },
   
   // Text colors

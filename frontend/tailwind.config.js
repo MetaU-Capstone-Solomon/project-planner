@@ -50,6 +50,8 @@ export default {
           tertiary: '#f3f4f6',
           card: '#ffffff',
           cardHover: '#f9fafb',
+          navbar: '#d1d5db',
+          footer: '#d1d5db',
         },
         text: {
           primary: '#111827',
