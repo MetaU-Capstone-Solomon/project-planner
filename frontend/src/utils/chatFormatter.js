@@ -151,11 +151,6 @@ export const formatAIResponse = (content) => {
   if (roadmapData) {
     let formattedText = '';
     
-    // Add summary if available
-    if (roadmapData.metadata && roadmapData.metadata.summary) {
-      formattedText += `${roadmapData.metadata.summary}\n\n`;
-    }
-    
     // Add phases
     if (roadmapData.phases && Array.isArray(roadmapData.phases)) {
       formattedText += 'Project Phases:\n\n';
