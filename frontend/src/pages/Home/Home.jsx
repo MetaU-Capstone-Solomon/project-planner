@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, CheckCircle } from 'lucide-react';
-import Logo from '@/components/Logo/Logo';
 import Button from '@/components/Button/Button';
+import LandingNavbar from '@/components/Layout/LandingNavbar';
+import Footer from '@/components/Layout/Footer';
 import { ROUTES } from '@/constants/routes';
 import prosperImg from '@/assets/images/testimonials/prosper.jpg';
 import sudeepImg from '@/assets/images/testimonials/sudeep.jpg';
@@ -54,13 +55,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <Logo />
-          </div>
-        </div>
-      </header>
+      <LandingNavbar />
 
       {/* Hero Section */}
       <section className="bg-white py-16">
@@ -157,13 +152,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 py-12 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-800 py-8 text-center text-gray-400">
-            <p>&copy; 2024 Project Planner. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

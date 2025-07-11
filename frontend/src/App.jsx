@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import RootLayout from '@/layouts/RootLayout';
 import Home from '@/pages/Home/Home';
 import Auth from '@/pages/Auth/Auth';
 import Callback from '@/pages/Auth/Callback';
@@ -28,41 +29,37 @@ const ProtectedRoute = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public routes (no navbar/footer) */}
       <Route path={ROUTES.HOME} element={<Home />} />
       <Route path={ROUTES.AUTH} element={<Auth />} />
       <Route path={ROUTES.AUTH_CALLBACK} element={<Callback />} />
+      
+      {/* Protected routes with navbar/footer */}
       <Route
-        path={ROUTES.DASHBOARD}
+        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <RootLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path={ROUTES.NEW_PROJECT_CHAT}
-        element={
-          <ProtectedRoute>
-            <NewProjectChatPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={ROUTES.PROFILE}
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={ROUTES.PROJECT_DETAIL}
-        element={
-          <ProtectedRoute>
-            <ProjectDetailPage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route
+          path={ROUTES.DASHBOARD}
+          element={<Dashboard />}
+        />
+        <Route
+          path={ROUTES.NEW_PROJECT_CHAT}
+          element={<NewProjectChatPage />}
+        />
+        <Route
+          path={ROUTES.PROFILE}
+          element={<Profile />}
+        />
+        <Route
+          path={ROUTES.PROJECT_DETAIL}
+          element={<ProjectDetailPage />}
+        />
+      </Route>
     </Routes>
   );
 }
