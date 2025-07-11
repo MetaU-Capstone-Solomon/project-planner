@@ -14,6 +14,7 @@ const useChat = () => {
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
+
   // Save messages to localStorage
   const saveMessages = useCallback((newMessages) => {
     localStorage.setItem('chatMessages', JSON.stringify(newMessages));
@@ -28,6 +29,8 @@ const useChat = () => {
   const saveProjectTitle = useCallback((title) => {
     localStorage.setItem('projectTitle', title);
   }, []);
+
+
 
   // Load saved chat data on mount
   useEffect(() => {
@@ -100,6 +103,8 @@ const useChat = () => {
         const finalTitle = extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE;
         setProjectTitle(finalTitle);
         saveProjectTitle(finalTitle);
+        
+
 
         // Start chat
         const userMessage = extractedTitle
@@ -169,6 +174,8 @@ const useChat = () => {
         return;
       }
 
+
+
       appendMessage({ 
         role: 'user', 
         content, 
@@ -224,6 +231,8 @@ const useChat = () => {
           content: aiText, 
           type: responseType 
         });
+        
+
       } catch (err) {
         console.error('AI generate error', err);
         appendMessage({ 
@@ -242,6 +251,8 @@ const useChat = () => {
   const findRoadmapMessage = useCallback(() => {
     return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
   }, [messages]);
+
+
 
   return { 
     messages, 
