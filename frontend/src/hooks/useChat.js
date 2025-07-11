@@ -238,9 +238,11 @@ const useChat = () => {
     [stage, appendMessage, generateAiResponse, messages, projectTitle, saveStage]
   );
 
-  // Utility function to find roadmap message
+  // Utility function to find roadmap message - get the latest one
   const findRoadmapMessage = useCallback(() => {
-    return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+    // Find the last roadmap message (most recent modification)
+    const roadmapMessages = messages.filter(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+    return roadmapMessages.length > 0 ? roadmapMessages[roadmapMessages.length - 1] : null;
   }, [messages]);
 
   return { 
