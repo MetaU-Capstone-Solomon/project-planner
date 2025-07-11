@@ -16,7 +16,7 @@ const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
   }, [messages]);
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white pb-4">
+    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white pb-2">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-500">
@@ -43,7 +43,7 @@ const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
         <div ref={bottomRef} />
       </div>
 
-      <div className="px-4">
+      <div className="px-2">
         <ChatInput onSendMessage={handleSendMessage} disabled={loading || stage === 'initial'} />
       </div>
     </div>
