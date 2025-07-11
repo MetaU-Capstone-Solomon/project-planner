@@ -6,15 +6,12 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * 
  * Features:
  * - Copyright information
- * - Legal links (placeholder)
- * 
- * TODO: Add actual legal pages and links
- * TODO: Add company social media link to my website
+ * - Legal links
+ * - Responsive layout
  */
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  // placeholder links
   const footerLinks = [
     { label: 'Privacy Policy', href: '#', isExternal: false },
     { label: 'Terms of Service', href: '#', isExternal: false },
