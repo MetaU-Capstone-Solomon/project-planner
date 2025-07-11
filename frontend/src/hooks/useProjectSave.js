@@ -33,9 +33,11 @@ export const useProjectSave = (messages, formValues) => {
   const [saving, setSaving] = useState(false);
   const [savedProjectId, setSavedProjectId] = useState(null);
 
-  // Find roadmap message using message type
+  // Find roadmap message using message type - get the latest one
   const findRoadmapMessage = useCallback(() => {
-    return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+    // Find the last roadmap message (most recent modification)
+    const roadmapMessages = messages.filter(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+    return roadmapMessages.length > 0 ? roadmapMessages[roadmapMessages.length - 1] : null;
   }, [messages]);
 
   // Clear localStorage after successful save
