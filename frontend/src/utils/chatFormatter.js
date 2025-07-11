@@ -95,6 +95,25 @@ const removeCodeBlockMarkers = (text) => {
 };
 
 /**
+ * Removes markdown formatting from text
+ * @param {string} text - The text to clean
+ * @returns {string} - Text without markdown formatting
+ */
+const removeMarkdownFormatting = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markers
+    .replace(/\*(.*?)\*/g, '$1')     // Remove italic markers
+    .replace(/`(.*?)`/g, '$1')       // Remove inline code markers
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove link markers, keep text
+    .replace(/^#+\s+/gm, '')         // Remove heading markers
+    .replace(/^\s*[-*+]\s+/gm, '')   // Remove list markers
+    .replace(/^\s*\d+\.\s+/gm, '')   // Remove numbered list markers
+    .trim();
+};
+
+/**
  * parses JSON content 
  * @param {string} content - The content to parse
  * @returns {Object|null} Parsed content or null if invalid
@@ -149,5 +168,5 @@ export const formatAIResponse = (content) => {
   }
   
   // If not roadmap content, return cleaned content
-  return cleanedContent;
+  return removeMarkdownFormatting(cleanedContent);
 }; 
