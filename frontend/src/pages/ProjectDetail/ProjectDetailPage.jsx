@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
+import PhaseModal from '@/components/Roadmap/PhaseModal';
 import { ROUTES } from '@/constants/routes';
 import { getProject, updateProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
@@ -28,6 +29,8 @@ const ProjectDetailPage = () => {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [roadmapData, setRoadmapData] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState(null);
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(async (updatedRoadmap) => {
@@ -89,6 +92,54 @@ const ProjectDetailPage = () => {
     navigate(ROUTES.DASHBOARD);
   };
 
+  // Handler to open modal with selected phase
+  const handlePhaseClick = (phase) => {
+    setSelectedPhase(phase);
+    setModalOpen(true);
+  };
+
+  // Handler to close modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedPhase(null);
+  };
+
+  // Handler to update task status from modal
+  const handleTaskUpdate = (phaseId, milestoneId, taskId, newStatus) => {
+    setRoadmapData((prevRoadmap) => {
+      const newPhases = prevRoadmap.phases.map((phase) => {
+        if (phase.id === phaseId) {
+          const newMilestones = phase.milestones.map((milestone) => {
+            if (milestone.id === milestoneId) {
+              const newTasks = milestone.tasks.map((task) => 
+                task.id === taskId ? { ...task, status: newStatus } : task
+              );
+              return { ...milestone, tasks: newTasks };
+            }
+            return milestone;
+          });
+          return { ...phase, milestones: newMilestones };
+        }
+        return phase;
+      });
+
+      const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
+      
+      // Update selectedPhase with the updated phase data
+      if (selectedPhase && selectedPhase.id === phaseId) {
+        const updatedPhase = newPhases.find(phase => phase.id === phaseId);
+        if (updatedPhase) {
+          setSelectedPhase(updatedPhase);
+        }
+      }
+      
+      // Persist changes to backend
+      persistRoadmap(updatedRoadmap);
+      
+      return updatedRoadmap;
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -147,11 +198,19 @@ const ProjectDetailPage = () => {
                       <PhaseCardNew
                         key={phase.id}
                         phase={phase}
+                        onClick={() => handlePhaseClick(phase)}
                       />
                     ))}
                   </div>
                 </div>
               </div>
+              {/* Phase Modal */}
+              <PhaseModal 
+                open={modalOpen} 
+                onClose={handleCloseModal} 
+                phase={selectedPhase}
+                onTaskUpdate={handleTaskUpdate}
+              />
             </>
           ) : (
             <div className="rounded-lg bg-white p-8 shadow-sm text-center">

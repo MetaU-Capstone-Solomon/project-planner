@@ -32,8 +32,9 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {Array} props.phase.milestones - Array of milestone objects
  * @param {Array} props.phase.milestones[].tasks - Array of task objects
  * @param {string} props.phase.milestones[].tasks[].status - Task status ('pending', 'completed', etc.)
+ * @param {Function} [props.onClick] - Optional click handler for opening modal
  */
-const PhaseCardNew = ({ phase }) => {
+const PhaseCardNew = ({ phase, onClick }) => {
   // Calculate phase progress percentage (0-100)
   const progress = calculatePhaseProgress(phase);
   
@@ -52,7 +53,8 @@ const PhaseCardNew = ({ phase }) => {
 
   return (
     <div 
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} hover:shadow-md transition-all duration-200 border-l-4 ${phaseColorClasses}`}
+      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} hover:shadow-md transition-all duration-200 border-l-4 ${phaseColorClasses} cursor-pointer`}
+      onClick={onClick}
     >
       <div className="p-6">
         {/* Header */}
