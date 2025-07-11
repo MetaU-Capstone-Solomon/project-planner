@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import ChatInput from './ChatInput';
 import ChatMessage from './ChatMessage';
 
+
 const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
   const bottomRef = useRef(null);
 
@@ -44,7 +45,10 @@ const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
       </div>
 
       <div className="px-4">
-        <ChatInput onSendMessage={handleSendMessage} disabled={loading || stage === 'initial'} />
+        <ChatInput 
+          onSendMessage={handleSendMessage} 
+          disabled={loading || stage === 'initial'} 
+        />
       </div>
     </div>
   );

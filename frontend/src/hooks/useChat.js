@@ -14,6 +14,7 @@ const useChat = () => {
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
+
   // Save messages to localStorage
   const saveMessages = useCallback((newMessages) => {
     localStorage.setItem('chatMessages', JSON.stringify(newMessages));
@@ -28,6 +29,8 @@ const useChat = () => {
   const saveProjectTitle = useCallback((title) => {
     localStorage.setItem('projectTitle', title);
   }, []);
+
+
 
   // Load saved chat data on mount
   useEffect(() => {
@@ -44,10 +47,12 @@ const useChat = () => {
 
   // Adds a new message to the chat history
   const appendMessage = useCallback((msg) => {
-    const newMessages = [...messages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
-    setMessages(newMessages);
-    saveMessages(newMessages);
-  }, [messages, saveMessages]);
+    setMessages(prevMessages => {
+      const newMessages = [...prevMessages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
+      saveMessages(newMessages);
+      return newMessages;
+    });
+  }, [saveMessages]);
 
   // Fetches AI response from the backend
   const generateAiResponse = useCallback(async (prompt) => {
@@ -98,6 +103,8 @@ const useChat = () => {
         const finalTitle = extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE;
         setProjectTitle(finalTitle);
         saveProjectTitle(finalTitle);
+        
+
 
         // Start chat
         const userMessage = extractedTitle
@@ -167,6 +174,8 @@ const useChat = () => {
         return;
       }
 
+
+
       appendMessage({ 
         role: 'user', 
         content, 
@@ -222,6 +231,8 @@ const useChat = () => {
           content: aiText, 
           type: responseType 
         });
+        
+
       } catch (err) {
         console.error('AI generate error', err);
         appendMessage({ 
@@ -240,6 +251,8 @@ const useChat = () => {
   const findRoadmapMessage = useCallback(() => {
     return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
   }, [messages]);
+
+
 
   return { 
     messages, 
