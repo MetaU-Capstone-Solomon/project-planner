@@ -44,10 +44,12 @@ const useChat = () => {
 
   // Adds a new message to the chat history
   const appendMessage = useCallback((msg) => {
-    const newMessages = [...messages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
-    setMessages(newMessages);
-    saveMessages(newMessages);
-  }, [messages, saveMessages]);
+    setMessages(prevMessages => {
+      const newMessages = [...prevMessages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
+      saveMessages(newMessages);
+      return newMessages;
+    });
+  }, [saveMessages]);
 
   // Fetches AI response from the backend
   const generateAiResponse = useCallback(async (prompt) => {
