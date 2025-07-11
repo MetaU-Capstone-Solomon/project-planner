@@ -51,4 +51,6 @@ export const CHAT_STAGES = {
   INITIAL: 'initial',
   AWAITING_CONFIRMATION: 'awaiting_confirmation',
   DONE: 'done'
-}; 
+};
+
+ 
