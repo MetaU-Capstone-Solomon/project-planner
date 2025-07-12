@@ -9,5 +9,6 @@ export const ERROR_MESSAGES = {
 };
 
 export const SUCCESS_MESSAGES = {
-  PASSWORD_UPDATED: 'Password updated successfully'
+  PASSWORD_UPDATED: 'Password updated successfully',
+  SIGN_OUT_SUCCESS: 'Signed out successfully'
 }; 

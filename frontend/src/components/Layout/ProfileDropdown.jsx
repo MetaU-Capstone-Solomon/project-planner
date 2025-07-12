@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
-import { COLOR_CLASSES } from '@/constants/colors';
 import { ROUTES } from '@/constants/routes';
 import { signOutUser } from '@/services/profileService';
 
@@ -67,7 +66,7 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
     try {
       const result = await signOutUser(signOut, navigate);
       if (!result.success) {
-        console.error('Sign out error:', result.error);
+        console.error('Sign out failed:', result.error);
       }
     } catch (error) {
       console.error('Sign out error:', error);
