@@ -53,12 +53,12 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="bg-white py-16">
+      <section className="bg-blue-50 pt-8 pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="mb-6 text-4xl font-bold text-gray-900">
@@ -69,15 +69,15 @@ const Home = () => {
               Streamline your workflow with our intuitive project management platform. Keep your
               team organized and projects on track.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-row justify-center gap-3 sm:gap-4">
               <Link to={ROUTES.AUTH}>
-                <Button variant="primary" size="lg" className="flex items-center">
+                <Button variant="outline" size="sm" className="flex items-center sm:text-base">
                   Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </Link>
               <Link to={ROUTES.AUTH}>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="sm" className="sm:text-base">
                   Sign In
                 </Button>
               </Link>
@@ -87,7 +87,7 @@ const Home = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-gray-50 py-16">
+      <section className="bg-gray-100 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900">How it works</h2>
@@ -100,7 +100,7 @@ const Home = () => {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="rounded-lg bg-gray-300 p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
                   {step.number}
@@ -116,7 +116,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-white py-16">
+      <section className="bg-gray-100 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900">What people are saying</h2>
@@ -127,7 +127,7 @@ const Home = () => {
 
           <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="rounded-lg bg-gray-50 p-6">
+              <div key={index} className="rounded-lg bg-gray-300 p-6">
                 <div className="mb-4 flex items-center">
                   <img
                     src={testimonial.image}
