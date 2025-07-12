@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Sun, Moon, User, Plus } from 'lucide-react';
-import { COLOR_CLASSES } from '../../constants/colors';
-import { ROUTES } from '../../constants/routes';
-import Logo from '../Logo/Logo';
-import { useAuth } from '../../contexts/AuthContext';
-import { getDisplayName, getAvatarUrl } from '../../utils/userUtils';
+import { COLOR_CLASSES } from '@/constants/colors';
+import { ROUTES } from '@/constants/routes';
+import Logo from '@/components/Logo/Logo';
+import { useAuth } from '@/contexts/AuthContext';
+import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
+import ProfileDropdown from './ProfileDropdown';
 
 /**
  * Navbar Component - Main navigation header
@@ -22,6 +23,8 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const profileButtonRef = useRef(null);
   
   const userProfile = {
     name: getDisplayName(user),
@@ -32,9 +35,9 @@ const Navbar = () => {
     console.log('Theme toggle clicked - TODO: Implement theme switching');
   };
 
-  // Handle profile navigation
+  // Handle profile dropdown toggle
   const handleProfileClick = () => {
-    navigate(ROUTES.PROFILE);
+    setIsDropdownOpen(!isDropdownOpen);
   };
 
   // Handle new project creation
@@ -111,22 +114,32 @@ const Navbar = () => {
             <Sun className="h-5 w-5" />
           </button>
 
-          {/* Profile Avatar */}
-          <button
-            onClick={handleProfileClick}
-            className={`flex items-center justify-center w-8 h-8 rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200`}
-            aria-label="User profile"
-          >
-            {userProfile.image ? (
-              <img 
-                src={userProfile.image} 
-                alt={userProfile.name}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            ) : (
-              <User className="h-4 w-4" />
-            )}
-          </button>
+          {/* Profile Avatar with Dropdown */}
+          <div className="relative">
+            <button
+              ref={profileButtonRef}
+              onClick={handleProfileClick}
+              className={`flex items-center justify-center w-8 h-8 rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200 ${isDropdownOpen ? 'ring-2 ring-blue-500' : ''}`}
+              aria-label="User profile"
+              aria-expanded={isDropdownOpen}
+            >
+              {userProfile.image ? (
+                <img 
+                  src={userProfile.image} 
+                  alt={userProfile.name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <User className="h-4 w-4" />
+              )}
+            </button>
+            
+            <ProfileDropdown
+              isOpen={isDropdownOpen}
+              onClose={() => setIsDropdownOpen(false)}
+              triggerRef={profileButtonRef}
+            />
+          </div>
         </div>
       </div>
     </header>
