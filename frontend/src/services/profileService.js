@@ -1,4 +1,6 @@
 import { PASSWORD_MIN_LENGTH, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/validation';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { ROUTES } from '@/constants/routes';
 
 // File Upload Constants
 const FILE_UPLOAD_CONSTANTS = {
@@ -73,12 +75,41 @@ export const uploadAvatar = async (supabase, userId, file) => {
   return { success: true, url: publicUrl };
 };
 
+/**
+ * Sign out user and redirect to landing page
+ * 
+ * @param {Function} signOut - Supabase sign out function
+ * @param {Function} navigate - React Router navigate function
+ * @returns {Promise<Object>} Result with success status and optional error
+ */
 export const signOutUser = async (signOut, navigate) => {
   try {
+    // Attempt to sign out from Supabase
     await signOut();
-    navigate('/');
+    
+    // Show success feedback
+    showSuccessToast(SUCCESS_MESSAGES.SIGN_OUT_SUCCESS);
+    
+    // Navigate to landing page
+    navigate(ROUTES.HOME);
+    
     return { success: true };
   } catch (error) {
-    return { success: false, error: ERROR_MESSAGES.SIGN_OUT_FAILED };
+    console.error('Sign out error:', error);
+    
+    // Show error feedback
+    showErrorToast(ERROR_MESSAGES.SIGN_OUT_FAILED);
+    
+    // Still attempt navigation to landing page for better UX
+    try {
+      navigate(ROUTES.HOME);
+    } catch (navError) {
+      console.error('Navigation error after sign out:', navError);
+    }
+    
+    return { 
+      success: false, 
+      error: error.message || ERROR_MESSAGES.SIGN_OUT_FAILED 
+    };
   }
 }; 

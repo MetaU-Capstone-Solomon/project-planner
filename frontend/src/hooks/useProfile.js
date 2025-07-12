@@ -61,9 +61,14 @@ export const useProfile = () => {
   };
 
   const handleSignOut = async () => {
-    const result = await signOutUser(signOut, navigate);
-    if (!result.success) {
-      setError(result.error);
+    try {
+      const result = await signOutUser(signOut, navigate);
+      if (!result.success) {
+        setError(result.error);
+      }
+    } catch (error) {
+      console.error('Sign out error in useProfile:', error);
+      setError('Failed to sign out. Please try again.');
     }
   };
 
