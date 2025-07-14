@@ -173,11 +173,6 @@ const NewProjectChatPage = () => {
                 >
                   {chatLoading ? MESSAGES.LOADING.GENERATING_ROADMAP : MESSAGES.ACTIONS.GENERATE_ROADMAP}
                 </Button>
-                {stage !== CHAT_STAGES.INITIAL && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    Use the chat to modify your roadmap
-                  </p>
-                )}
               </div>
             </div>
           </div>
