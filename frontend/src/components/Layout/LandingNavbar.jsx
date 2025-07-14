@@ -4,15 +4,17 @@ import Logo from '../Logo/Logo';
 
 /**
  * LandingNavbar Component - Simplified navbar for landing page
- * 
+ *
  * Features:
  * - Logo only (no navigation links)
- * - Same styling as main navbar 
+ * - Same styling as main navbar
  */
 const LandingNavbar = () => {
   return (
-    <header className={`${COLOR_CLASSES.surface.navbar} ${COLOR_CLASSES.border.primary} border-b shadow-sm`}>
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+    <header
+      className={`${COLOR_CLASSES.surface.navbar} ${COLOR_CLASSES.border.primary} border-b shadow-sm`}
+    >
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">
           <div className="flex items-center space-x-2">
@@ -32,4 +34,4 @@ const LandingNavbar = () => {
   );
 };
 
-export default LandingNavbar; 
+export default LandingNavbar;

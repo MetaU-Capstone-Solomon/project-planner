@@ -19,4 +19,4 @@ const confirmAction = (message, title = 'Confirm Action') => {
   return window.confirm(`${title}\n\n${message}`);
 };
 
-export default confirmAction; 
+export default confirmAction;

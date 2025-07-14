@@ -17,4 +17,4 @@ const Select = ({ name, value, onChange, options, className = '' }) => {
   );
 };
 
-export default Select; 
+export default Select;

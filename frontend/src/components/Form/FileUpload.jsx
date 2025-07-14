@@ -20,10 +20,7 @@ const FileUpload = ({
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (
-      file &&
-      accept.split(',').some((type) => file.name.toLowerCase().endsWith(type))
-    ) {
+    if (file && accept.split(',').some((type) => file.name.toLowerCase().endsWith(type))) {
       onFileSelect(file);
     }
   };
@@ -39,7 +36,10 @@ const FileUpload = ({
           type="file"
           className="hidden"
           id="file-upload"
-          accept={accept.split(',').map(type => `.${type}`).join(',')}
+          accept={accept
+            .split(',')
+            .map((type) => `.${type}`)
+            .join(',')}
           onChange={handleFileChange}
         />
         <label htmlFor="file-upload" className="cursor-pointer">

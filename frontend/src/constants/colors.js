@@ -1,9 +1,9 @@
 /**
  * Color Constants for Project Planner
- * 
+ *
  * This file provides centralized color definitions and utility functions
  * for consistent theming across the application.
- * 
+ *
  * Use:
  * - Use semantic color classes (e.g., 'bg-surface-primary', 'text-text-primary')
  * - Use utility functions for dynamic color selection
@@ -22,7 +22,7 @@ export const COLOR_CLASSES = {
     navbar: 'bg-surface-navbar',
     footer: 'bg-surface-footer',
   },
-  
+
   // Text colors
   text: {
     primary: 'text-text-primary',
@@ -32,14 +32,14 @@ export const COLOR_CLASSES = {
     link: 'text-text-link',
     linkHover: 'hover:text-text-linkHover',
   },
-  
+
   // Border colors
   border: {
     primary: 'border-border-primary',
     secondary: 'border-border-secondary',
     focus: 'focus:border-border-focus',
   },
-  
+
   // Status colors
   status: {
     success: {
@@ -63,7 +63,7 @@ export const COLOR_CLASSES = {
       border: 'border-status-info-main',
     },
   },
-  
+
   // Experience level colors
   experience: {
     beginner: {
@@ -83,7 +83,7 @@ export const COLOR_CLASSES = {
       text: 'text-experience-expert-text',
     },
   },
-  
+
   // Scope colors
   scope: {
     mvp: {
@@ -104,33 +104,33 @@ export const COLOR_CLASSES = {
 // Utility functions for dynamic color selection
 export const getExperienceColor = (level) => {
   const colors = {
-    'Beginner': COLOR_CLASSES.experience.beginner,
-    'Intermediate': COLOR_CLASSES.experience.intermediate,
-    'Advanced': COLOR_CLASSES.experience.advanced,
-    'Expert': COLOR_CLASSES.experience.expert,
+    Beginner: COLOR_CLASSES.experience.beginner,
+    Intermediate: COLOR_CLASSES.experience.intermediate,
+    Advanced: COLOR_CLASSES.experience.advanced,
+    Expert: COLOR_CLASSES.experience.expert,
   };
-  
+
   return colors[level] || COLOR_CLASSES.experience.beginner;
 };
 
 export const getScopeColor = (scope) => {
   const colors = {
-    'MVP': COLOR_CLASSES.scope.mvp,
+    MVP: COLOR_CLASSES.scope.mvp,
     'Full-featured': COLOR_CLASSES.scope.fullFeatured,
     'Enterprise-level': COLOR_CLASSES.scope.enterprise,
   };
-  
+
   return colors[scope] || COLOR_CLASSES.scope.mvp;
 };
 
 export const getStatusColor = (status) => {
   const colors = {
-    'success': COLOR_CLASSES.status.success,
-    'warning': COLOR_CLASSES.status.warning,
-    'error': COLOR_CLASSES.status.error,
-    'info': COLOR_CLASSES.status.info,
+    success: COLOR_CLASSES.status.success,
+    warning: COLOR_CLASSES.status.warning,
+    error: COLOR_CLASSES.status.error,
+    info: COLOR_CLASSES.status.info,
   };
-  
+
   return colors[status] || COLOR_CLASSES.status.info;
 };
 
@@ -141,14 +141,14 @@ export const COLOR_PATTERNS = {
     container: `${COLOR_CLASSES.surface.card} ${COLOR_CLASSES.border.primary} shadow-sm`,
     hover: `${COLOR_CLASSES.surface.cardHover} ${COLOR_CLASSES.border.primary} shadow-md`,
   },
-  
+
   // Button styling
   button: {
     primary: 'bg-primary-600 hover:bg-primary-700 text-white',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900',
     outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700',
   },
-  
+
   // Form styling
   form: {
     input: `${COLOR_CLASSES.border.primary} focus:${COLOR_CLASSES.border.focus}`,
@@ -156,7 +156,7 @@ export const COLOR_PATTERNS = {
     error: COLOR_CLASSES.status.error,
     success: COLOR_CLASSES.status.success,
   },
-  
+
   // Navigation styling
   nav: {
     active: 'bg-primary-100 text-primary-700',
@@ -172,4 +172,4 @@ export default {
   getExperienceColor,
   getScopeColor,
   getStatusColor,
-}; 
+};

@@ -3,16 +3,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { getDisplayName, isEmailUser, getAvatarUrl } from '@/utils/userUtils';
-import { updateUserPassword, signOutUser, validatePassword, uploadAvatar } from '@/services/profileService';
+import {
+  updateUserPassword,
+  signOutUser,
+  validatePassword,
+  uploadAvatar,
+} from '@/services/profileService';
 
 export const useProfile = () => {
   const { user, signOut, updatePassword } = useAuth();
   const navigate = useNavigate();
-  
+
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,7 +30,7 @@ export const useProfile = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
+
     const validation = validatePassword(passwordData.newPassword, passwordData.confirmPassword);
     if (!validation.isValid) {
       setError(validation.error);
@@ -34,9 +39,9 @@ export const useProfile = () => {
 
     setIsLoading(true);
     setError('');
-    
+
     const result = await updateUserPassword(updatePassword, passwordData.newPassword);
-    
+
     if (result.success) {
       setSuccess(result.message);
       setPasswordData({ newPassword: '', confirmPassword: '' });
@@ -44,7 +49,7 @@ export const useProfile = () => {
     } else {
       setError(result.error);
     }
-    
+
     setIsLoading(false);
   };
 
@@ -94,6 +99,6 @@ export const useProfile = () => {
     handleSignOut,
     handleAvatarUpload,
     avatarLoading,
-    resetPasswordForm
+    resetPasswordForm,
   };
-}; 
+};

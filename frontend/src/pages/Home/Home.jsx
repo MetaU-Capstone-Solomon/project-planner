@@ -58,7 +58,7 @@ const Home = () => {
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="bg-blue-50 pt-8 pb-16">
+      <section className="bg-blue-50 pb-16 pt-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="mb-6 text-4xl font-bold text-gray-900">

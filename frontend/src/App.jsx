@@ -14,10 +14,10 @@ import ProjectDetailPage from '@/pages/ProjectDetail/ProjectDetailPage';
 
 /**
  * ProtectedRoute Component
- * 
+ *
  * Wraps routes that require authentication. Redirects unauthenticated users
  * to the landing page instead of auth page for better UX after sign out.
- * 
+ *
  * @param {React.ReactNode} children - Child components to render if authenticated
  * @returns {React.ReactNode} Protected content or redirect
  */
@@ -39,11 +39,11 @@ const ProtectedRoute = ({ children }) => {
 
 /**
  * AppRoutes Component
- * 
+ *
  * Defines the application routing structure with public and protected routes.
  * Public routes (landing, auth) don't have navbar/footer, while protected
  * routes are wrapped with authentication check and layout components.
- * 
+ *
  * @returns {React.ReactNode} Application routes
  */
 function AppRoutes() {
@@ -53,7 +53,7 @@ function AppRoutes() {
       <Route path={ROUTES.HOME} element={<Home />} />
       <Route path={ROUTES.AUTH} element={<Auth />} />
       <Route path={ROUTES.AUTH_CALLBACK} element={<Callback />} />
-      
+
       {/* Protected routes - require authentication */}
       <Route
         element={

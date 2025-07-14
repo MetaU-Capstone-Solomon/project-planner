@@ -23,11 +23,8 @@ const resetNewProjectState = () => {
     localStorage.removeItem('projectFile');
     localStorage.removeItem('processedFile');
   } catch (error) {
-
     console.warn('Failed to clear new project state from localStorage:', error);
   }
-
-
 };
 
-export default resetNewProjectState; 
+export default resetNewProjectState;
