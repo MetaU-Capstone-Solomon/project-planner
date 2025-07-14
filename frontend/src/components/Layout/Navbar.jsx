@@ -32,10 +32,10 @@ const Navbar = () => {
   const { user } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const profileButtonRef = useRef(null);
-  
+
   const userProfile = {
     name: getDisplayName(user),
-    image: getAvatarUrl(user)
+    image: getAvatarUrl(user),
   };
 
   const handleThemeToggle = () => {
@@ -54,11 +54,11 @@ const Navbar = () => {
       const shouldProceed = confirmAction(
         'Are you sure you want to start over? This will clear all your current progress.'
       );
-      
+
       if (!shouldProceed) {
         return; // User cancelled, nothing happens
       }
-      
+
       // Reset state
       resetNewProjectState();
       // Trigger an event that the NewProjectChatPage can listen to
@@ -76,8 +76,10 @@ const Navbar = () => {
   ];
 
   return (
-    <header className={`${COLOR_CLASSES.surface.navbar} ${COLOR_CLASSES.border.primary} border-b shadow-sm`}>
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+    <header
+      className={`${COLOR_CLASSES.surface.navbar} ${COLOR_CLASSES.border.primary} border-b shadow-sm`}
+    >
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">
           <Link to={ROUTES.DASHBOARD} className="flex items-center space-x-2">
@@ -85,19 +87,17 @@ const Navbar = () => {
             <span className={`text-xl font-bold ${COLOR_CLASSES.text.primary} hidden md:inline`}>
               Project Planner
             </span>
-            <span className={`text-lg font-bold ${COLOR_CLASSES.text.primary} md:hidden`}>
-              PP
-            </span>
+            <span className={`text-lg font-bold ${COLOR_CLASSES.text.primary} md:hidden`}>PP</span>
           </Link>
         </div>
 
         {/* Navigation Links - Hidden on mobile */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden items-center space-x-8 md:flex">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`text-base font-bold px-3 py-2 rounded-lg transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary} hover:shadow-sm`}
+              className={`rounded-lg px-3 py-2 text-base font-bold transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary} hover:shadow-sm`}
             >
               {item.label}
             </Link>
@@ -105,12 +105,12 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Navigation Links */}
-        <nav className="flex md:hidden items-center space-x-2">
+        <nav className="flex items-center space-x-2 md:hidden">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`text-xs font-bold px-1.5 py-0.5 rounded transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary}`}
+              className={`rounded px-1.5 py-0.5 text-xs font-bold transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary}`}
             >
               {item.label}
             </Link>
@@ -122,18 +122,18 @@ const Navbar = () => {
           {/* New Project Button */}
           <button
             onClick={handleNewProject}
-            className={`flex items-center space-x-1 md:space-x-2 px-1.5 py-0.5 md:px-3 md:py-2 rounded-lg ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
+            className={`flex items-center space-x-1 rounded-lg px-1.5 py-0.5 md:space-x-2 md:px-3 md:py-2 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
             aria-label="Create new project"
           >
             <Plus className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="hidden md:inline text-sm font-medium">New Project</span>
-            <span className="md:hidden text-xs font-medium">Create</span>
+            <span className="hidden text-sm font-medium md:inline">New Project</span>
+            <span className="text-xs font-medium md:hidden">Create</span>
           </button>
 
           {/* Theme Toggle */}
           <button
             onClick={handleThemeToggle}
-            className={`p-2 rounded-lg ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
+            className={`rounded-lg p-2 ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
             aria-label="Toggle theme"
           >
             <Sun className="h-5 w-5" />
@@ -144,21 +144,21 @@ const Navbar = () => {
             <button
               ref={profileButtonRef}
               onClick={handleProfileClick}
-              className={`flex items-center justify-center w-8 h-8 rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200 ${isDropdownOpen ? 'ring-2 ring-blue-500' : ''}`}
+              className={`flex h-8 w-8 items-center justify-center rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200 ${isDropdownOpen ? 'ring-2 ring-blue-500' : ''}`}
               aria-label="User profile"
               aria-expanded={isDropdownOpen}
             >
               {userProfile.image ? (
-                <img 
-                  src={userProfile.image} 
+                <img
+                  src={userProfile.image}
                   alt={userProfile.name}
-                  className="w-8 h-8 rounded-full object-cover"
+                  className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (
                 <User className="h-4 w-4" />
               )}
             </button>
-            
+
             <ProfileDropdown
               isOpen={isDropdownOpen}
               onClose={() => setIsDropdownOpen(false)}
@@ -171,4 +171,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

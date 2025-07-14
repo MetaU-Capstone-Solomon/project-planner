@@ -3,7 +3,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * Footer Component - Site footer
- * 
+ *
  * Features:
  * - Copyright information
  * - Legal links
@@ -20,8 +20,8 @@ const Footer = () => {
 
   return (
     <footer className={`${COLOR_CLASSES.surface.footer} ${COLOR_CLASSES.border.primary} border-t`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           {/* Copyright */}
           <div className={`text-sm ${COLOR_CLASSES.text.primary}`}>
             © {currentYear} Project Planner. All rights reserved.
@@ -47,4 +47,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

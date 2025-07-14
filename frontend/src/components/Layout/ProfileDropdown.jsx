@@ -8,7 +8,7 @@ import { signOutUser } from '@/services/profileService';
 
 /**
  * ProfileDropdown Component - User profile dropdown menu
- * 
+ *
  * Features:
  * - User information display (name, email, avatar)
  * - Settings and sign out actions
@@ -26,7 +26,7 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   const userProfile = {
     name: getDisplayName(user),
     email: user?.email,
-    image: getAvatarUrl(user)
+    image: getAvatarUrl(user),
   };
 
   // Handle click outside to close dropdown
@@ -84,31 +84,27 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+      className="absolute right-0 top-full z-50 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg md:w-72"
     >
       {/* User Info Section */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="border-b border-gray-100 p-4">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             {userProfile.image ? (
               <img
                 src={userProfile.image}
                 alt={userProfile.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
                 <User className="h-5 w-5 text-gray-500" />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
-              {userProfile.name}
-            </p>
-            <p className="text-xs text-gray-500 truncate">
-              {userProfile.email}
-            </p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-gray-900">{userProfile.name}</p>
+            <p className="truncate text-xs text-gray-500">{userProfile.email}</p>
           </div>
         </div>
       </div>
@@ -117,19 +113,19 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
       <div className="py-2">
         <button
           onClick={() => handleNavigation(ROUTES.PROFILE)}
-          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+          className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50"
         >
-          <Settings className="h-4 w-4 mr-3 text-gray-400" />
+          <Settings className="mr-3 h-4 w-4 text-gray-400" />
           Settings
         </button>
-        
-        <div className="border-t border-gray-100 my-1" />
-        
+
+        <div className="my-1 border-t border-gray-100" />
+
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+          className="flex w-full items-center px-4 py-2 text-sm text-red-600 transition-colors duration-150 hover:bg-red-50"
         >
-          <LogOut className="h-4 w-4 mr-3 text-red-400" />
+          <LogOut className="mr-3 h-4 w-4 text-red-400" />
           Sign Out
         </button>
       </div>
@@ -137,4 +133,4 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   );
 };
 
-export default ProfileDropdown; 
+export default ProfileDropdown;

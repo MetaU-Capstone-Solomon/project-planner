@@ -66,17 +66,17 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4"
       onClick={onClose}
     >
-      <div 
-        className="relative w-full max-w-4xl bg-white rounded-lg shadow-xl flex flex-col max-h-[90vh] overflow-hidden"
+      <div
+        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-white shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
-          className={`absolute top-4 right-4 p-2 rounded-full hover:${COLOR_CLASSES.surface.secondary} focus:outline-none z-10`}
+          className={`absolute right-4 top-4 rounded-full p-2 hover:${COLOR_CLASSES.surface.secondary} z-10 focus:outline-none`}
           onClick={onClose}
           aria-label="Close modal"
         >
@@ -84,13 +84,13 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
         </button>
 
         {/* Phase Header */}
-        <div className={`p-6 border-b ${COLOR_CLASSES.border.primary} ${COLOR_CLASSES.surface.secondary}`}>
+        <div
+          className={`border-b p-6 ${COLOR_CLASSES.border.primary} ${COLOR_CLASSES.surface.secondary}`}
+        >
           <h2 className={`text-2xl font-bold ${COLOR_CLASSES.text.primary} mb-2`}>
             Phase {phase.order}: {phase.title}
           </h2>
-          <div className={`text-sm ${COLOR_CLASSES.text.secondary}`}>
-            {phase.timeline}
-          </div>
+          <div className={`text-sm ${COLOR_CLASSES.text.secondary}`}>{phase.timeline}</div>
         </div>
 
         {/* Milestones and Tasks */}
@@ -98,10 +98,13 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
           {phase.milestones && phase.milestones.length > 0 ? (
             <div className="space-y-4">
               {phase.milestones.map((milestone) => (
-                <div key={milestone.id} className={`${COLOR_CLASSES.surface.card} rounded-lg ${COLOR_CLASSES.border.primary} shadow-sm`}>
+                <div
+                  key={milestone.id}
+                  className={`${COLOR_CLASSES.surface.card} rounded-lg ${COLOR_CLASSES.border.primary} shadow-sm`}
+                >
                   {/* Milestone Header */}
-                  <div 
-                    className={`p-4 cursor-pointer hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
+                  <div
+                    className={`cursor-pointer p-4 hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
                     onClick={() => handleMilestoneToggle(milestone.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -116,13 +119,15 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                           <h3 className={`font-semibold ${COLOR_CLASSES.text.primary}`}>
                             {milestone.title}
                           </h3>
-                          <div className={`flex items-center space-x-1 mt-1 text-sm ${COLOR_CLASSES.text.secondary}`}>
+                          <div
+                            className={`mt-1 flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.secondary}`}
+                          >
                             <Calendar className="h-3 w-3" />
                             <span>{milestone.timeline}</span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
                         <div className={`text-sm ${COLOR_CLASSES.text.secondary}`}>
                           {milestone.tasks ? milestone.tasks.length : 0} tasks
@@ -133,33 +138,42 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
 
                   {/* Tasks (when expanded) */}
                   {expandedMilestones.has(milestone.id) && (
-                    <div className="px-4 pb-4 space-y-3">
+                    <div className="space-y-3 px-4 pb-4">
                       {milestone.tasks && milestone.tasks.length > 0 ? (
                         milestone.tasks.map((task) => (
-                          <div key={task.id} className={`${COLOR_CLASSES.surface.tertiary} rounded-lg p-4 ${COLOR_CLASSES.border.primary}`}>
-                            <div className="flex items-start justify-between mb-3">
+                          <div
+                            key={task.id}
+                            className={`${COLOR_CLASSES.surface.tertiary} rounded-lg p-4 ${COLOR_CLASSES.border.primary}`}
+                          >
+                            <div className="mb-3 flex items-start justify-between">
                               <h4 className={`font-medium ${COLOR_CLASSES.text.primary}`}>
                                 {task.title}
                               </h4>
                               <select
                                 value={task.status || 'pending'}
-                                onChange={(e) => handleTaskStatusChange(milestone.id, task.id, e.target.value)}
-                                className={`text-sm border rounded px-2 py-1 ${COLOR_CLASSES.border.primary} focus:${COLOR_CLASSES.border.focus} outline-none`}
+                                onChange={(e) =>
+                                  handleTaskStatusChange(milestone.id, task.id, e.target.value)
+                                }
+                                className={`rounded border px-2 py-1 text-sm ${COLOR_CLASSES.border.primary} focus:${COLOR_CLASSES.border.focus} outline-none`}
                               >
                                 <option value="pending">Pending</option>
                                 <option value="in_progress">In Progress</option>
                                 <option value="completed">Completed</option>
                               </select>
                             </div>
-                            
-                            <p className={`text-sm ${COLOR_CLASSES.text.secondary} mb-3 leading-relaxed`}>
+
+                            <p
+                              className={`text-sm ${COLOR_CLASSES.text.secondary} mb-3 leading-relaxed`}
+                            >
                               {task.description}
                             </p>
 
                             {/* Resources */}
                             {task.resources && task.resources.length > 0 && (
                               <div>
-                                <h5 className={`text-sm font-medium ${COLOR_CLASSES.text.primary} mb-2`}>
+                                <h5
+                                  className={`text-sm font-medium ${COLOR_CLASSES.text.primary} mb-2`}
+                                >
                                   Resources:
                                 </h5>
                                 <div className="space-y-1">
@@ -188,7 +202,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                           </div>
                         ))
                       ) : (
-                        <div className={`text-sm ${COLOR_CLASSES.text.secondary} text-center py-4`}>
+                        <div className={`text-sm ${COLOR_CLASSES.text.secondary} py-4 text-center`}>
                           No tasks available for this milestone.
                         </div>
                       )}
@@ -198,7 +212,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
               ))}
             </div>
           ) : (
-            <div className={`text-center py-8 ${COLOR_CLASSES.text.secondary}`}>
+            <div className={`py-8 text-center ${COLOR_CLASSES.text.secondary}`}>
               No milestones available for this phase.
             </div>
           )}
@@ -208,4 +222,4 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   );
 };
 
-export default PhaseModal; 
+export default PhaseModal;

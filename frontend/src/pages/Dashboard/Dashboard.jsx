@@ -1,13 +1,13 @@
 /**
  * Dashboard Page
- * 
+ *
  * Displays user's project overview with welcome message, statistics, and project list.
- * 
+ *
  * Components:
  * - Welcome section with personalized greeting and create button
  * - Stats cards showing project metrics (Total, Completed, Progress, Milestones)
  * - Project list section with ProjectCard components
- * 
+ *
  * Features:
  * - Real-time project data from backend
  * - Progress tracking and statistics
@@ -33,17 +33,15 @@ const Dashboard = () => {
       <div className="p-6">
         <main>
           {/* Welcome section */}
-          <div className="text-center mb-8">
+          <div className="mb-8 text-center">
             <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
               Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
             </h1>
-            <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>
-              {DASHBOARD_MESSAGES.WELCOME}
-            </p>
+            <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>{DASHBOARD_MESSAGES.WELCOME}</p>
           </div>
 
           {/* Statistics */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Object.entries(STATS_CONFIG).map(([key, config]) => (
               <StatsCard
                 key={key}
@@ -56,8 +54,10 @@ const Dashboard = () => {
 
           {/* Project list section */}
           <div>
-            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary} mb-4`}>Your Roadmaps</h3>
-            
+            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary} mb-4`}>
+              Your Roadmaps
+            </h3>
+
             {loading ? (
               <div className="flex justify-center py-8">
                 <LoadingSpinner size="lg" />
@@ -65,9 +65,9 @@ const Dashboard = () => {
             ) : error ? (
               <div className={`text-center ${COLOR_CLASSES.status.error.text} py-8`}>
                 <p>Failed to load projects. Please try again.</p>
-                <Button 
-                  onClick={() => window.location.reload()} 
-                  variant="secondary" 
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="secondary"
                   className="mt-4"
                 >
                   Retry

@@ -5,7 +5,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * TaskCard - Displays a task with interactive completion toggling
- * 
+ *
  * Features:
  * - Shows task title and description
  * - Expandable/collapsible design with chevron indicators
@@ -13,7 +13,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * - Real-time status updates with backend integration
  * - Progress tracking integration with parent components
  * - Resources display with links when available
- * 
+ *
  * @param {Object} props - Component props
  * @param {Object} props.task - The task data object
  * @param {string} props.task.id - Unique identifier for the task
@@ -30,17 +30,17 @@ const TaskCard = ({ task, onTaskUpdate }) => {
   const handleToggleComplete = () => {
     const newStatus = !isCompleted ? TASK_STATUS.COMPLETED : TASK_STATUS.PENDING;
     setIsCompleted(!isCompleted);
-    
+
     // Notify parent components of the change
     if (onTaskUpdate) {
       onTaskUpdate(task.id, newStatus);
     }
-    
+
     // TODO: Implement backend API call to persist task status
   };
 
   return (
-    <div 
+    <div
       className={`${COLOR_CLASSES.surface.tertiary} rounded-lg ${COLOR_CLASSES.border.primary}`}
       onClick={(e) => e.stopPropagation()}
     >
@@ -56,13 +56,17 @@ const TaskCard = ({ task, onTaskUpdate }) => {
             {isCompleted ? (
               <CheckCircle className="h-5 w-5 text-status-success-main" />
             ) : (
-              <Circle className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary} hover:${COLOR_CLASSES.text.secondary}`} />
+              <Circle
+                className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary} hover:${COLOR_CLASSES.text.secondary}`}
+              />
             )}
           </button>
-          
-          <div className="flex-1 min-w-0">
+
+          <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
-              <h5 className={`font-medium ${isCompleted ? `line-through ${COLOR_CLASSES.text.tertiary}` : COLOR_CLASSES.text.primary}`}>
+              <h5
+                className={`font-medium ${isCompleted ? `line-through ${COLOR_CLASSES.text.tertiary}` : COLOR_CLASSES.text.primary}`}
+              >
                 {task.title}
               </h5>
               <button
@@ -84,9 +88,11 @@ const TaskCard = ({ task, onTaskUpdate }) => {
               <div className="mt-4 space-y-4">
                 <div>
                   <h6 className={`font-medium ${COLOR_CLASSES.text.primary} mb-2`}>Description</h6>
-                  <p className={`${COLOR_CLASSES.text.secondary} text-sm leading-relaxed`}>{task.description}</p>
+                  <p className={`${COLOR_CLASSES.text.secondary} text-sm leading-relaxed`}>
+                    {task.description}
+                  </p>
                 </div>
-                
+
                 {task.resources && task.resources.length > 0 && (
                   <div>
                     <h6 className={`font-medium ${COLOR_CLASSES.text.primary} mb-2`}>Resources</h6>
@@ -104,7 +110,9 @@ const TaskCard = ({ task, onTaskUpdate }) => {
                               <ExternalLink className="h-3 w-3" />
                             </a>
                           ) : (
-                            <span className={`${COLOR_CLASSES.text.secondary} text-sm`}>{resource.name}</span>
+                            <span className={`${COLOR_CLASSES.text.secondary} text-sm`}>
+                              {resource.name}
+                            </span>
                           )}
                         </div>
                       ))}
@@ -120,4 +128,4 @@ const TaskCard = ({ task, onTaskUpdate }) => {
   );
 };
 
-export default TaskCard; 
+export default TaskCard;

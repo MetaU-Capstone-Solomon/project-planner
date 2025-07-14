@@ -1,6 +1,6 @@
 /**
  * AI Prompt Constants
- * 
+ *
  * Centralized prompt management for consistent AI interactions
  * and easy maintenance across the application
  */
@@ -11,7 +11,7 @@ export const PROMPT_VARIABLES = {
   TIMELINE: '[TIMELINE]',
   EXPERIENCE_LEVEL: '[EXPERIENCE_LEVEL]',
   TECHNOLOGIES: '[TECHNOLOGIES]',
-  PROJECT_SCOPE: '[PROJECT_SCOPE]'
+  PROJECT_SCOPE: '[PROJECT_SCOPE]',
 };
 
 export const ROADMAP_CONSTRAINTS = `

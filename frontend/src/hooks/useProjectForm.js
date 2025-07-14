@@ -18,25 +18,31 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
   });
 
   // Validates and submits form data to generate roadmap
-  const handleGenerateRoadmap = useCallback((processedFile) => {
-    if (hasRequiredFields(values)) {
-      const finalTimeline = getFinalTimeline(values);
-      startChatWithDetails({ ...values, timeline: finalTimeline, processedFile });
-    }
-  }, [values, startChatWithDetails]);
+  const handleGenerateRoadmap = useCallback(
+    (processedFile) => {
+      if (hasRequiredFields(values)) {
+        const finalTimeline = getFinalTimeline(values);
+        startChatWithDetails({ ...values, timeline: finalTimeline, processedFile });
+      }
+    },
+    [values, startChatWithDetails]
+  );
 
   // Checks if form is valid and not currently loading
   // Also disables generate button once chat has been initiated
-  const canGenerate = useCallback((processedFile) => {
-    const isChatInitiated = stage !== CHAT_STAGES.INITIAL;
-    return hasRequiredFields(values) && !chatLoading && !fileLoading && !isChatInitiated;
-  }, [values, chatLoading, fileLoading, stage]);
+  const canGenerate = useCallback(
+    (processedFile) => {
+      const isChatInitiated = stage !== CHAT_STAGES.INITIAL;
+      return hasRequiredFields(values) && !chatLoading && !fileLoading && !isChatInitiated;
+    },
+    [values, chatLoading, fileLoading, stage]
+  );
 
   return {
     values,
     handleChange,
     handleGenerateRoadmap,
     canGenerate,
-    resetForm: reset
+    resetForm: reset,
   };
-}; 
+};
