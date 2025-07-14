@@ -3,6 +3,7 @@ import useProjectDetail from '@/hooks/useProjectDetail';
 import { FORM_FIELDS } from '@/constants/projectOptions';
 import { hasRequiredFields, getFinalTimeline } from '@/utils/formValidation';
 import { CHAT_STAGES } from '@/constants/messages';
+import { summarizeDescription } from '@/utils/descriptionSummarizer';
 
 // Hook for managing project form state and validation
 export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, stage) => {
@@ -19,10 +20,27 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
 
   // Validates and submits form data to generate roadmap
   const handleGenerateRoadmap = useCallback(
-    (processedFile) => {
+    async (processedFile) => {
       if (hasRequiredFields(values)) {
-        const finalTimeline = getFinalTimeline(values);
-        startChatWithDetails({ ...values, timeline: finalTimeline, processedFile });
+        try {
+          const finalTimeline = getFinalTimeline(values);
+
+          // Summarize description if it's too long
+          const descriptionResult = await summarizeDescription(values[FORM_FIELDS.DESCRIPTION]);
+
+          // Use summarized description if available, otherwise use original
+          const formData = {
+            ...values,
+            description: descriptionResult.summarizedText,
+            timeline: finalTimeline,
+            processedFile,
+          };
+
+          startChatWithDetails(formData);
+        } catch (error) {
+          console.error('Error in form submission:', error);
+          throw error;
+        }
       }
     },
     [values, startChatWithDetails]

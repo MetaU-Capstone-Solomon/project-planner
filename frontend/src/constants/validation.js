@@ -1,3 +1,11 @@
+/**
+ * Validation constants
+ */
+
+export const VALIDATION_CONSTANTS = {
+  DESCRIPTION_MAX_LENGTH: 1500,
+};
+
 export const PASSWORD_MIN_LENGTH = 8;
 
 export const ERROR_MESSAGES = {

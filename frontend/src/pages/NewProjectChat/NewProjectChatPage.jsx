@@ -82,9 +82,13 @@ const NewProjectChatPage = () => {
     return () => window.removeEventListener('resetNewProject', handleReset);
   }, [clearFile, resetChat, resetForm]);
 
-  const onGenerateClick = () => {
-    handleGenerateRoadmap(processedFile);
-    if (isMobile) setMobileStep(2);
+  const onGenerateClick = async () => {
+    try {
+      await handleGenerateRoadmap(processedFile);
+      if (isMobile) setMobileStep(2);
+    } catch (error) {
+      //not advance to chat step on mobile if there's an error
+    }
   };
 
   // --- Form Section ---
