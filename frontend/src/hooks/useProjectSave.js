@@ -8,6 +8,24 @@ import { MESSAGES } from '@/constants/messages';
 import { MESSAGE_TYPES } from '@/constants/messageTypes';
 import { ROUTES } from '@/constants/routes';
 import { validateRoadmapContent, getValidationErrorMessage, getParsedRoadmap } from '@/utils/roadmapValidation';
+import resetNewProjectState from '@/utils/resetNewProjectState';
+
+/**
+ * useProjectSave.js
+ *
+ * Custom React hook for handling the complete project saving workflow in the New Project Chat flow.
+ *
+ * Responsibilities:
+ * - Extracts roadmap from AI chat messages using message types
+ * - Validates and saves project to the database
+ * - Shows toast notifications for success/error
+ * - Manages loading and success states
+ * - Clears all relevant localStorage keys after saving (via clearNewProjectState)
+ * - Auto-redirects to project detail page after save
+ *
+ * Usage:
+ *   const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, formValues);
+ */
 
 // Navigation Constants
 const NAVIGATION_CONSTANTS = {
@@ -42,16 +60,7 @@ export const useProjectSave = (messages, formValues) => {
 
   // Clear localStorage after successful save
   const clearLocalStorage = useCallback(() => {
-    try {
-      localStorage.removeItem('chatMessages');
-      localStorage.removeItem('chatStage');
-      localStorage.removeItem('projectTitle');
-      localStorage.removeItem('projectForm');
-      localStorage.removeItem('projectFile');
-      localStorage.removeItem('processedFile');
-    } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
-    }
+    resetNewProjectState();
   }, []);
 
   const handleSaveProject = useCallback(async () => {

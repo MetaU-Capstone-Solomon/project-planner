@@ -40,10 +40,10 @@ import { CheckCircle } from 'lucide-react';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
-  const { file, processedFile, error, loading: fileLoading, handleFileSelect } = useFileUpload();
-  const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails } = useChat();
+  const { file, processedFile, error, loading: fileLoading, handleFileSelect, clearFile } = useFileUpload();
+  const { messages, loading: chatLoading, stage, sendMessage, startChatWithDetails, resetChat } = useChat();
   
-  const { values, handleChange, handleGenerateRoadmap, canGenerate } = useProjectForm(
+  const { values, handleChange, handleGenerateRoadmap, canGenerate, resetForm } = useProjectForm(
     startChatWithDetails, 
     chatLoading, 
     fileLoading,
@@ -51,6 +51,18 @@ const NewProjectChatPage = () => {
   );
 
   const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
+
+  // Listen for reset event from navbar
+  React.useEffect(() => {
+    const handleReset = () => {
+      clearFile();
+      resetChat();
+      resetForm();
+    };
+
+    window.addEventListener('resetNewProject', handleReset);
+    return () => window.removeEventListener('resetNewProject', handleReset);
+  }, [clearFile, resetChat, resetForm]);
 
   const onGenerateClick = () => {
     handleGenerateRoadmap(processedFile);

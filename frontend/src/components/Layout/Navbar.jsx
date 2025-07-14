@@ -7,17 +7,24 @@ import Logo from '@/components/Logo/Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
 import ProfileDropdown from './ProfileDropdown';
+import resetNewProjectState from '@/utils/resetNewProjectState';
+import confirmAction from '@/utils/confirmAction';
 
 /**
- * Navbar Component - Main navigation header
- * 
+ * Navbar.jsx
+ *
+ * Main navigation header for the application.
+ *
  * Features:
  * - Logo with home navigation
  * - Main navigation links
  * - Theme toggle (placeholder)
  * - Profile avatar with user image
  * - Responsive design
- * - Industry standard layout
+ * - "New Project" button clears all New Project Chat state (localStorage) before navigation
+ *
+ * Usage:
+ *   The "New Project" button uses clearNewProjectState to ensure a fresh start.
  */
 const Navbar = () => {
   const location = useLocation();
@@ -41,9 +48,27 @@ const Navbar = () => {
   };
 
   // Handle new project creation
-  const handleNewProject = () => {
-    navigate(ROUTES.NEW_PROJECT_CHAT);
-  };
+  const handleNewProject = React.useCallback(() => {
+    // If already on the new project page, ask for confirmation before clearing
+    if (location.pathname === ROUTES.NEW_PROJECT_CHAT) {
+      const shouldProceed = confirmAction(
+        'Are you sure you want to start over? This will clear all your current progress.'
+      );
+      
+      if (!shouldProceed) {
+        return; // User cancelled, nothing happens
+      }
+      
+      // Reset state
+      resetNewProjectState();
+      // Trigger an event that the NewProjectChatPage can listen to
+      window.dispatchEvent(new CustomEvent('resetNewProject'));
+    } else {
+      // Navigate to new project page
+      resetNewProjectState();
+      navigate(ROUTES.NEW_PROJECT_CHAT);
+    }
+  }, [navigate, location.pathname]);
 
   // Navigation items
   const navItems = [

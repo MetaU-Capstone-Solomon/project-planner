@@ -7,7 +7,7 @@ import { CHAT_STAGES } from '@/constants/messages';
 // Hook for managing project form state and validation
 export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, stage) => {
   // Initialize form with all project fields
-  const { values, handleChange } = useProjectDetail({
+  const { values, handleChange, reset } = useProjectDetail({
     [FORM_FIELDS.TITLE]: '',
     [FORM_FIELDS.DESCRIPTION]: '',
     [FORM_FIELDS.TIMELINE]: '',
@@ -36,6 +36,7 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
     values,
     handleChange,
     handleGenerateRoadmap,
-    canGenerate
+    canGenerate,
+    resetForm: reset
   };
 }; 

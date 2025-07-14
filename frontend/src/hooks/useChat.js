@@ -245,6 +245,14 @@ const useChat = () => {
     return roadmapMessages.length > 0 ? roadmapMessages[roadmapMessages.length - 1] : null;
   }, [messages]);
 
+  // Reset chat state to initial values
+  const resetChat = useCallback(() => {
+    setMessages([]);
+    setStage(CHAT_STAGES.INITIAL);
+    setLoading(false);
+    setProjectTitle('');
+  }, []);
+
   return { 
     messages, 
     loading, 
@@ -252,6 +260,7 @@ const useChat = () => {
     sendMessage, 
     startChatWithDetails,
     findRoadmapMessage,
+    resetChat,
     MESSAGE_TYPES
   };
 };
