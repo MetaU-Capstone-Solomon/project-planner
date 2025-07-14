@@ -102,4 +102,11 @@ export const ROADMAP_MODIFICATION_PROMPT = `You are helping the user modify thei
 
 User request: [USER_MESSAGE]
 
+INSTRUCTIONS:
+1. Modify the current roadmap according to the user's request
+2. ALWAYS respond with valid JSON using the same structure as the original roadmap
+3. Maintain all existing IDs, order numbers, and structure
+4. Only modify the specific aspects requested by the user
+5. Ensure the response is valid JSON that can be parsed
+
 ${ROADMAP_CONSTRAINTS}`;
