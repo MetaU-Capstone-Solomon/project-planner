@@ -1,12 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Sun, Moon, User, Plus } from 'lucide-react';
+import { User, Plus } from 'lucide-react';
 import { COLOR_CLASSES } from '@/constants/colors';
 import { ROUTES } from '@/constants/routes';
 import Logo from '@/components/Logo/Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
 import ProfileDropdown from './ProfileDropdown';
+import ThemeToggle from './ThemeToggle';
 import resetNewProjectState from '@/utils/resetNewProjectState';
 import confirmAction from '@/utils/confirmAction';
 
@@ -18,7 +19,7 @@ import confirmAction from '@/utils/confirmAction';
  * Features:
  * - Logo with home navigation
  * - Main navigation links
- * - Theme toggle (placeholder)
+ * - Theme toggle
  * - Profile avatar with user image
  * - Responsive design
  * - "New Project" button clears all New Project Chat state (localStorage) before navigation
@@ -36,10 +37,6 @@ const Navbar = () => {
   const userProfile = {
     name: getDisplayName(user),
     image: getAvatarUrl(user),
-  };
-
-  const handleThemeToggle = () => {
-    console.log('Theme toggle clicked - TODO: Implement theme switching');
   };
 
   // Handle profile dropdown toggle
@@ -76,16 +73,16 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="border-b border-gray-200 bg-white shadow-sm">
+    <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">
           <Link to={ROUTES.DASHBOARD} className="flex items-center space-x-2">
             <Logo className="h-8 w-8" />
-            <span className={`text-xl font-bold ${COLOR_CLASSES.text.primary} hidden md:inline`}>
+            <span className="text-xl font-bold text-gray-900 dark:text-white hidden md:inline">
               Project Planner
             </span>
-            <span className={`text-lg font-bold ${COLOR_CLASSES.text.primary} md:hidden`}>PP</span>
+            <span className="text-lg font-bold text-gray-900 dark:text-white md:hidden">PP</span>
           </Link>
         </div>
 
@@ -129,20 +126,14 @@ const Navbar = () => {
           </button>
 
           {/* Theme Toggle */}
-          <button
-            onClick={handleThemeToggle}
-            className={`rounded-lg p-2 ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
-            aria-label="Toggle theme"
-          >
-            <Sun className="h-5 w-5" />
-          </button>
+          <ThemeToggle />
 
           {/* Profile Avatar with Dropdown */}
           <div className="relative">
             <button
               ref={profileButtonRef}
               onClick={handleProfileClick}
-              className={`flex h-8 w-8 items-center justify-center rounded-full ${COLOR_CLASSES.surface.secondary} ${COLOR_CLASSES.text.secondary} hover:${COLOR_CLASSES.text.primary} transition-colors duration-200 ${isDropdownOpen ? 'ring-2 ring-blue-500' : ''}`}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ring-2 ring-transparent hover:ring-blue-500"
               aria-label="User profile"
               aria-expanded={isDropdownOpen}
             >

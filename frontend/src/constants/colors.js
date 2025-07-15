@@ -99,6 +99,54 @@ export const COLOR_CLASSES = {
       text: 'text-scope-enterprise-text',
     },
   },
+
+  // Landing page specific colors
+  landing: {
+    // Background colors for landing page
+    backgrounds: {
+      primary: 'bg-white dark:bg-gray-800',
+      secondary: 'bg-gray-50 dark:bg-gray-800',
+      hero: 'bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800',
+      content: 'bg-white dark:bg-gray-800',
+      testimonials: 'bg-gray-50 dark:bg-gray-800',
+      card: 'bg-white/95 dark:bg-gray-900/95'
+    },
+
+    // Text colors for landing page
+    text: {
+      primary: 'text-gray-900 dark:text-white',
+      secondary: 'text-gray-700 dark:text-gray-300',
+      muted: 'text-gray-600 dark:text-gray-300',
+      accent: 'text-orange-300',
+    },
+
+    // Border colors for landing page
+    border: {
+      primary: 'border-gray-200 dark:border-gray-700',
+      hover: 'hover:border-orange-200 dark:hover:border-orange-300'
+    },
+
+    // Button colors for landing page
+    buttons: {
+      hero: {
+        background: 'bg-white',
+        border: 'border-white',
+        text: 'text-gray-900',
+        hover: {
+          background: 'hover:bg-orange-300',
+          text: 'hover:text-gray-900'
+        }
+      }
+    },
+
+    // Shadow colors for landing page
+    shadows: {
+      cards: {
+        light: 'shadow-lg hover:shadow-xl hover:shadow-orange-100',
+        dark: 'dark:shadow-lg dark:hover:shadow-md dark:hover:shadow-orange-300/30'
+      }
+    }
+  }
 };
 
 // Utility functions for dynamic color selection
@@ -162,6 +210,20 @@ export const COLOR_PATTERNS = {
     active: 'bg-primary-100 text-primary-700',
     inactive: COLOR_CLASSES.text.secondary,
     hover: 'hover:bg-gray-100 hover:text-gray-900',
+  },
+
+  // Landing page specific patterns
+  landing: {
+    // Card styling for landing page
+    card: `${COLOR_CLASSES.landing.backgrounds.card} ${COLOR_CLASSES.landing.border.primary} rounded-xl p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 ${COLOR_CLASSES.landing.border.hover} ${COLOR_CLASSES.landing.shadows.cards.light} ${COLOR_CLASSES.landing.shadows.cards.dark}`,
+    
+    // Hero button styling
+    heroButton: `${COLOR_CLASSES.landing.buttons.hero.background} ${COLOR_CLASSES.landing.buttons.hero.border} ${COLOR_CLASSES.landing.buttons.hero.text} border-2 font-semibold transition-colors duration-200 ${COLOR_CLASSES.landing.buttons.hero.hover.background} ${COLOR_CLASSES.landing.buttons.hero.hover.text}`,
+    
+    // Section backgrounds
+    hero: `${COLOR_CLASSES.landing.backgrounds.hero} pb-16 pt-24`,
+    contentSection: `${COLOR_CLASSES.landing.backgrounds.content} py-16`,
+    testimonialsSection: `${COLOR_CLASSES.landing.backgrounds.testimonials} py-16`,
   },
 };
 
