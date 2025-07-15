@@ -29,15 +29,15 @@ const Dashboard = () => {
   const { projects, loading, error, stats } = useDashboardData();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
       <div className="p-6">
         <main>
           {/* Welcome section */}
           <div className="mb-8 text-center">
-            <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
+            <h1 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white">
               Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
             </h1>
-            <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>{DASHBOARD_MESSAGES.WELCOME}</p>
+            <p className="mb-6 text-gray-600 dark:text-gray-300">{DASHBOARD_MESSAGES.WELCOME}</p>
           </div>
 
           {/* Statistics */}
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
           {/* Project list section */}
           <div>
-            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary} mb-4`}>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Your Roadmaps
             </h3>
 
@@ -63,18 +63,17 @@ const Dashboard = () => {
                 <LoadingSpinner size="lg" />
               </div>
             ) : error ? (
-              <div className={`text-center ${COLOR_CLASSES.status.error.text} py-8`}>
+              <div className="text-center text-red-600 dark:text-red-400 py-8">
                 <p>Failed to load projects. Please try again.</p>
-                <Button
+                <button
                   onClick={() => window.location.reload()}
-                  variant="secondary"
-                  className="mt-4"
+                  className="mt-4 rounded-lg bg-gray-200 dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
                   Retry
-                </Button>
+                </button>
               </div>
             ) : projects.length === 0 ? (
-              <div className={`text-center ${COLOR_CLASSES.text.tertiary} py-8`}>
+              <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 {DASHBOARD_MESSAGES.NO_PROJECTS}
               </div>
             ) : (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLOR_CLASSES } from '../../constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
 
 /**
  * StatsCard Component
@@ -15,15 +15,15 @@ import { COLOR_CLASSES } from '../../constants/colors';
 const StatsCard = ({ title, value, icon: Icon }) => {
   return (
     <div
-      className={`rounded-xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-200 hover:border-blue-200 hover:shadow-blue-200`}
+      className={`${COLOR_PATTERNS.landing.card} hover:border-purple-200 dark:hover:border-purple-300 hover:shadow-purple-100 dark:hover:shadow-purple-300/30`}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className={`text-sm font-medium ${COLOR_CLASSES.text.secondary}`}>{title}</p>
-          <p className={`text-2xl font-bold ${COLOR_CLASSES.text.primary}`}>{value}</p>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         </div>
-        <div className={`${COLOR_CLASSES.status.info.bg} rounded-lg p-2`}>
-          <Icon className="h-6 w-6 text-status-info-main" />
+        <div className="bg-purple-100 dark:bg-purple-900/50 rounded-lg p-2">
+          <Icon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
         </div>
       </div>
     </div>

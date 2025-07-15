@@ -19,7 +19,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="border-t border-gray-300 dark:border-gray-800 bg-gray-200 dark:bg-gray-900/95">
+    <footer className="border-t border-gray-300 dark:border-gray-800 bg-gray-200 dark:bg-gray-950/95">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           {/* Copyright */}
