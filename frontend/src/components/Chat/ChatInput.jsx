@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabled = false }) => {
   const [message, setMessage] = useState('');
+  const textareaRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,6 +19,21 @@ const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabl
     }
   };
 
+  // Auto-resize textarea height based on content, expanding up to 2 lines then scrolling
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const scrollHeight = textarea.scrollHeight;
+      const maxHeight = 80; // 2 lines max
+      textarea.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [message]);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -25,13 +41,14 @@ const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabl
     >
       <div className="flex-1">
         <textarea
+          ref={textareaRef}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="min-h-[40px] w-full resize-none overflow-y-auto rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
         />
       </div>
       <button
