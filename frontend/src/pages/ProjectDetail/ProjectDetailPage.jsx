@@ -140,7 +140,7 @@ const ProjectDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-800">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -148,13 +148,13 @@ const ProjectDetailPage = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
         <div className="p-6">
-          <main className="rounded-lg bg-white p-8 text-center shadow-sm">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+          <main className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
               {MESSAGES.ERROR.PROJECT_NOT_FOUND}
             </h2>
-            <p className="text-gray-600">The project could not be found.</p>
+            <p className="text-gray-600 dark:text-gray-100">The project could not be found.</p>
           </main>
         </div>
       </div>
@@ -162,7 +162,7 @@ const ProjectDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
       <div className="p-6">
         <main>
           {roadmapData ? (
@@ -173,7 +173,9 @@ const ProjectDetailPage = () => {
 
                 {/* Phase Cards Grid */}
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Project Phases</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Project Phases
+                  </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {roadmapData.phases.map((phase) => (
                       <PhaseCardNew
@@ -194,9 +196,13 @@ const ProjectDetailPage = () => {
               />
             </>
           ) : (
-            <div className="rounded-lg bg-white p-8 text-center shadow-sm">
-              <h2 className="mb-4 text-2xl font-semibold text-gray-900">No Roadmap Data</h2>
-              <p className="text-gray-600">This project doesn't have any roadmap data available.</p>
+            <div className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+                No Roadmap Data
+              </h2>
+              <p className="text-gray-600 dark:text-gray-100">
+                This project doesn't have any roadmap data available.
+              </p>
             </div>
           )}
         </main>
