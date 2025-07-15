@@ -22,15 +22,15 @@ const Summary = ({ metadata, summary }) => {
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} mb-6 p-6`}
+      className="rounded-lg shadow-sm mb-6 p-6 bg-white border border-green-500"
     >
       {/* Title and Summary Section */}
       <div className="mb-6">
-        <h1 className={`text-3xl font-bold ${COLOR_CLASSES.text.primary} mb-3`}>
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">
           {metadata.title}
         </h1>
         {summary && (
-          <p className={`${COLOR_CLASSES.text.secondary} text-lg leading-relaxed`}>{summary}</p>
+          <p className="text-gray-700 text-lg leading-relaxed">{summary}</p>
         )}
       </div>
 

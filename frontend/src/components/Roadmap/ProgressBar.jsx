@@ -21,18 +21,18 @@ const ProgressBar = ({ phases }) => {
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} mb-6 p-6`}
+      className="rounded-lg shadow-sm mb-6 p-6 bg-white border border-blue-500"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.primary}`}>Overall Progress</h3>
-        <span className={`text-2xl font-bold ${COLOR_CLASSES.status.info.main}`}>
+        <h3 className="text-lg font-semibold text-gray-900">Overall Progress</h3>
+        <span className="text-2xl font-bold text-blue-600">
           {overallProgress}%
         </span>
       </div>
 
-      <div className="h-3 w-full rounded-full bg-gray-200">
+      <div className="h-3 w-full rounded-full bg-gray-200 shadow-inner">
         <div
-          className="h-3 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300 ease-out"
+          className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 transition-all duration-300 ease-out shadow-sm"
           style={{ width: `${overallProgress}%` }}
         ></div>
       </div>
