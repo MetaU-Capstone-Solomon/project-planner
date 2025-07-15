@@ -95,7 +95,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className="rounded-lg border border-blue-300 bg-blue-200 px-3 py-2 text-base font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md"
+              className="rounded-lg border border-blue-600 bg-blue-600 px-3 py-2 text-base font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
             >
               {item.label}
             </Link>
@@ -108,7 +108,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className="rounded border border-blue-300 bg-blue-200 px-1.5 py-0.5 text-xs font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md"
+              className="rounded border border-blue-600 bg-blue-600 px-1.5 py-0.5 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
             >
               {item.label}
             </Link>
@@ -120,7 +120,7 @@ const Navbar = () => {
           {/* New Project Button */}
           <button
             onClick={handleNewProject}
-            className="flex items-center space-x-1 rounded-lg border border-blue-300 bg-blue-200 px-1.5 py-0.5 font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md md:space-x-2 md:px-3 md:py-2"
+            className="flex items-center space-x-1 rounded-lg border border-blue-600 bg-blue-600 px-1.5 py-0.5 font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md md:space-x-2 md:px-3 md:py-2"
             aria-label="Create new project"
           >
             <Plus className="h-3 w-3 md:h-4 md:w-4" />

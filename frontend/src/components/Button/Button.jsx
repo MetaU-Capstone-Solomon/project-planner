@@ -15,7 +15,7 @@ const Button = ({
 
   const variantClasses = {
     primary:
-      'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md',
+      'bg-blue-600 text-white hover:bg-green-600 focus:ring-blue-500 shadow-sm hover:shadow-md',
     secondary:
       'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500 shadow-sm hover:shadow-md',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md',

@@ -215,7 +215,7 @@ const NewProjectChatPage = () => {
       {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
         <div className="border-t border-gray-200 p-2">
           <div className="text-center">
-            <Button onClick={handleSaveProject} disabled={saving} className="w-full">
+            <Button onClick={handleSaveProject} disabled={saving} size="md" className="px-6 py-2">
               {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
             </Button>
           </div>
@@ -226,7 +226,7 @@ const NewProjectChatPage = () => {
 
   // --- Responsive Layout ---
   return (
-    <div className="mx-auto min-h-screen max-w-7xl bg-gray-50 p-6">
+    <div className="mx-auto min-h-screen max-w-7xl bg-gray-100 p-6">
       {isMobile ? (
         <div className="flex flex-col gap-6">{mobileStep === 1 ? formSection : chatSection}</div>
       ) : (
