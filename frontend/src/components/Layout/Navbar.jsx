@@ -76,9 +76,7 @@ const Navbar = () => {
   ];
 
   return (
-    <header
-      className={`${COLOR_CLASSES.surface.navbar} ${COLOR_CLASSES.border.primary} border-b shadow-sm`}
-    >
+    <header className="border-b border-gray-200 bg-white shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">
@@ -97,7 +95,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`rounded-lg px-3 py-2 text-base font-bold transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary} hover:shadow-sm`}
+              className="rounded-lg border border-blue-300 bg-blue-200 px-3 py-2 text-base font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md"
             >
               {item.label}
             </Link>
@@ -110,7 +108,7 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`rounded px-1.5 py-0.5 text-xs font-bold transition-all duration-200 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.surface.secondary}`}
+              className="rounded border border-blue-300 bg-blue-200 px-1.5 py-0.5 text-xs font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md"
             >
               {item.label}
             </Link>
@@ -122,7 +120,7 @@ const Navbar = () => {
           {/* New Project Button */}
           <button
             onClick={handleNewProject}
-            className={`flex items-center space-x-1 rounded-lg px-1.5 py-0.5 md:space-x-2 md:px-3 md:py-2 ${COLOR_CLASSES.surface.primary} ${COLOR_CLASSES.border.primary} border ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
+            className="flex items-center space-x-1 rounded-lg border border-blue-300 bg-blue-200 px-1.5 py-0.5 font-medium text-black shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-white hover:text-blue-700 hover:shadow-md md:space-x-2 md:px-3 md:py-2"
             aria-label="Create new project"
           >
             <Plus className="h-3 w-3 md:h-4 md:w-4" />
