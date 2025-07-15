@@ -53,31 +53,39 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="bg-blue-50 pb-16 pt-8">
+      <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 pb-16 pt-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="mb-6 text-4xl font-bold text-gray-900">
+            <h1 className="mb-6 text-4xl font-bold text-white">
               Plan Your Projects
-              <span className="text-blue-600"> Smarter</span>
+              <span className="text-orange-300"> Smarter</span>
             </h1>
-            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600">
+            <p className="mx-auto mb-8 max-w-2xl text-xl text-white">
               Streamline your workflow with our intuitive project management platform. Keep your
               team organized and projects on track.
             </p>
-            <div className="flex flex-row justify-center gap-3 sm:gap-4">
+            <div className="flex flex-row justify-center gap-4 sm:gap-6">
               <Link to={ROUTES.AUTH}>
-                <Button variant="outline" size="sm" className="flex items-center sm:text-base">
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="flex items-center border-2 border-white bg-transparent font-semibold text-white hover:bg-white hover:text-blue-700"
+                >
                   Get Started
-                  <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to={ROUTES.AUTH}>
-                <Button variant="outline" size="sm" className="sm:text-base">
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="border-2 border-white bg-transparent font-semibold text-white hover:bg-white hover:text-blue-700"
+                >
                   Sign In
                 </Button>
               </Link>
@@ -87,7 +95,7 @@ const Home = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-gray-100 py-8">
+      <section className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900">How it works</h2>
@@ -100,15 +108,15 @@ const Home = () => {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="rounded-lg bg-gray-300 p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="rounded-xl border border-gray-200 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-200"
               >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-2xl font-bold text-white shadow-lg">
                   {step.number}
                 </div>
-                <h3 className="mb-2 text-center text-xl font-semibold text-gray-900">
+                <h3 className="mb-3 text-center text-xl font-semibold text-gray-900">
                   {step.title}
                 </h3>
-                <p className="text-center text-gray-600">{step.description}</p>
+                <p className="text-center leading-relaxed text-gray-600">{step.description}</p>
               </div>
             ))}
           </div>
@@ -116,7 +124,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-gray-100 py-16">
+      <section className="bg-gray-50 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
             <h2 className="mb-4 text-3xl font-bold text-gray-900">What people are saying</h2>
@@ -127,22 +135,25 @@ const Home = () => {
 
           <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="rounded-lg bg-gray-300 p-6">
-                <div className="mb-4 flex items-center">
+              <div
+                key={index}
+                className="rounded-xl border border-gray-200 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-200"
+              >
+                <div className="mb-6 flex items-center">
                   <img
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className="mr-4 h-12 w-12 rounded-full"
+                    className="mr-4 h-14 w-14 rounded-full ring-2 ring-blue-200"
                   />
                   <div>
                     <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <p className="text-sm font-medium text-blue-600">{testimonial.role}</p>
                   </div>
                 </div>
-                <p className="text-gray-700">{testimonial.content}</p>
-                <div className="mt-4 flex">
+                <p className="mb-6 leading-relaxed text-gray-700">{testimonial.content}</p>
+                <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current text-yellow-400" />
+                    <Star key={i} className="mr-1 h-5 w-5 fill-current text-orange-500" />
                   ))}
                 </div>
               </div>
