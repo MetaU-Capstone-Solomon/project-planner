@@ -27,7 +27,7 @@ const Profile = () => {
   } = useProfile();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-gray-100 p-6">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8">
