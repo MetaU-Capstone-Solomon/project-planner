@@ -1,6 +1,6 @@
 import React from 'react';
 import { calculateOverallProgress, calculatePhaseProgress } from '@/utils/roadmapUtils';
-import { COLOR_CLASSES } from '../../constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
 
 /**
  * ProgressBar - Displays overall project progress with real calculations
@@ -20,19 +20,17 @@ const ProgressBar = ({ phases }) => {
   const overallProgress = calculateOverallProgress(phases);
 
   return (
-    <div
-      className="rounded-lg shadow-sm mb-6 p-6 bg-white border border-blue-500"
-    >
+    <div className={`${COLOR_PATTERNS.components.container} mb-6 p-6`}>
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Overall Progress</h3>
-        <span className="text-2xl font-bold text-blue-600">
+        <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>Overall Progress</h3>
+        <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
           {overallProgress}%
         </span>
       </div>
 
-      <div className="h-3 w-full rounded-full bg-gray-200 shadow-inner">
+      <div className="h-3 w-full rounded-full bg-gray-200 shadow-inner dark:bg-gray-700">
         <div
-          className="h-3 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 transition-all duration-300 ease-out shadow-sm"
+          className="h-3 rounded-full bg-indigo-500 shadow-sm transition-all duration-300 ease-out dark:bg-indigo-400"
           style={{ width: `${overallProgress}%` }}
         ></div>
       </div>

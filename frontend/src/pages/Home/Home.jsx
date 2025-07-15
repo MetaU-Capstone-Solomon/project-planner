@@ -82,11 +82,7 @@ const Home = () => {
                 </Button>
               </Link>
               <Link to={ROUTES.AUTH}>
-                <Button
-                  variant="outline"
-                  size="md"
-                  className={COLOR_PATTERNS.landing.heroButton}
-                >
+                <Button variant="outline" size="md" className={COLOR_PATTERNS.landing.heroButton}>
                   Sign In
                 </Button>
               </Link>
@@ -99,7 +95,9 @@ const Home = () => {
       <section className={COLOR_PATTERNS.landing.contentSection}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>How it works</h2>
+            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
+              How it works
+            </h2>
             <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
               Get started in just a few simple steps
             </p>
@@ -111,10 +109,14 @@ const Home = () => {
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-2xl font-bold text-white shadow-lg">
                   {step.number}
                 </div>
-                <h3 className={`mb-3 text-center text-xl font-semibold ${COLOR_CLASSES.landing.text.primary}`}>
+                <h3
+                  className={`mb-3 text-center text-xl font-semibold ${COLOR_CLASSES.landing.text.primary}`}
+                >
                   {step.title}
                 </h3>
-                <p className={`text-center leading-relaxed ${COLOR_CLASSES.landing.text.muted}`}>{step.description}</p>
+                <p className={`text-center leading-relaxed ${COLOR_CLASSES.landing.text.muted}`}>
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -125,7 +127,9 @@ const Home = () => {
       <section className={COLOR_PATTERNS.landing.testimonialsSection}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>What people are saying</h2>
+            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
+              What people are saying
+            </h2>
             <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
               Hear from developers about their experience
             </p>
@@ -141,11 +145,17 @@ const Home = () => {
                     className="mr-4 h-14 w-14 rounded-full ring-2 ring-blue-200"
                   />
                   <div>
-                    <h3 className={`font-semibold ${COLOR_CLASSES.landing.text.primary}`}>{testimonial.name}</h3>
-                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">{testimonial.role}</p>
+                    <h3 className={`font-semibold ${COLOR_CLASSES.landing.text.primary}`}>
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                      {testimonial.role}
+                    </p>
                   </div>
                 </div>
-                <p className={`mb-6 leading-relaxed ${COLOR_CLASSES.landing.text.secondary}`}>{testimonial.content}</p>
+                <p className={`mb-6 leading-relaxed ${COLOR_CLASSES.landing.text.secondary}`}>
+                  {testimonial.content}
+                </p>
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="mr-1 h-5 w-5 fill-current text-orange-500" />
