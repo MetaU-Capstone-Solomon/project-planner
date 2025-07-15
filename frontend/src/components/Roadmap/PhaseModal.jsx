@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink } from 'lucide-react';
 import { COLOR_CLASSES } from '../../constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 
 /**
  * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks
@@ -65,6 +66,8 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
     }
   };
 
+
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4"
@@ -100,7 +103,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
               {phase.milestones.map((milestone) => (
                 <div
                   key={milestone.id}
-                  className={`${COLOR_CLASSES.surface.card} rounded-lg ${COLOR_CLASSES.border.primary} shadow-sm`}
+                  className={`${COLOR_CLASSES.surface.card} rounded-lg border-2 border-gray-400 shadow-sm`}
                 >
                   {/* Milestone Header */}
                   <div
@@ -143,7 +146,13 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                         milestone.tasks.map((task) => (
                           <div
                             key={task.id}
-                            className={`${COLOR_CLASSES.surface.tertiary} rounded-lg p-4 ${COLOR_CLASSES.border.primary}`}
+                            className={`${COLOR_CLASSES.surface.tertiary} rounded-lg p-4 ${COLOR_CLASSES.border.primary} ${
+                              task.status === 'completed' 
+                                ? 'ring-2 ring-green-300 ring-opacity-70' 
+                                : task.status === 'in-progress'
+                                ? 'ring-2 ring-blue-300 ring-opacity-70'
+                                : 'ring-2 ring-red-300 ring-opacity-70'
+                            }`}
                           >
                             <div className="mb-3 flex items-start justify-between">
                               <h4 className={`font-medium ${COLOR_CLASSES.text.primary}`}>
@@ -157,7 +166,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                 className={`rounded border px-2 py-1 text-sm ${COLOR_CLASSES.border.primary} focus:${COLOR_CLASSES.border.focus} outline-none`}
                               >
                                 <option value="pending">Pending</option>
-                                <option value="in_progress">In Progress</option>
+                                <option value="in-progress">In Progress</option>
                                 <option value="completed">Completed</option>
                               </select>
                             </div>

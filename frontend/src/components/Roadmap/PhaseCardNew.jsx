@@ -63,7 +63,7 @@ const PhaseCardNew = ({ phase, onClick }) => {
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 transition-all duration-200 hover:shadow-md ${phaseColorClasses} cursor-pointer`}
+      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 hover:shadow-blue-200 ${phaseColorClasses} cursor-pointer`}
       onClick={onClick}
     >
       <div className="p-6">
