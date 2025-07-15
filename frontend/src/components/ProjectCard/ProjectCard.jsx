@@ -55,7 +55,7 @@ const ProjectCard = ({ project }) => {
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} cursor-pointer transition-shadow duration-200 hover:shadow-md`}
+      className={`bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 hover:shadow-blue-200`}
       onClick={handleCardClick}
     >
       <div className="p-6">

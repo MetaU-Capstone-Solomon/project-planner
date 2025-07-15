@@ -15,7 +15,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
 const StatsCard = ({ title, value, icon: Icon }) => {
   return (
     <div
-      className={`rounded-lg ${COLOR_CLASSES.border.primary} ${COLOR_CLASSES.surface.card} p-6 shadow-sm`}
+      className={`rounded-xl bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-200 hover:border-blue-200 hover:shadow-blue-200`}
     >
       <div className="flex items-center justify-between">
         <div>

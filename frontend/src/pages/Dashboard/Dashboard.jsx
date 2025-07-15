@@ -29,7 +29,7 @@ const Dashboard = () => {
   const { projects, loading, error, stats } = useDashboardData();
 
   return (
-    <div className={`min-h-screen ${COLOR_CLASSES.surface.secondary}`}>
+    <div className="min-h-screen bg-gray-100">
       <div className="p-6">
         <main>
           {/* Welcome section */}
