@@ -40,6 +40,23 @@ const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
         ) : (
           messages.map((m, idx) => <ChatMessage key={idx} message={m} />)
         )}
+        {loading && (
+          <div className="mb-4 flex justify-start">
+            <div className="max-w-4xl rounded-lg bg-gray-100 px-4 py-3 text-left text-sm text-gray-800 shadow-md">
+              <div className="flex space-x-1">
+                <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400"></div>
+                <div
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '0.1s' }}
+                ></div>
+                <div
+                  className="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
