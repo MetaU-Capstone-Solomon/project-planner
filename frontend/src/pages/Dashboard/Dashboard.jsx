@@ -22,22 +22,22 @@ import ProjectCard from '@/components/ProjectCard';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import useDashboardData from '@/hooks/useDashboardData';
 import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
-import { COLOR_CLASSES } from '@/constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { projects, loading, error, stats } = useDashboardData();
 
   return (
-    <div className={`min-h-screen ${COLOR_CLASSES.surface.secondary}`}>
+    <div className={`${COLOR_PATTERNS.components.page}`}>
       <div className="p-6">
         <main>
           {/* Welcome section */}
           <div className="mb-8 text-center">
-            <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.primary}`}>
+            <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.heading}`}>
               Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
             </h1>
-            <p className={`mb-6 ${COLOR_CLASSES.text.secondary}`}>{DASHBOARD_MESSAGES.WELCOME}</p>
+            <p className={`mb-6 ${COLOR_CLASSES.text.body}`}>{DASHBOARD_MESSAGES.WELCOME}</p>
           </div>
 
           {/* Statistics */}
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
           {/* Project list section */}
           <div>
-            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary} mb-4`}>
+            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.heading} mb-4`}>
               Your Roadmaps
             </h3>
 
@@ -63,18 +63,17 @@ const Dashboard = () => {
                 <LoadingSpinner size="lg" />
               </div>
             ) : error ? (
-              <div className={`text-center ${COLOR_CLASSES.status.error.text} py-8`}>
+              <div className={`py-8 text-center text-red-600 dark:text-red-400`}>
                 <p>Failed to load projects. Please try again.</p>
-                <Button
+                <button
                   onClick={() => window.location.reload()}
-                  variant="secondary"
-                  className="mt-4"
+                  className={`mt-4 rounded-lg bg-gray-200 px-4 py-2 dark:bg-gray-700 ${COLOR_CLASSES.text.heading} transition-colors hover:bg-gray-300 dark:hover:bg-gray-600`}
                 >
                   Retry
-                </Button>
+                </button>
               </div>
             ) : projects.length === 0 ? (
-              <div className={`text-center ${COLOR_CLASSES.text.tertiary} py-8`}>
+              <div className={`py-8 text-center text-gray-500 dark:text-gray-400`}>
                 {DASHBOARD_MESSAGES.NO_PROJECTS}
               </div>
             ) : (

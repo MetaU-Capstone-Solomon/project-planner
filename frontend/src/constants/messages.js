@@ -21,6 +21,7 @@ export const MESSAGES = {
     TASK_UPDATE_FAILED: 'Failed to update task status. Please try again.',
     ROADMAP_OPTIMIZATION_FAILED: 'Failed to optimize roadmap.',
     OPTIMIZATION_FAILED: 'Optimization failed.',
+    DESCRIPTION_SUMMARIZATION_FAILED: 'Failed to summarize description. Using original text.',
   },
   LOADING: {
     DEFAULT: 'Loading...',
