@@ -46,7 +46,8 @@ const NewProjectChatPage = () => {
   const { values, handleChange, handleGenerateRoadmap, canGenerate } = useProjectForm(
     startChatWithDetails, 
     chatLoading, 
-    fileLoading
+    fileLoading,
+    stage
   );
 
   const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
@@ -151,14 +152,21 @@ const NewProjectChatPage = () => {
             </FormField>
 
             <div className="flex justify-center pt-4">
-              <Button
-                onClick={onGenerateClick}
-                disabled={!canGenerate(processedFile)}
-                size="md"
-                className="px-6 py-2"
-              >
-                {chatLoading ? MESSAGES.LOADING.GENERATING_ROADMAP : MESSAGES.ACTIONS.GENERATE_ROADMAP}
-              </Button>
+              <div className="text-center">
+                <Button
+                  onClick={onGenerateClick}
+                  disabled={!canGenerate(processedFile)}
+                  size="md"
+                  className="px-6 py-2"
+                >
+                  {chatLoading ? MESSAGES.LOADING.GENERATING_ROADMAP : MESSAGES.ACTIONS.GENERATE_ROADMAP}
+                </Button>
+                {stage !== CHAT_STAGES.INITIAL && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Use the chat to modify your roadmap
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -183,7 +191,7 @@ const NewProjectChatPage = () => {
           
           {/* Project saving section - show when roadmap is generated */}
           {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-gray-200 p-2">
               <div className="text-center">
                 <Button
                   onClick={handleSaveProject}
