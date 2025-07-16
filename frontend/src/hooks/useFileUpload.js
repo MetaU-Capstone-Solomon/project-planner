@@ -22,7 +22,7 @@ const useFileUpload = () => {
   useEffect(() => {
     const savedFile = JSON.parse(localStorage.getItem('projectFile') || 'null');
     const savedProcessedFile = JSON.parse(localStorage.getItem('processedFile') || 'null');
-    
+
     if (savedFile) {
       setFile(savedFile);
     }
@@ -32,46 +32,49 @@ const useFileUpload = () => {
   }, []);
 
   // Handles file selection, upload, and processing
-  const handleFileSelect = useCallback(async (selectedFile) => {
-    if (!selectedFile) {
-      setFile(null);
-      setProcessedFile(null);
-      setError('');
-      saveFileData(null, null);
-      return;
-    }
-
-    setFile(selectedFile);
-    setError('');
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await fetch(API_ENDPOINTS.UPLOAD, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to upload file');
+  const handleFileSelect = useCallback(
+    async (selectedFile) => {
+      if (!selectedFile) {
+        setFile(null);
+        setProcessedFile(null);
+        setError('');
+        saveFileData(null, null);
+        return;
       }
 
-      const result = await response.json();
-      setProcessedFile(result);
-      saveFileData(selectedFile, result);
-    } catch (err) {
-      console.error('File upload error:', err);
-      setError(err.message);
-      setFile(null);
-      setProcessedFile(null);
-      saveFileData(null, null);
-    } finally {
-      setLoading(false);
-    }
-  }, [saveFileData]);
+      setFile(selectedFile);
+      setError('');
+      setLoading(true);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        const response = await fetch(API_ENDPOINTS.UPLOAD, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to upload file');
+        }
+
+        const result = await response.json();
+        setProcessedFile(result);
+        saveFileData(selectedFile, result);
+      } catch (err) {
+        console.error('File upload error:', err);
+        setError(err.message);
+        setFile(null);
+        setProcessedFile(null);
+        saveFileData(null, null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [saveFileData]
+  );
 
   // Resets all file-related states
   const clearFile = useCallback(() => {
