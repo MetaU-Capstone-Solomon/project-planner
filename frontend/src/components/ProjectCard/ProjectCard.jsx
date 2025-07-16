@@ -54,24 +54,21 @@ const ProjectCard = ({ project }) => {
   };
 
   return (
-    <div
-      className={`${COLOR_PATTERNS.landing.card} cursor-pointer`}
-      onClick={handleCardClick}
-    >
+    <div className={`${COLOR_PATTERNS.landing.card} cursor-pointer`} onClick={handleCardClick}>
       <div className="p-6">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate`}>
               {project.title}
             </h3>
           </div>
-          <ArrowRight className="h-5 w-5 text-gray-400 dark:text-gray-500 ml-2 flex-shrink-0" />
+          <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
         </div>
 
         {/* Summary */}
         {roadmapData?.summary && (
-          <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 text-sm">
+          <p className={`${COLOR_CLASSES.text.body} mb-4 line-clamp-2 text-sm`}>
             {roadmapData.summary}
           </p>
         )}
@@ -79,8 +76,8 @@ const ProjectCard = ({ project }) => {
         {/* Progress */}
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Progress</span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            <span className={`text-sm font-medium ${COLOR_CLASSES.text.body}`}>Progress</span>
+            <span className={`text-sm font-semibold ${COLOR_CLASSES.text.heading}`}>
               {progress}%
             </span>
           </div>
@@ -95,13 +92,13 @@ const ProjectCard = ({ project }) => {
         {/* Metadata */}
         <div className="space-y-2">
           {roadmapData?.metadata?.timeline && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+            <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>{roadmapData.metadata.timeline}</span>
             </div>
           )}
 
-          <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <Clock className="mr-2 h-4 w-4" />
             <span>Updated {formatDate(project.updated_at || project.created_at)}</span>
           </div>

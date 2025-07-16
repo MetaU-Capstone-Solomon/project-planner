@@ -4,7 +4,6 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 //Toggle mode for the theme
 
-
 const ThemeToggle = ({ className = '' }) => {
   const { isDarkMode, toggleDarkMode } = useTheme();
 
@@ -23,4 +22,4 @@ const ThemeToggle = ({ className = '' }) => {
   );
 };
 
-export default ThemeToggle; 
+export default ThemeToggle;
