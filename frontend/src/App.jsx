@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ROUTES } from '@/constants/routes';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import RootLayout from '@/layouts/RootLayout';
@@ -73,9 +74,11 @@ function AppRoutes() {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <AppRoutes />
       <Toaster />
     </AuthProvider>
+    </ThemeProvider>
   );
 }
