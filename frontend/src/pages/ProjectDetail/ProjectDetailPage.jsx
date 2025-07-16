@@ -13,13 +13,23 @@ import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
 /**
- * ProjectDetailPage - Card-based project details layout
+ * ProjectDetailPage - Card-based project details layout with modal task editing
  *
  * Features:
  * - Card-based phase layout similar to dashboard
  * - Responsive grid layout for phase cards
  * - Clean, modern UI with consistent styling
  * - Maintains existing functionality for data display
+ * - Modal task editing: Edit task titles and descriptions in a dedicated edit modal
+ * 
+ * MODAL TASK EDITING WORKFLOW:
+ * 1. User clicks edit icon next to task status dropdown in PhaseModal
+ * 2. Edit modal opens with form fields for title and description
+ * 3. User modifies title and/or description
+ * 4. User clicks "Save" button 
+ * 5. User clicks "Cancel" button
+ * 6. Changes are validated (empty titles prevented) and persisted to database
+ * 
  */
 const ProjectDetailPage = () => {
   const navigate = useNavigate();
@@ -102,16 +112,38 @@ const ProjectDetailPage = () => {
     setSelectedPhase(null);
   };
 
-  // Handler to update task status from modal
-  const handleTaskUpdate = (phaseId, milestoneId, taskId, newStatus) => {
+  /**
+   * Handler to update task status and content from modal
+   * Supports both legacy format (status string) and new format (object with title, description, status)
+   * @param {string} phaseId - The phase ID containing the task
+   * @param {string} milestoneId - The milestone ID containing the task
+   * @param {string} taskId - The task ID to update
+   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status
+   */
+  const handleTaskUpdate = (phaseId, milestoneId, taskId, updates) => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
         if (phase.id === phaseId) {
           const newMilestones = phase.milestones.map((milestone) => {
             if (milestone.id === milestoneId) {
-              const newTasks = milestone.tasks.map((task) =>
-                task.id === taskId ? { ...task, status: newStatus } : task
-              );
+              const newTasks = milestone.tasks.map((task) => {
+                if (task.id === taskId) {
+                  // Handle both our init and new format (object) 
+                  if (typeof updates === 'string') {
+                    // Legacy format: just status
+                    return { ...task, status: updates };
+                  } else {
+                    // New format: object with title, description, status
+                    return { 
+                      ...task, 
+                      title: updates.title || task.title,
+                      description: updates.description || task.description,
+                      status: updates.status || task.status
+                    };
+                  }
+                }
+                return task;
+              });
               return { ...milestone, tasks: newTasks };
             }
             return milestone;
