@@ -2,10 +2,10 @@ import toast from 'react-hot-toast';
 
 /**
  * Toast notification utilities
- * 
+ *
  * Provides standardized toast notifications with consistent styling
  * and configuration
- * 
+ *
  * TODO: Add theme.js and refactor all toasts to use centralized theme configuration
  */
 
@@ -16,7 +16,7 @@ const TOAST_CONFIG = {
   POSITION: 'top-right',
   SUCCESS_BACKGROUND: '#10B981',
   ERROR_BACKGROUND: '#EF4444',
-  TEXT_COLOR: '#fff'
+  TEXT_COLOR: '#fff',
 };
 
 export const showSuccessToast = (message, options = {}) => {
@@ -41,4 +41,4 @@ export const showErrorToast = (message, options = {}) => {
     },
     ...options,
   });
-}; 
+};
