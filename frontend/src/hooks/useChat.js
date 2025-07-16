@@ -14,6 +14,7 @@ const useChat = () => {
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
 
+
   // Save messages to localStorage
   const saveMessages = useCallback((newMessages) => {
     localStorage.setItem('chatMessages', JSON.stringify(newMessages));
@@ -29,12 +30,14 @@ const useChat = () => {
     localStorage.setItem('projectTitle', title);
   }, []);
 
+
+
   // Load saved chat data on mount
   useEffect(() => {
     const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
     const savedStage = localStorage.getItem('chatStage') || CHAT_STAGES.INITIAL;
     const savedTitle = localStorage.getItem('projectTitle') || '';
-    
+
     if (savedMessages.length > 0) {
       setMessages(savedMessages);
       setStage(savedStage);
@@ -43,11 +46,19 @@ const useChat = () => {
   }, []);
 
   // Adds a new message to the chat history
-  const appendMessage = useCallback((msg) => {
-    const newMessages = [...messages, { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION }];
-    setMessages(newMessages);
-    saveMessages(newMessages);
-  }, [messages, saveMessages]);
+  const appendMessage = useCallback(
+    (msg) => {
+      setMessages((prevMessages) => {
+        const newMessages = [
+          ...prevMessages,
+          { ...msg, type: msg.type || MESSAGE_TYPES.EXPLANATION },
+        ];
+        saveMessages(newMessages);
+        return newMessages;
+      });
+    },
+    [saveMessages]
+  );
 
   // Fetches AI response from the backend
   const generateAiResponse = useCallback(async (prompt) => {
@@ -70,7 +81,15 @@ const useChat = () => {
 
   // Initiates chat with project details and file content
   const startChatWithDetails = useCallback(
-    async ({ title, description, timeline, experienceLevel, technologies, projectScope, processedFile }) => {
+    async ({
+      title,
+      description,
+      timeline,
+      experienceLevel,
+      technologies,
+      projectScope,
+      processedFile,
+    }) => {
       setLoading(true);
 
       try {
@@ -98,15 +117,17 @@ const useChat = () => {
         const finalTitle = extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE;
         setProjectTitle(finalTitle);
         saveProjectTitle(finalTitle);
+        
+
 
         // Start chat
         const userMessage = extractedTitle
           ? `Generating a roadmap for: ${extractedTitle}`
           : 'Generating a roadmap from uploaded document';
-        appendMessage({ 
-          role: 'user', 
-          content: userMessage, 
-          type: MESSAGE_TYPES.REQUEST 
+        appendMessage({
+          role: 'user',
+          content: userMessage,
+          type: MESSAGE_TYPES.REQUEST,
         });
 
         // Build project data object
@@ -116,7 +137,7 @@ const useChat = () => {
           timeline,
           experienceLevel,
           technologies,
-          scope: projectScope
+          scope: projectScope,
         };
 
         // Validate project data
@@ -138,20 +159,20 @@ const useChat = () => {
         }
 
         const aiResponse = await generateAiResponse(prompt);
-        appendMessage({ 
-          role: 'assistant', 
-          content: aiResponse, 
-          type: MESSAGE_TYPES.ROADMAP 
+        appendMessage({
+          role: 'assistant',
+          content: aiResponse,
+          type: MESSAGE_TYPES.ROADMAP,
         });
         const newStage = CHAT_STAGES.AWAITING_CONFIRMATION;
         setStage(newStage);
         saveStage(newStage);
       } catch (error) {
         console.error('AI generate error', error);
-        appendMessage({ 
-          role: 'assistant', 
-          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${error.message}`, 
-          type: MESSAGE_TYPES.ERROR 
+        appendMessage({
+          role: 'assistant',
+          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${error.message}`,
+          type: MESSAGE_TYPES.ERROR,
         });
       } finally {
         setLoading(false);
@@ -167,10 +188,10 @@ const useChat = () => {
         return;
       }
 
-      appendMessage({ 
-        role: 'user', 
-        content, 
-        type: MESSAGE_TYPES.REQUEST 
+      appendMessage({
+        role: 'user',
+        content,
+        type: MESSAGE_TYPES.REQUEST,
       });
       setLoading(true);
 
@@ -206,9 +227,9 @@ const useChat = () => {
             // User wants modifications - only include the current roadmap, not full history
             const roadmapMessage = findRoadmapMessage();
             const currentRoadmap = roadmapMessage ? roadmapMessage.content : '';
-            
+
             prompt = `Current Roadmap:\n${currentRoadmap}\n\n${ROADMAP_MODIFICATION_PROMPT.replace('[USER_MESSAGE]', content)}`;
-            
+
             responseType = MESSAGE_TYPES.ROADMAP; // Always ROADMAP type for roadmap responses
           }
         } else {
@@ -217,17 +238,19 @@ const useChat = () => {
         }
 
         const aiText = await generateAiResponse(prompt);
-        appendMessage({ 
-          role: 'assistant', 
-          content: aiText, 
-          type: responseType 
+        appendMessage({
+          role: 'assistant',
+          content: aiText,
+          type: responseType,
         });
+        
+
       } catch (err) {
         console.error('AI generate error', err);
-        appendMessage({ 
-          role: 'assistant', 
-          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${err.message}`, 
-          type: MESSAGE_TYPES.ERROR 
+        appendMessage({
+          role: 'assistant',
+          content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${err.message}`,
+          type: MESSAGE_TYPES.ERROR,
         });
       } finally {
         setLoading(false);
@@ -236,19 +259,32 @@ const useChat = () => {
     [stage, appendMessage, generateAiResponse, messages, projectTitle, saveStage]
   );
 
-  // Utility function to find roadmap message
+  // Utility function to find roadmap message - get the latest one
   const findRoadmapMessage = useCallback(() => {
-    return messages.find(m => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP);
+    // Find the last roadmap message (most recent modification)
+    const roadmapMessages = messages.filter(
+      (m) => m.role === 'assistant' && m.type === MESSAGE_TYPES.ROADMAP
+    );
+    return roadmapMessages.length > 0 ? roadmapMessages[roadmapMessages.length - 1] : null;
   }, [messages]);
 
-  return { 
-    messages, 
-    loading, 
-    stage, 
-    sendMessage, 
+  // Reset chat state to initial values
+  const resetChat = useCallback(() => {
+    setMessages([]);
+    setStage(CHAT_STAGES.INITIAL);
+    setLoading(false);
+    setProjectTitle('');
+  }, []);
+
+  return {
+    messages,
+    loading,
+    stage,
+    sendMessage,
     startChatWithDetails,
     findRoadmapMessage,
-    MESSAGE_TYPES
+    resetChat,
+    MESSAGE_TYPES,
   };
 };
 
