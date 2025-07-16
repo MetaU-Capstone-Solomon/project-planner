@@ -16,24 +16,30 @@ const useForm = (initialState = {}) => {
     }
   }, []);
 
-  const handleChange = useCallback((e) => {
-    const { name, value } = e.target;
-    const newValues = {
-      ...values,
-      [name]: value,
-    };
-    setValues(newValues);
-    saveFormValues(newValues);
-  }, [values, saveFormValues]);
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      const newValues = {
+        ...values,
+        [name]: value,
+      };
+      setValues(newValues);
+      saveFormValues(newValues);
+    },
+    [values, saveFormValues]
+  );
 
-  const setValue = useCallback((name, value) => {
-    const newValues = {
-      ...values,
-      [name]: value,
-    };
-    setValues(newValues);
-    saveFormValues(newValues);
-  }, [values, saveFormValues]);
+  const setValue = useCallback(
+    (name, value) => {
+      const newValues = {
+        ...values,
+        [name]: value,
+      };
+      setValues(newValues);
+      saveFormValues(newValues);
+    },
+    [values, saveFormValues]
+  );
 
   const reset = useCallback(() => {
     setValues(initialState);
