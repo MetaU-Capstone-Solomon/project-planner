@@ -73,13 +73,13 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+    <header className="relative z-50 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">
           <Link to={ROUTES.DASHBOARD} className="flex items-center space-x-2">
             <Logo className="h-8 w-8" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white hidden md:inline">
+            <span className="hidden text-xl font-bold text-gray-900 dark:text-white md:inline">
               Project Planner
             </span>
             <span className="text-lg font-bold text-gray-900 dark:text-white md:hidden">PP</span>
@@ -133,7 +133,7 @@ const Navbar = () => {
             <button
               ref={profileButtonRef}
               onClick={handleProfileClick}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ring-2 ring-transparent hover:ring-blue-500"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 ring-2 ring-transparent transition-colors duration-200 hover:text-gray-900 hover:ring-blue-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:text-white"
               aria-label="User profile"
               aria-expanded={isDropdownOpen}
             >
