@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
-import { ROUTES } from '@/constants/routes';
 import { getProject, updateProject } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
-import { formatDate } from '@/utils/dateUtils';
 import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 
 /**
  * ProjectDetailPage - Card-based project details layout
- * 
+ *
  * Features:
  * - Card-based phase layout similar to dashboard
  * - Responsive grid layout for phase cards
@@ -33,26 +31,30 @@ const ProjectDetailPage = () => {
   const [selectedPhase, setSelectedPhase] = useState(null);
 
   // Debounced persist function to minimize network overhead during rapid interactions
-  const persistRoadmap = useDebouncedCallback(async (updatedRoadmap) => {
-    if (!projectId) return;
-    const payload = JSON.stringify(updatedRoadmap);
-    const result = await updateProject(projectId, payload);
-    if (!result.success) {
-      console.error('Error saving roadmap:', result.error);
-    }
-  }, 800, [projectId]);
+  const persistRoadmap = useDebouncedCallback(
+    async (updatedRoadmap) => {
+      if (!projectId) return;
+      const payload = JSON.stringify(updatedRoadmap);
+      const result = await updateProject(projectId, payload);
+      if (!result.success) {
+        console.error('Error saving roadmap:', result.error);
+      }
+    },
+    800,
+    [projectId]
+  );
 
   // Fetch project data when component mounts or projectId changes
   useEffect(() => {
     const fetchProject = async () => {
       if (!projectId) return;
-      
+
       setLoading(true);
       try {
         const result = await getProject(projectId);
         if (result.success) {
           setProject(result.project);
-          
+
           // Try to parse content as JSON roadmap
           try {
             // Remove markdown code block formatting if present
@@ -60,9 +62,9 @@ const ProjectDetailPage = () => {
             if (jsonContent.startsWith(MARKDOWN.JSON_CODE_BLOCK)) {
               jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
             }
-            
+
             const parsedContent = JSON.parse(jsonContent);
-            
+
             if (parsedContent.metadata && parsedContent.phases) {
               setRoadmapData(parsedContent);
             } else {
@@ -88,10 +90,6 @@ const ProjectDetailPage = () => {
     fetchProject();
   }, [projectId]);
 
-  const handleBackToDashboard = () => {
-    navigate(ROUTES.DASHBOARD);
-  };
-
   // Handler to open modal with selected phase
   const handlePhaseClick = (phase) => {
     setSelectedPhase(phase);
@@ -111,7 +109,7 @@ const ProjectDetailPage = () => {
         if (phase.id === phaseId) {
           const newMilestones = phase.milestones.map((milestone) => {
             if (milestone.id === milestoneId) {
-              const newTasks = milestone.tasks.map((task) => 
+              const newTasks = milestone.tasks.map((task) =>
                 task.id === taskId ? { ...task, status: newStatus } : task
               );
               return { ...milestone, tasks: newTasks };
@@ -124,25 +122,25 @@ const ProjectDetailPage = () => {
       });
 
       const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
-      
+
       // Update selectedPhase with the updated phase data
       if (selectedPhase && selectedPhase.id === phaseId) {
-        const updatedPhase = newPhases.find(phase => phase.id === phaseId);
+        const updatedPhase = newPhases.find((phase) => phase.id === phaseId);
         if (updatedPhase) {
           setSelectedPhase(updatedPhase);
         }
       }
-      
+
       // Persist changes to backend
       persistRoadmap(updatedRoadmap);
-      
+
       return updatedRoadmap;
     });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-800">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -150,20 +148,13 @@ const ProjectDetailPage = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
         <div className="p-6">
-          <header className="mb-6">
-            <Button
-              onClick={handleBackToDashboard}
-              variant="secondary"
-              aria-label="Navigate back to dashboard"
-            >
-              ← Dashboard
-            </Button>
-          </header>
-          <main className="rounded-lg bg-white p-8 shadow-sm text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">{MESSAGES.ERROR.PROJECT_NOT_FOUND}</h2>
-            <p className="text-gray-600">The project could not be found.</p>
+          <main className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
+            <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+              {MESSAGES.ERROR.PROJECT_NOT_FOUND}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-100">The project could not be found.</p>
           </main>
         </div>
       </div>
@@ -171,29 +162,21 @@ const ProjectDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
       <div className="p-6">
-        <header className="mb-6 flex items-center justify-between">
-          <Button
-            onClick={handleBackToDashboard}
-            variant="secondary"
-            aria-label="Navigate back to dashboard"
-          >
-            ← Dashboard
-          </Button>
-        </header>
-
         <main>
           {roadmapData ? (
             <>
               <div className="space-y-6">
                 <ProgressBar phases={roadmapData.phases} />
                 <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
-                
+
                 {/* Phase Cards Grid */}
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Project Phases</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Project Phases
+                  </h2>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {roadmapData.phases.map((phase) => (
                       <PhaseCardNew
                         key={phase.id}
@@ -205,17 +188,21 @@ const ProjectDetailPage = () => {
                 </div>
               </div>
               {/* Phase Modal */}
-              <PhaseModal 
-                open={modalOpen} 
-                onClose={handleCloseModal} 
+              <PhaseModal
+                open={modalOpen}
+                onClose={handleCloseModal}
                 phase={selectedPhase}
                 onTaskUpdate={handleTaskUpdate}
               />
             </>
           ) : (
-            <div className="rounded-lg bg-white p-8 shadow-sm text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">No Roadmap Data</h2>
-              <p className="text-gray-600">This project doesn't have any roadmap data available.</p>
+            <div className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
+              <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+                No Roadmap Data
+              </h2>
+              <p className="text-gray-600 dark:text-gray-100">
+                This project doesn't have any roadmap data available.
+              </p>
             </div>
           )}
         </main>
