@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, Clock, CheckCircle } from 'lucide-react';
 import { calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
-import { COLOR_CLASSES } from '@/constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { getPhaseColor } from '@/utils/roadmapUtils';
 
 /**
@@ -63,14 +63,14 @@ const PhaseCardNew = ({ phase, onClick }) => {
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-200 hover:shadow-blue-200 ${phaseColorClasses} cursor-pointer`}
+      className={`${COLOR_PATTERNS.landing.card} border-l-4 ${phaseColorClasses} cursor-pointer`}
       onClick={onClick}
     >
       <div className="p-6">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.primary} truncate`}>
+            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate`}>
               Phase {phase.order}: {phase.title}
             </h3>
           </div>
@@ -79,12 +79,12 @@ const PhaseCardNew = ({ phase, onClick }) => {
         {/* Progress */}
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between">
-            <span className={`text-sm font-medium ${COLOR_CLASSES.text.secondary}`}>Progress</span>
-            <span className={`text-sm font-semibold ${COLOR_CLASSES.text.primary}`}>
+            <span className={`text-sm font-medium ${COLOR_CLASSES.text.body}`}>Progress</span>
+            <span className={`text-sm font-semibold ${COLOR_CLASSES.text.heading}`}>
               {progress}%
             </span>
           </div>
-          <div className="h-2 w-full rounded-full bg-gray-200">
+          <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
               className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -94,19 +94,19 @@ const PhaseCardNew = ({ phase, onClick }) => {
 
         {/* Metadata */}
         <div className="space-y-2">
-          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.secondary}`}>
+          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <Calendar className="mr-2 h-4 w-4" />
             <span>{phase.timeline}</span>
           </div>
 
-          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.secondary}`}>
+          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <Clock className="mr-2 h-4 w-4" />
             <span>
               {completedTasks}/{totalTasks} tasks completed
             </span>
           </div>
 
-          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.secondary}`}>
+          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <CheckCircle className="mr-2 h-4 w-4" />
             <span>{phase.milestones ? phase.milestones.length : 0} milestones</span>
           </div>

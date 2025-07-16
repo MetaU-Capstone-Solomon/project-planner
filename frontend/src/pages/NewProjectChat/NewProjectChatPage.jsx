@@ -93,10 +93,10 @@ const NewProjectChatPage = () => {
 
   // --- Form Section ---
   const formSection = (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg">
-      <div className="border-b border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-900">Project Details</h2>
-        <p className="mt-1 text-sm text-gray-600">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg dark:bg-gray-800">
+      <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Project Details</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-100">
           Fill in the details below or upload a document to get started
         </p>
       </div>
@@ -162,14 +162,16 @@ const NewProjectChatPage = () => {
         <FormField label="Upload Document">
           <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
           {fileLoading && (
-            <div className="flex items-center space-x-2 text-blue-600">
+            <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
               <LoadingSpinner size="sm" />
-              <p className="mt-2 text-sm text-blue-600">{MESSAGES.LOADING.PROCESSING_DOCUMENT}</p>
+              <p className="mt-2 text-sm text-blue-600 dark:text-blue-400">
+                {MESSAGES.LOADING.PROCESSING_DOCUMENT}
+              </p>
             </div>
           )}
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
           {processedFile && (
-            <div className="flex items-center space-x-2 text-green-600">
+            <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
               <CheckCircle className="h-4 w-4" />
               <p>{MESSAGES.SUCCESS.FILE_PROCESSED}</p>
             </div>
@@ -196,11 +198,11 @@ const NewProjectChatPage = () => {
   // --- Chat Section ---
   const chatSection = (
     <div
-      className={`flex flex-col overflow-hidden rounded-xl bg-white shadow-lg ${isMobile ? 'h-[calc(100vh-3rem)]' : 'h-full'}`}
+      className={`flex flex-col overflow-hidden rounded-xl bg-white shadow-lg dark:bg-gray-800 ${isMobile ? 'h-[calc(100vh-3rem)]' : 'h-full'}`}
     >
-      <div className="border-b border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-900">AI Assistant</h2>
-        <p className="mt-1 text-sm text-gray-600">
+      <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">AI Assistant</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-100">
           Take advantage of our AI assistant (# questions max)
         </p>
       </div>
@@ -213,7 +215,7 @@ const NewProjectChatPage = () => {
         />
       </div>
       {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
-        <div className="border-t border-gray-200 p-2">
+        <div className="border-t border-gray-200 p-2 dark:border-gray-700">
           <div className="text-center">
             <Button onClick={handleSaveProject} disabled={saving} size="md" className="px-6 py-2">
               {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
@@ -226,15 +228,17 @@ const NewProjectChatPage = () => {
 
   // --- Responsive Layout ---
   return (
-    <div className="mx-auto min-h-screen max-w-7xl bg-gray-100 p-6">
-      {isMobile ? (
-        <div className="flex flex-col gap-6">{mobileStep === 1 ? formSection : chatSection}</div>
-      ) : (
-        <div className="grid h-[calc(100vh-3rem)] grid-cols-1 gap-6 lg:grid-cols-2">
-          {formSection}
-          {chatSection}
-        </div>
-      )}
+    <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-7xl">
+        {isMobile ? (
+          <div className="flex flex-col gap-6">{mobileStep === 1 ? formSection : chatSection}</div>
+        ) : (
+          <div className="grid h-[calc(100vh-3rem)] grid-cols-1 gap-6 lg:grid-cols-2">
+            {formSection}
+            {chatSection}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

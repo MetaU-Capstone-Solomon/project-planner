@@ -84,10 +84,10 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full z-50 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg md:w-72"
+      className="absolute right-0 top-full z-[99999] mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 md:w-72"
     >
       {/* User Info Section */}
-      <div className="border-b border-gray-100 p-4">
+      <div className="border-b border-gray-100 p-4 dark:border-gray-700">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             {userProfile.image ? (
@@ -97,14 +97,16 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
                 className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-                <User className="h-5 w-5 text-gray-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
+                <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </div>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-gray-900">{userProfile.name}</p>
-            <p className="truncate text-xs text-gray-500">{userProfile.email}</p>
+            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
+              {userProfile.name}
+            </p>
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">{userProfile.email}</p>
           </div>
         </div>
       </div>
@@ -113,19 +115,19 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
       <div className="py-2">
         <button
           onClick={() => handleNavigation(ROUTES.PROFILE)}
-          className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50"
+          className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          <Settings className="mr-3 h-4 w-4 text-gray-400" />
+          <Settings className="mr-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
           Settings
         </button>
 
-        <div className="my-1 border-t border-gray-100" />
+        <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
 
         <button
           onClick={handleSignOut}
-          className="flex w-full items-center px-4 py-2 text-sm text-red-600 transition-colors duration-150 hover:bg-red-50"
+          className="flex w-full items-center px-4 py-2 text-sm text-red-600 transition-colors duration-150 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
         >
-          <LogOut className="mr-3 h-4 w-4 text-red-400" />
+          <LogOut className="mr-3 h-4 w-4 text-red-400 dark:text-red-500" />
           Sign Out
         </button>
       </div>
