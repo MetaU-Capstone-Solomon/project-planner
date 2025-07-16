@@ -1,3 +1,11 @@
+/**
+ * Validation constants
+ */
+
+export const VALIDATION_CONSTANTS = {
+  DESCRIPTION_MAX_LENGTH: 1500,
+};
+
 export const PASSWORD_MIN_LENGTH = 8;
 
 export const ERROR_MESSAGES = {
@@ -5,10 +13,10 @@ export const ERROR_MESSAGES = {
   PASSWORD_TOO_SHORT: 'Password must be at least 8 characters',
   PASSWORD_WEAK: 'Password must include uppercase, lowercase, number and special character',
   PASSWORD_UPDATE_FAILED: 'Failed to update password',
-  SIGN_OUT_FAILED: 'Failed to sign out'
+  SIGN_OUT_FAILED: 'Failed to sign out',
 };
 
 export const SUCCESS_MESSAGES = {
   PASSWORD_UPDATED: 'Password updated successfully',
-  SIGN_OUT_SUCCESS: 'Signed out successfully'
-}; 
+  SIGN_OUT_SUCCESS: 'Signed out successfully',
+};

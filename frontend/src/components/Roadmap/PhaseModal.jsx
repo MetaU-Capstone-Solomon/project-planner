@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink } from 'lucide-react';
-import { COLOR_CLASSES } from '../../constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 
 /**
  * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks
@@ -66,65 +67,67 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4"
-      onClick={onClose}
-    >
-      <div 
-        className="relative w-full max-w-4xl bg-white rounded-lg shadow-xl flex flex-col max-h-[90vh] overflow-hidden"
+    <div className={`${COLOR_PATTERNS.components.modal.overlay}`} onClick={onClose}>
+      <div
+        className={`${COLOR_PATTERNS.components.modal.container}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
         <button
-          className={`absolute top-4 right-4 p-2 rounded-full hover:${COLOR_CLASSES.surface.secondary} focus:outline-none z-10`}
+          className="absolute right-4 top-4 z-10 rounded-full p-2 transition-colors duration-200 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-800"
           onClick={onClose}
           aria-label="Close modal"
         >
-          <X className={`h-5 w-5 ${COLOR_CLASSES.text.tertiary}`} />
+          <X className="h-5 w-5 text-gray-600 dark:text-white" />
         </button>
 
         {/* Phase Header */}
-        <div className={`p-6 border-b ${COLOR_CLASSES.border.primary} ${COLOR_CLASSES.surface.secondary}`}>
-          <h2 className={`text-2xl font-bold ${COLOR_CLASSES.text.primary} mb-2`}>
+        <div
+          className={`border-b border-gray-200 p-6 dark:border-gray-600 ${COLOR_CLASSES.surface.modal}`}
+        >
+          <h2 className={`text-2xl font-bold ${COLOR_CLASSES.text.heading} mb-2`}>
             Phase {phase.order}: {phase.title}
           </h2>
-          <div className={`text-sm ${COLOR_CLASSES.text.secondary}`}>
-            {phase.timeline}
-          </div>
+          <div className={`text-sm ${COLOR_CLASSES.text.body}`}>{phase.timeline}</div>
         </div>
 
         {/* Milestones and Tasks */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className={`flex-1 overflow-y-auto p-6 ${COLOR_CLASSES.surface.modal}`}>
           {phase.milestones && phase.milestones.length > 0 ? (
             <div className="space-y-4">
               {phase.milestones.map((milestone) => (
-                <div key={milestone.id} className={`${COLOR_CLASSES.surface.card} rounded-lg ${COLOR_CLASSES.border.primary} shadow-sm`}>
+                <div
+                  key={milestone.id}
+                  className="rounded-lg border border-gray-200 bg-gray-50 shadow-lg dark:border-gray-500 dark:bg-gray-800"
+                >
                   {/* Milestone Header */}
-                  <div 
-                    className={`p-4 cursor-pointer hover:${COLOR_CLASSES.surface.secondary} transition-colors duration-200`}
+                  <div
+                    className="cursor-pointer p-4 transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={() => handleMilestoneToggle(milestone.id)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         {expandedMilestones.has(milestone.id) ? (
-                          <ChevronDown className={`h-4 w-4 ${COLOR_CLASSES.text.tertiary}`} />
+                          <ChevronDown className="h-4 w-4 text-blue-600 dark:text-cyan-200" />
                         ) : (
-                          <ChevronRight className={`h-4 w-4 ${COLOR_CLASSES.text.tertiary}`} />
+                          <ChevronRight className="h-4 w-4 text-blue-600 dark:text-cyan-200" />
                         )}
-                        <Target className="h-5 w-5 text-status-info-main" />
+                        <Target className="h-5 w-5 text-blue-600 dark:text-cyan-200" />
                         <div>
-                          <h3 className={`font-semibold ${COLOR_CLASSES.text.primary}`}>
+                          <h3 className={`font-semibold ${COLOR_CLASSES.text.heading}`}>
                             {milestone.title}
                           </h3>
-                          <div className={`flex items-center space-x-1 mt-1 text-sm ${COLOR_CLASSES.text.secondary}`}>
+                          <div
+                            className={`mt-1 flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.body}`}
+                          >
                             <Calendar className="h-3 w-3" />
                             <span>{milestone.timeline}</span>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
-                        <div className={`text-sm ${COLOR_CLASSES.text.secondary}`}>
+                        <div className={`text-sm ${COLOR_CLASSES.text.body}`}>
                           {milestone.tasks ? milestone.tasks.length : 0} tasks
                         </div>
                       </div>
@@ -133,33 +136,63 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
 
                   {/* Tasks (when expanded) */}
                   {expandedMilestones.has(milestone.id) && (
-                    <div className="px-4 pb-4 space-y-3">
+                    <div className="space-y-3 px-4 pb-4">
                       {milestone.tasks && milestone.tasks.length > 0 ? (
                         milestone.tasks.map((task) => (
-                          <div key={task.id} className={`${COLOR_CLASSES.surface.tertiary} rounded-lg p-4 ${COLOR_CLASSES.border.primary}`}>
-                            <div className="flex items-start justify-between mb-3">
-                              <h4 className={`font-medium ${COLOR_CLASSES.text.primary}`}>
+                          <div
+                            key={task.id}
+                            className={`rounded-lg border-2 bg-white p-4 dark:bg-gray-700 ${
+                              task.status === 'completed'
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                                : task.status === 'in-progress'
+                                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                  : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                            }`}
+                          >
+                            <div className="mb-3 flex items-start justify-between">
+                              <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
                                 {task.title}
                               </h4>
                               <select
                                 value={task.status || 'pending'}
-                                onChange={(e) => handleTaskStatusChange(milestone.id, task.id, e.target.value)}
-                                className={`text-sm border rounded px-2 py-1 ${COLOR_CLASSES.border.primary} focus:${COLOR_CLASSES.border.focus} outline-none`}
+                                onChange={(e) =>
+                                  handleTaskStatusChange(milestone.id, task.id, e.target.value)
+                                }
+                                className={`rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-400 ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400`}
                               >
-                                <option value="pending">Pending</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
+                                <option
+                                  value="pending"
+                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                >
+                                  Pending
+                                </option>
+                                <option
+                                  value="in-progress"
+                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                >
+                                  In Progress
+                                </option>
+                                <option
+                                  value="completed"
+                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                >
+                                  Completed
+                                </option>
                               </select>
                             </div>
-                            
-                            <p className={`text-sm ${COLOR_CLASSES.text.secondary} mb-3 leading-relaxed`}>
+
+                            <p
+                              className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
+                            >
                               {task.description}
                             </p>
 
                             {/* Resources */}
                             {task.resources && task.resources.length > 0 && (
                               <div>
-                                <h5 className={`text-sm font-medium ${COLOR_CLASSES.text.primary} mb-2`}>
+                                <h5
+                                  className={`text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}
+                                >
                                   Resources:
                                 </h5>
                                 <div className="space-y-1">
@@ -170,13 +203,13 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                           href={resource.url}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className={`flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover}`}
+                                          className="flex items-center space-x-1 text-sm text-blue-600 transition-colors duration-200 hover:text-blue-500 dark:text-cyan-200 dark:hover:text-cyan-100"
                                         >
                                           <span>{resource.name}</span>
                                           <ExternalLink className="h-3 w-3" />
                                         </a>
                                       ) : (
-                                        <span className={`text-sm ${COLOR_CLASSES.text.secondary}`}>
+                                        <span className={`text-sm ${COLOR_CLASSES.text.body}`}>
                                           {resource.name}
                                         </span>
                                       )}
@@ -188,7 +221,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                           </div>
                         ))
                       ) : (
-                        <div className={`text-sm ${COLOR_CLASSES.text.secondary} text-center py-4`}>
+                        <div className={`text-sm ${COLOR_CLASSES.text.body} py-4 text-center`}>
                           No tasks available for this milestone.
                         </div>
                       )}
@@ -198,7 +231,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
               ))}
             </div>
           ) : (
-            <div className={`text-center py-8 ${COLOR_CLASSES.text.secondary}`}>
+            <div className={`py-8 text-center ${COLOR_CLASSES.text.body}`}>
               No milestones available for this phase.
             </div>
           )}
@@ -208,4 +241,4 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   );
 };
 
-export default PhaseModal; 
+export default PhaseModal;

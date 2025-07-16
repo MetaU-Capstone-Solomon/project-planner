@@ -4,6 +4,7 @@ const multer = require('multer');
 require('dotenv').config();
 const FileProcessingService = require('./services/fileProcessingService');
 const RoadmapPrioritizationService = require('./services/prioritizationService');
+const TextSummarizer = require('./utils/textSummarizer');
 
 // Environment variables
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -19,6 +20,7 @@ if (!GEMINI_API_KEY) {
 const app = express();
 const fileProcessingService = new FileProcessingService();
 const prioritizationService = new RoadmapPrioritizationService();
+const textSummarizer = new TextSummarizer();
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -29,7 +31,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
+
   if (req.method === 'OPTIONS') {
     res.sendStatus(204);
     return;
@@ -116,7 +118,9 @@ app.post('/api/chat', async (req, res) => {
           // Check for API errors
           if (parsedResponse.error) {
             console.error('Gemini API Error:', parsedResponse.error.message);
-            return res.status(500).json({ error: `AI Service Error: ${parsedResponse.error.message}` });
+            return res
+              .status(500)
+              .json({ error: `AI Service Error: ${parsedResponse.error.message}` });
           }
 
           // Check for blocked responses
@@ -148,21 +152,47 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// Summarization endpoint
+app.post('/api/summarize', async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+
+    const summarizedText = textSummarizer.summarize(text);
+
+    res.json({
+      success: true,
+      originalText: text,
+      summarizedText,
+      isSummarized: text.length > summarizedText.length,
+    });
+  } catch (error) {
+    console.error('Summarization error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Prioritization endpoint
 app.post('/api/prioritize', async (req, res) => {
   try {
     const { roadmap, userConstraints } = req.body;
-    
+
     if (!roadmap || !userConstraints) {
       return res.status(400).json({ error: 'Roadmap and user constraints are required' });
     }
 
-    const optimizedRoadmap = await prioritizationService.prioritizeRoadmap(roadmap, userConstraints);
-    
-    res.json({ 
-      success: true, 
+    const optimizedRoadmap = await prioritizationService.prioritizeRoadmap(
+      roadmap,
+      userConstraints
+    );
+
+    res.json({
+      success: true,
       optimizedRoadmap,
-      message: 'Roadmap optimized successfully'
+      message: 'Roadmap optimized successfully',
     });
   } catch (error) {
     console.error('Prioritization error:', error);

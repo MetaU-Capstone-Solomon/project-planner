@@ -6,13 +6,13 @@ import { MESSAGES } from '@/constants/messages';
 
 /**
  * Custom hook for managing dashboard data
- * 
+ *
  * Handles:
  * - Project data fetching from backend
  * - Loading states
  * - Error handling
  * - Stats calculations
- * 
+ *
  * @returns {Object} Dashboard data and functions
  */
 const useDashboardData = () => {
@@ -25,10 +25,10 @@ const useDashboardData = () => {
     const fetchProjects = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const result = await getUserProjects();
-        
+
         if (result.success) {
           setProjects(result.projects);
         } else {
@@ -54,8 +54,8 @@ const useDashboardData = () => {
     projects,
     loading,
     error,
-    stats
+    stats,
   };
 };
 
-export default useDashboardData; 
+export default useDashboardData;
