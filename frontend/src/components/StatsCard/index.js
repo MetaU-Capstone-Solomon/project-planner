@@ -1,1 +1,1 @@
-export { default } from './StatsCard'; 
+export { default } from './StatsCard';
