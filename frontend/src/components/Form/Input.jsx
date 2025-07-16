@@ -1,19 +1,13 @@
 import React from 'react';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 
-const Input = ({ type = 'text', placeholder, value, onChange, className = '', ...props }) => {
-  const baseClasses =
-    'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+const Input = React.forwardRef(({ className = '', ...props }, ref) => {
+  const baseClasses = `${COLOR_PATTERNS.components.input}`;
+  const combinedClasses = `${baseClasses} ${className}`;
 
-  return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      className={`${baseClasses} ${className}`}
-      value={value}
-      onChange={onChange}
-      {...props}
-    />
-  );
-};
+  return <input ref={ref} className={combinedClasses} {...props} />;
+});
+
+Input.displayName = 'Input';
 
 export default Input;
