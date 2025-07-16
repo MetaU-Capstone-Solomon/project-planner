@@ -2,9 +2,10 @@ import { useCallback } from 'react';
 import useProjectDetail from '@/hooks/useProjectDetail';
 import { FORM_FIELDS } from '@/constants/projectOptions';
 import { hasRequiredFields, getFinalTimeline } from '@/utils/formValidation';
+import { CHAT_STAGES } from '@/constants/messages';
 
 // Hook for managing project form state and validation
-export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) => {
+export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, stage) => {
   // Initialize form with all project fields
   const { values, handleChange } = useProjectDetail({
     [FORM_FIELDS.TITLE]: '',
@@ -25,9 +26,11 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading) =
   }, [values, startChatWithDetails]);
 
   // Checks if form is valid and not currently loading
+  // Also disables generate button once chat has been initiated
   const canGenerate = useCallback((processedFile) => {
-    return hasRequiredFields(values) && !chatLoading && !fileLoading;
-  }, [values, chatLoading, fileLoading]);
+    const isChatInitiated = stage !== CHAT_STAGES.INITIAL;
+    return hasRequiredFields(values) && !chatLoading && !fileLoading && !isChatInitiated;
+  }, [values, chatLoading, fileLoading, stage]);
 
   return {
     values,
