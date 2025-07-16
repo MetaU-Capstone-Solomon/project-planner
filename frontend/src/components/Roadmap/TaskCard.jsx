@@ -35,8 +35,6 @@ const TaskCard = ({ task, onTaskUpdate }) => {
     if (onTaskUpdate) {
       onTaskUpdate(task.id, newStatus);
     }
-
-    // TODO: Implement backend API call to persist task status
   };
 
   return (

@@ -1,5 +1,4 @@
 import React from 'react';
-import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * Footer Component - Site footer
@@ -7,6 +6,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * Features:
  * - Copyright information
  * - Legal links
+ * - Darker gray styling for clear distinction
  * - Responsive layout
  */
 const Footer = () => {
@@ -19,11 +19,11 @@ const Footer = () => {
   ];
 
   return (
-    <footer className={`${COLOR_CLASSES.surface.footer} ${COLOR_CLASSES.border.primary} border-t`}>
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <footer className="border-t border-gray-300 bg-gray-200 dark:border-gray-800 dark:bg-gray-950/95">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           {/* Copyright */}
-          <div className={`text-sm ${COLOR_CLASSES.text.primary}`}>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             © {currentYear} Project Planner. All rights reserved.
           </div>
 
@@ -35,7 +35,7 @@ const Footer = () => {
                 href={link.href}
                 target={link.isExternal ? '_blank' : undefined}
                 rel={link.isExternal ? 'noopener noreferrer' : undefined}
-                className={`text-sm ${COLOR_CLASSES.text.primary} hover:${COLOR_CLASSES.text.link} transition-colors duration-200`}
+                className="text-sm text-gray-700 transition-colors duration-200 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
               >
                 {link.label}
               </a>
