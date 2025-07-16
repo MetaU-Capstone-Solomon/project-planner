@@ -9,4 +9,3 @@ export const ROUTES = {
 };
 // function to generate project detail URL with project ID
 export const getProjectDetailPath = (projectId) => `/project/${projectId}`;
-

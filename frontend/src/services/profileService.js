@@ -1,10 +1,12 @@
 import { PASSWORD_MIN_LENGTH, ERROR_MESSAGES, SUCCESS_MESSAGES } from '@/constants/validation';
+import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
+import { ROUTES } from '@/constants/routes';
 
 // File Upload Constants
 const FILE_UPLOAD_CONSTANTS = {
   MAX_FILE_SIZE_BYTES: 2 * 1024 * 1024, // 2MB in bytes
   CACHE_CONTROL_SECONDS: 3600,
-  ALLOWED_IMAGE_TYPES: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif']
+  ALLOWED_IMAGE_TYPES: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'],
 };
 
 export const validatePassword = (newPassword, confirmPassword) => {
@@ -46,13 +48,11 @@ export const uploadAvatar = async (supabase, userId, file) => {
   const filePath = `avatars/${userId}`;
 
   // Upload — `upsert: true` allows overwrite.
-  const { error: uploadError } = await supabase.storage
-    .from('avatars')
-    .upload(filePath, file, {
-      cacheControl: `${FILE_UPLOAD_CONSTANTS.CACHE_CONTROL_SECONDS}`,
-      upsert: true,
-      contentType: file.type,
-    });
+  const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, {
+    cacheControl: `${FILE_UPLOAD_CONSTANTS.CACHE_CONTROL_SECONDS}`,
+    upsert: true,
+    contentType: file.type,
+  });
   if (uploadError) {
     return { success: false, error: uploadError.message };
   }
@@ -73,12 +73,41 @@ export const uploadAvatar = async (supabase, userId, file) => {
   return { success: true, url: publicUrl };
 };
 
+/**
+ * Sign out user and redirect to landing page
+ *
+ * @param {Function} signOut - Supabase sign out function
+ * @param {Function} navigate - React Router navigate function
+ * @returns {Promise<Object>} Result with success status and optional error
+ */
 export const signOutUser = async (signOut, navigate) => {
   try {
+    // Attempt to sign out from Supabase
     await signOut();
-    navigate('/');
+
+    // Show success feedback
+    showSuccessToast(SUCCESS_MESSAGES.SIGN_OUT_SUCCESS);
+
+    // Navigate to landing page
+    navigate(ROUTES.HOME);
+
     return { success: true };
   } catch (error) {
-    return { success: false, error: ERROR_MESSAGES.SIGN_OUT_FAILED };
+    console.error('Sign out error:', error);
+
+    // Show error feedback
+    showErrorToast(ERROR_MESSAGES.SIGN_OUT_FAILED);
+
+    // Still attempt navigation to landing page for better UX
+    try {
+      navigate(ROUTES.HOME);
+    } catch (navError) {
+      console.error('Navigation error after sign out:', navError);
+    }
+
+    return {
+      success: false,
+      error: error.message || ERROR_MESSAGES.SIGN_OUT_FAILED,
+    };
   }
-}; 
+};
