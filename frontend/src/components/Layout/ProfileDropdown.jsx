@@ -1,15 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
-import { COLOR_CLASSES } from '@/constants/colors';
 import { ROUTES } from '@/constants/routes';
 import { signOutUser } from '@/services/profileService';
 
 /**
  * ProfileDropdown Component - User profile dropdown menu
- * 
+ *
  * Features:
  * - User information display (name, email, avatar)
  * - Settings and sign out actions
@@ -27,7 +26,7 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   const userProfile = {
     name: getDisplayName(user),
     email: user?.email,
-    image: getAvatarUrl(user)
+    image: getAvatarUrl(user),
   };
 
   // Handle click outside to close dropdown
@@ -67,7 +66,7 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
     try {
       const result = await signOutUser(signOut, navigate);
       if (!result.success) {
-        console.error('Sign out error:', result.error);
+        console.error('Sign out failed:', result.error);
       }
     } catch (error) {
       console.error('Sign out error:', error);
@@ -85,31 +84,29 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   return (
     <div
       ref={dropdownRef}
-      className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+      className="absolute right-0 top-full z-[99999] mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 md:w-72"
     >
       {/* User Info Section */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="border-b border-gray-100 p-4 dark:border-gray-700">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             {userProfile.image ? (
               <img
                 src={userProfile.image}
                 alt={userProfile.name}
-                className="w-10 h-10 rounded-full object-cover"
+                className="h-10 w-10 rounded-full object-cover"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <User className="h-5 w-5 text-gray-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700">
+                <User className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
               {userProfile.name}
             </p>
-            <p className="text-xs text-gray-500 truncate">
-              {userProfile.email}
-            </p>
+            <p className="truncate text-xs text-gray-500 dark:text-gray-400">{userProfile.email}</p>
           </div>
         </div>
       </div>
@@ -118,19 +115,19 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
       <div className="py-2">
         <button
           onClick={() => handleNavigation(ROUTES.PROFILE)}
-          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+          className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          <Settings className="h-4 w-4 mr-3 text-gray-400" />
+          <Settings className="mr-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
           Settings
         </button>
-        
-        <div className="border-t border-gray-100 my-1" />
-        
+
+        <div className="my-1 border-t border-gray-100 dark:border-gray-700" />
+
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+          className="flex w-full items-center px-4 py-2 text-sm text-red-600 transition-colors duration-150 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
         >
-          <LogOut className="h-4 w-4 mr-3 text-red-400" />
+          <LogOut className="mr-3 h-4 w-4 text-red-400 dark:text-red-500" />
           Sign Out
         </button>
       </div>
@@ -138,4 +135,4 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
   );
 };
 
-export default ProfileDropdown; 
+export default ProfileDropdown;
