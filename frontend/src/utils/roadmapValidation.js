@@ -1,10 +1,10 @@
 /**
  * Roadmap Validation Utility using Zod
- * 
+ *
  * Validates AI-generated roadmap JSON structure before saving to database.
  * Handles markdown code block stripping and schema validation
  * prevent unexpected data from being stored.
- * 
+ *
  * @module roadmapValidation
  * @requires zod
  * @requires @/constants/messages
@@ -16,7 +16,7 @@ import { MESSAGES } from '@/constants/messages';
 
 /**
  * Zod schema definitions for roadmap validation
- * 
+ *
  * Each schema defines the structure and validation rules for different
  * components of the roadmap data structure.
  */
@@ -27,7 +27,7 @@ import { MESSAGES } from '@/constants/messages';
  */
 const ResourceSchema = z.object({
   name: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  url: z.string().optional() // AI provides URLs, but they might not always be valid
+  url: z.string().optional(), // AI provides URLs, but they might not always be valid
 });
 
 /**
@@ -40,9 +40,9 @@ const TaskSchema = z.object({
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   resources: z.array(ResourceSchema).default([]),
   status: z.string().default('pending'), // AI always sets to "pending"
-  estimatedHours: z.union([z.string().min(1), z.number().positive()]).transform(val => 
-    typeof val === 'number' ? val.toString() : val
-  )
+  estimatedHours: z
+    .union([z.string().min(1), z.number().positive()])
+    .transform((val) => (typeof val === 'number' ? val.toString() : val)),
 });
 
 /**
@@ -54,7 +54,7 @@ const MilestoneSchema = z.object({
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   order: z.number(), // AI provides numbers, no need for positive integer validation
-  tasks: z.array(TaskSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE)
+  tasks: z.array(TaskSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
 
 /**
@@ -66,7 +66,7 @@ const PhaseSchema = z.object({
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   order: z.number(), // AI provides numbers, no need for positive integer validation
-  milestones: z.array(MilestoneSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE)
+  milestones: z.array(MilestoneSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
 
 /**
@@ -78,9 +78,9 @@ const MetadataSchema = z.object({
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   experienceLevel: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  technologies: z.string().optional().default(""),
+  technologies: z.string().optional().default(''),
   scope: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  version: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE)
+  version: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
 
 /**
@@ -90,35 +90,35 @@ const MetadataSchema = z.object({
 const RoadmapSchema = z.object({
   metadata: MetadataSchema,
   summary: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  phases: z.array(PhaseSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE)
+  phases: z.array(PhaseSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
 
 /**
  * Strips markdown code blocks from content
- * 
+ *
  * Removes markdown formatting from AI responses that wrap JSON in code blocks.
- * AI consistently uses ```json format for JSON responses so I strip it 
- * 
+ * AI consistently uses ```json format for JSON responses so I strip it
+ *
  * @param {string} content - Content that may contain markdown code blocks
  * @returns {string} Content with markdown code blocks removed
  */
 const stripMarkdownCodeBlocks = (content) => {
   if (!content || typeof content !== 'string') return content;
-  
+
   return content
-    .replace(/^```json\s*\n?/i, '')  // Remove opening ```json
-    .replace(/\n?```\s*$/i, '')      // Remove closing ```
+    .replace(/^```json\s*\n?/i, '') // Remove opening ```json
+    .replace(/\n?```\s*$/i, '') // Remove closing ```
     .trim();
 };
 
 /**
  * Validates AI-generated roadmap JSON content
- * 
+ *
  * Performs comprehensive validation of roadmap data including:
  * Markdown code block stripping
  * JSON parsing validation
  * Schema structure validation using Zod
- * 
+ *
  * @param {string} content - Raw AI response content that may contain markdown
  * @returns {Object} Validation result object
  * @returns {boolean} returns.isValid - Whether the content passed all validations
@@ -129,7 +129,7 @@ export const validateRoadmapContent = (content) => {
   const result = {
     isValid: false,
     errors: [],
-    warnings: []
+    warnings: [],
   };
 
   if (!content || typeof content !== 'string') {
@@ -151,10 +151,10 @@ export const validateRoadmapContent = (content) => {
 
   // Validate with Zod schema
   const validationResult = RoadmapSchema.safeParse(parsedContent);
-  
+
   if (!validationResult.success) {
     // Convert Zod errors to proper format
-    result.errors = validationResult.error.issues.map(issue => {
+    result.errors = validationResult.error.issues.map((issue) => {
       const path = issue.path.join('.');
       return `${path}: ${issue.message}`;
     });
@@ -167,10 +167,10 @@ export const validateRoadmapContent = (content) => {
 
 /**
  * Get parsed roadmap JSON from validated content
- * 
+ *
  * Extracts the parsed JSON object from validated roadmap content.
  * This avoids redundant parsing since validation already handles markdown stripping.
- * 
+ *
  * @param {string} content - Raw AI response content
  * @returns {Object|null} Parsed roadmap object or null if invalid
  */
@@ -192,10 +192,10 @@ export const getParsedRoadmap = (content) => {
 
 /**
  * Error message for validation failures
- * 
+ *
  * Converts technical validation errors into  readable messages.
  * Limits the number of errors shown to avoid overwhelming the user.
- * 
+ *
  * @param {Object} validationResult - Result from validateRoadmapContent
  * @param {boolean} validationResult.isValid - Whether validation passed
  * @param {string[]} validationResult.errors - Array of validation errors
@@ -211,6 +211,6 @@ export const getValidationErrorMessage = (validationResult) => {
     return MESSAGES.VALIDATION.ROADMAP_INCOMPLETE;
   }
 
-  // Validation message 
+  // Validation message
   return MESSAGES.VALIDATION.ROADMAP_VALIDATION_FAILED;
-}; 
+};
