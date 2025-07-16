@@ -1,6 +1,6 @@
 /**
  * Frontend Prioritization Service
- * 
+ *
  * Handles communication with the backend  API
  */
 
@@ -9,7 +9,7 @@ import { MESSAGES } from '@/constants/messages';
 
 /**
  * Optimize roadmap using the backend prioritization algorithm
- * 
+ *
  * @param {Object} roadmap - Validated JSON roadmap from AI
  * @param {Object} userConstraints - User input constraints
  * @param {string} userConstraints.timeline - Project timeline
@@ -26,7 +26,7 @@ export const optimizeRoadmap = async (roadmap, userConstraints) => {
       },
       body: JSON.stringify({
         roadmap,
-        userConstraints
+        userConstraints,
       }),
     });
 
@@ -36,7 +36,7 @@ export const optimizeRoadmap = async (roadmap, userConstraints) => {
     }
 
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.error || MESSAGES.ERROR.OPTIMIZATION_FAILED);
     }
@@ -50,7 +50,7 @@ export const optimizeRoadmap = async (roadmap, userConstraints) => {
 
 /**
  * Check if prioritization service is available
- * 
+ *
  * @returns {Promise<boolean>} True if service is available
  */
 export const checkPrioritizationService = async () => {
@@ -62,4 +62,4 @@ export const checkPrioritizationService = async () => {
   } catch (error) {
     return false;
   }
-}; 
+};
