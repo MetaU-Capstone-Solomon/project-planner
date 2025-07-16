@@ -35,7 +35,7 @@ import EditTaskModal from './EditTaskModal';
  * - Local state: expandedMilestones (Set of milestone IDs)
  * - Props: phase data, modal open/close state
  * - Parent state: task status updates via onTaskUpdate callback
- * 
+ *
  * MODAL TASK EDITING WORKFLOW:
  * 1. Edit Icon Click: handleStartEdit(taskId, task) - Opens edit modal
  * 2. Modal Editing: User types in dedicated modal form for title and description
@@ -179,7 +179,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                         milestone.tasks.map((task) => {
                           // Add milestoneId to task for edit functionality
                           const taskWithMilestone = { ...task, milestoneId: milestone.id };
-                          
+
                           return (
                             <div
                               key={task.id}
@@ -192,91 +192,91 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                               }`}
                             >
                               <div className="mb-3 flex items-start justify-between">
-                                <div className="flex-1 mr-4">
+                                <div className="mr-4 flex-1">
                                   <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
                                     {task.title}
                                   </h4>
                                 </div>
-                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                <div className="flex flex-shrink-0 items-center space-x-2">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleStartEdit(task.id, taskWithMilestone);
                                     }}
-                                    className={`p-1 rounded ${COLOR_CLASSES.surface.cardHover} transition-colors`}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors`}
                                     aria-label="Edit task"
                                   >
                                     <Edit2 className="h-4 w-4 text-gray-900 dark:text-white" />
                                   </button>
-                                <select
-                                  value={task.status || 'pending'}
-                                  onChange={(e) =>
-                                    handleTaskStatusChange(milestone.id, task.id, e.target.value)
-                                  }
-                                  className={`rounded ${COLOR_CLASSES.border.input} px-2 py-1 text-sm ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:${COLOR_CLASSES.border.focus} focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400`}
-                                >
-                                  <option
-                                    value="pending"
-                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                  <select
+                                    value={task.status || 'pending'}
+                                    onChange={(e) =>
+                                      handleTaskStatusChange(milestone.id, task.id, e.target.value)
+                                    }
+                                    className={`rounded ${COLOR_CLASSES.border.input} px-2 py-1 text-sm ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:${COLOR_CLASSES.border.focus} focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400`}
                                   >
-                                    Pending
-                                  </option>
-                                  <option
-                                    value="in-progress"
-                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                  >
-                                    In Progress
-                                  </option>
-                                  <option
-                                    value="completed"
-                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                  >
-                                    Completed
-                                  </option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <p
-                              className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
-                            >
-                              {task.description}
-                            </p>
-
-                            {/* Resources */}
-                            {task.resources && task.resources.length > 0 && (
-                              <div>
-                                <h5
-                                  className={`text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}
-                                >
-                                  Resources:
-                                </h5>
-                                <div className="space-y-1">
-                                  {task.resources.map((resource, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
-                                      {resource.url ? (
-                                        <a
-                                          href={resource.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className={`flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover} transition-colors duration-200`}
-                                        >
-                                          <span>{resource.name}</span>
-                                          <ExternalLink className="h-3 w-3" />
-                                        </a>
-                                      ) : (
-                                        <span className={`text-sm ${COLOR_CLASSES.text.body}`}>
-                                          {resource.name}
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
+                                    <option
+                                      value="pending"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      Pending
+                                    </option>
+                                    <option
+                                      value="in-progress"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      In Progress
+                                    </option>
+                                    <option
+                                      value="completed"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      Completed
+                                    </option>
+                                  </select>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        );
-                      })
+
+                              <p
+                                className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
+                              >
+                                {task.description}
+                              </p>
+
+                              {/* Resources */}
+                              {task.resources && task.resources.length > 0 && (
+                                <div>
+                                  <h5
+                                    className={`text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}
+                                  >
+                                    Resources:
+                                  </h5>
+                                  <div className="space-y-1">
+                                    {task.resources.map((resource, index) => (
+                                      <div key={index} className="flex items-center space-x-2">
+                                        {resource.url ? (
+                                          <a
+                                            href={resource.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover} transition-colors duration-200`}
+                                          >
+                                            <span>{resource.name}</span>
+                                            <ExternalLink className="h-3 w-3" />
+                                          </a>
+                                        ) : (
+                                          <span className={`text-sm ${COLOR_CLASSES.text.body}`}>
+                                            {resource.name}
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                       ) : (
                         <div className={`text-sm ${COLOR_CLASSES.text.body} py-4 text-center`}>
                           No tasks available for this milestone.
