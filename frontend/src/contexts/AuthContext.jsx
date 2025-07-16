@@ -76,8 +76,8 @@ export const AuthProvider = ({ children }) => {
       options: {
         emailRedirectTo: `${FRONTEND_URL}/auth/callback`,
         data: {
-          full_name: fullName
-        }
+          full_name: fullName,
+        },
       },
     });
     if (error) throw error;

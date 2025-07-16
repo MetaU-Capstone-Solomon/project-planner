@@ -7,7 +7,7 @@ export const TIMELINE_OPTIONS = [
   { value: '3 months', label: '3 months' },
   { value: '6 months', label: '6 months' },
   { value: '1 year', label: '1 year' },
-  { value: 'custom', label: 'Custom (enter below)' }
+  { value: 'custom', label: 'Custom (enter below)' },
 ];
 
 export const EXPERIENCE_LEVEL_OPTIONS = [
@@ -15,14 +15,14 @@ export const EXPERIENCE_LEVEL_OPTIONS = [
   { value: 'Beginner', label: 'Beginner' },
   { value: 'Intermediate', label: 'Intermediate' },
   { value: 'Advanced', label: 'Advanced' },
-  { value: 'Expert', label: 'Expert' }
+  { value: 'Expert', label: 'Expert' },
 ];
 
 export const PROJECT_SCOPE_OPTIONS = [
   { value: '', label: 'Select project scope' },
   { value: 'MVP', label: 'MVP (Minimum Viable Product)' },
   { value: 'Full-featured', label: 'Full-featured' },
-  { value: 'Enterprise-level', label: 'Enterprise-level' }
+  { value: 'Enterprise-level', label: 'Enterprise-level' },
 ];
 
 export const FORM_FIELDS = {
@@ -32,5 +32,5 @@ export const FORM_FIELDS = {
   CUSTOM_TIMELINE: 'customTimeline',
   EXPERIENCE_LEVEL: 'experienceLevel',
   TECHNOLOGIES: 'technologies',
-  PROJECT_SCOPE: 'projectScope'
-}; 
+  PROJECT_SCOPE: 'projectScope',
+};
