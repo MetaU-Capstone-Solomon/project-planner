@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +27,17 @@ export const useProfile = () => {
   const displayName = getDisplayName(user);
   const emailUser = isEmailUser(user);
   const avatarUrl = getAvatarUrl(user);
+
+  // Auto-dismiss success messages after 5 seconds (errors persist until user action)
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -83,6 +94,13 @@ export const useProfile = () => {
     setError('');
   };
 
+  // Clear error state when user starts typing in password fields
+  const clearErrorOnInput = () => {
+    if (error) {
+      setError('');
+    }
+  };
+
   return {
     user,
     displayName,
@@ -100,5 +118,6 @@ export const useProfile = () => {
     handleAvatarUpload,
     avatarLoading,
     resetPasswordForm,
+    clearErrorOnInput,
   };
 };
