@@ -70,7 +70,7 @@ const PhaseCard = ({
 
   return (
     <div
-      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 ${phaseColorClasses} mb-4`}
+      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 ${phaseColorClasses} mb-4 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-200`}
     >
       <div className="cursor-pointer p-6" onClick={onToggle}>
         <div className="flex items-center justify-between">
