@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink } from 'lucide-react';
+import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink, Edit2 } from 'lucide-react';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
+import EditTaskModal from './EditTaskModal';
 
 /**
- * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks
+ * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks with modal editing
  *
  * COMPONENT:
  * This modal provides a detailed view of a project phase, allowing users to:
  * - View all milestones within the phase
  * - Expand milestones to see individual tasks
- * - Update task status (pending/in progress/completed) TODO: add colors or tags to show state
+ * - Update task status (pending/in progress/completed)
  * - Access learning resources and links
  * - Track progress through visual indicators
  *
@@ -34,6 +35,12 @@ import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
  * - Local state: expandedMilestones (Set of milestone IDs)
  * - Props: phase data, modal open/close state
  * - Parent state: task status updates via onTaskUpdate callback
+ * 
+ * MODAL TASK EDITING WORKFLOW:
+ * 1. Edit Icon Click: handleStartEdit(taskId, task) - Opens edit modal
+ * 2. Modal Editing: User types in dedicated modal form for title and description
+ * 3. Save Action: handleSaveEdit(updatedTask) - Validates and saves
+ * 4. Cancel Action: handleCloseEditModal() - Discards changes and closes edit modal
  *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the modal is open
@@ -43,6 +50,8 @@ import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
  */
 const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
   if (!open || !phase) return null;
 
@@ -64,6 +73,35 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
     if (onTaskUpdate) {
       onTaskUpdate(phase.id, milestoneId, taskId, newStatus);
     }
+  };
+
+  /**
+   * Start editing a task
+   * @param {string} taskId - The task ID to edit
+   * @param {Object} task - The task data
+   */
+  const handleStartEdit = (taskId, task) => {
+    setEditingTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  /**
+   * Close edit modal and reopen phase modal
+   */
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingTask(null);
+  };
+
+  /**
+   * Save task changes
+   * @param {Object} updatedTask - The updated task data
+   */
+  const handleSaveEdit = (updatedTask) => {
+    if (onTaskUpdate && editingTask) {
+      onTaskUpdate(phase.id, editingTask.milestoneId, editingTask.id, updatedTask);
+    }
+    handleCloseEditModal();
   };
 
   return (
@@ -138,47 +176,65 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                   {expandedMilestones.has(milestone.id) && (
                     <div className="space-y-3 px-4 pb-4">
                       {milestone.tasks && milestone.tasks.length > 0 ? (
-                        milestone.tasks.map((task) => (
-                          <div
-                            key={task.id}
-                            className={`rounded-lg border-2 bg-white p-4 dark:bg-gray-700 ${
-                              task.status === 'completed'
-                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                                : task.status === 'in-progress'
-                                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                  : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                            }`}
-                          >
-                            <div className="mb-3 flex items-start justify-between">
-                              <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
-                                {task.title}
-                              </h4>
-                              <select
-                                value={task.status || 'pending'}
-                                onChange={(e) =>
-                                  handleTaskStatusChange(milestone.id, task.id, e.target.value)
-                                }
-                                className={`rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-400 ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400`}
-                              >
-                                <option
-                                  value="pending"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                        milestone.tasks.map((task) => {
+                          // Add milestoneId to task for edit functionality
+                          const taskWithMilestone = { ...task, milestoneId: milestone.id };
+                          
+                          return (
+                            <div
+                              key={task.id}
+                              className={`rounded-lg border-2 p-4 ${
+                                task.status === 'completed'
+                                  ? `${COLOR_CLASSES.status.success.border} ${COLOR_CLASSES.status.success.bg}`
+                                  : task.status === 'in-progress'
+                                    ? `${COLOR_CLASSES.status.info.border}`
+                                    : `${COLOR_CLASSES.status.warning.border}`
+                              }`}
+                            >
+                              <div className="mb-3 flex items-start justify-between">
+                                <div className="flex-1 mr-4">
+                                  <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
+                                    {task.title}
+                                  </h4>
+                                </div>
+                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleStartEdit(task.id, taskWithMilestone);
+                                    }}
+                                    className={`p-1 rounded ${COLOR_CLASSES.surface.cardHover} transition-colors`}
+                                    aria-label="Edit task"
+                                  >
+                                    <Edit2 className="h-4 w-4 text-gray-900 dark:text-white" />
+                                  </button>
+                                <select
+                                  value={task.status || 'pending'}
+                                  onChange={(e) =>
+                                    handleTaskStatusChange(milestone.id, task.id, e.target.value)
+                                  }
+                                  className={`rounded ${COLOR_CLASSES.border.input} px-2 py-1 text-sm ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:${COLOR_CLASSES.border.focus} focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400`}
                                 >
-                                  Pending
-                                </option>
-                                <option
-                                  value="in-progress"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                >
-                                  In Progress
-                                </option>
-                                <option
-                                  value="completed"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                >
-                                  Completed
-                                </option>
-                              </select>
+                                  <option
+                                    value="pending"
+                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                  >
+                                    Pending
+                                  </option>
+                                  <option
+                                    value="in-progress"
+                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                  >
+                                    In Progress
+                                  </option>
+                                  <option
+                                    value="completed"
+                                    className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                  >
+                                    Completed
+                                  </option>
+                                </select>
+                              </div>
                             </div>
 
                             <p
@@ -203,7 +259,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                           href={resource.url}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="flex items-center space-x-1 text-sm text-blue-600 transition-colors duration-200 hover:text-blue-500 dark:text-cyan-200 dark:hover:text-cyan-100"
+                                          className={`flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover} transition-colors duration-200`}
                                         >
                                           <span>{resource.name}</span>
                                           <ExternalLink className="h-3 w-3" />
@@ -219,7 +275,8 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                               </div>
                             )}
                           </div>
-                        ))
+                        );
+                      })
                       ) : (
                         <div className={`text-sm ${COLOR_CLASSES.text.body} py-4 text-center`}>
                           No tasks available for this milestone.
@@ -237,6 +294,14 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
           )}
         </div>
       </div>
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        task={editingTask}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
