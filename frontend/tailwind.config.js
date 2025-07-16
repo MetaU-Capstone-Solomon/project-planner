@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -50,6 +51,8 @@ export default {
           tertiary: '#f3f4f6',
           card: '#ffffff',
           cardHover: '#f9fafb',
+          navbar: '#d1d5db',
+          footer: '#d1d5db',
         },
         text: {
           primary: '#111827',
