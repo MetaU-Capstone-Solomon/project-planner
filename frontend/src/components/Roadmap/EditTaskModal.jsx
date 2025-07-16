@@ -41,7 +41,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
     if (isOpen && task) {
       setFormData({
         title: task.title || '',
-        description: task.description || ''
+        description: task.description || '',
       });
       setIsValid(true);
     }
@@ -60,10 +60,10 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
       setIsValid(false);
       return;
     }
-    
+
     onSave({
       title: formData.title.trim(),
-      description: formData.description
+      description: formData.description,
     });
     onClose();
   };
@@ -87,20 +87,17 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
   if (!isOpen || !task) return null;
 
   return (
-    <div 
-      className={`${COLOR_PATTERNS.components.modal.overlay} z-50`} 
-      onClick={handleCancel}
-    >
+    <div className={`${COLOR_PATTERNS.components.modal.overlay} z-50`} onClick={handleCancel}>
       <div
-        className={`${COLOR_PATTERNS.components.modal.container} max-w-lg w-full mx-4`}
+        className={`${COLOR_PATTERNS.components.modal.container} mx-4 w-full max-w-lg`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`border-b border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal}`}>
+        <div
+          className={`border-b border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal}`}
+        >
           <div className="flex items-center justify-between">
-            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>
-              Edit Task
-            </h2>
+            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>Edit Task</h2>
             <button
               onClick={handleCancel}
               className="rounded-full p-1 transition-colors duration-200 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-800"
@@ -116,15 +113,15 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
           <div className="space-y-4">
             {/* Title Field */}
             <div>
-              <label 
-                htmlFor="task-title" 
-                className={`block text-sm font-medium mb-2 ${COLOR_CLASSES.text.heading}`}
+              <label
+                htmlFor="task-title"
+                className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}
               >
                 Task Title *
               </label>
               <textarea
                 id="task-title"
-                className={`w-full font-medium ${COLOR_CLASSES.text.heading} bg-gray-100 dark:bg-gray-700 border ${isValid ? 'border-gray-300 dark:border-gray-600' : 'border-red-500'} rounded px-3 py-2 focus:${COLOR_CLASSES.border.focus} focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none resize-none min-h-[50px] max-h-[100px] transition-all duration-200`}
+                className={`w-full font-medium ${COLOR_CLASSES.text.heading} border bg-gray-100 dark:bg-gray-700 ${isValid ? 'border-gray-300 dark:border-gray-600' : 'border-red-500'} rounded px-3 py-2 focus:${COLOR_CLASSES.border.focus} max-h-[100px] min-h-[50px] resize-none outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800`}
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -134,7 +131,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
                 autoFocus
               />
               {!isValid && (
-                <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                   Task title is required
                 </p>
               )}
@@ -142,15 +139,15 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
 
             {/* Description Field */}
             <div>
-              <label 
-                htmlFor="task-description" 
-                className={`block text-sm font-medium mb-2 ${COLOR_CLASSES.text.heading}`}
+              <label
+                htmlFor="task-description"
+                className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}
               >
                 Description
               </label>
               <textarea
                 id="task-description"
-                className={`w-full ${COLOR_CLASSES.text.body} text-sm leading-relaxed bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 focus:${COLOR_CLASSES.border.focus} focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none resize-vertical min-h-[120px] max-h-[300px] transition-all duration-200`}
+                className={`w-full ${COLOR_CLASSES.text.body} rounded border border-gray-300 bg-gray-100 px-3 py-2 text-sm leading-relaxed dark:border-gray-600 dark:bg-gray-700 focus:${COLOR_CLASSES.border.focus} resize-vertical max-h-[300px] min-h-[120px] outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800`}
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -163,11 +160,13 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
         </div>
 
         {/* Footer */}
-        <div className={`border-t border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal}`}>
-          <div className="flex gap-3 justify-end">
+        <div
+          className={`border-t border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal}`}
+        >
+          <div className="flex justify-end gap-3">
             <button
               onClick={handleCancel}
-              className={`flex items-center space-x-1 px-4 py-2 rounded ${COLOR_PATTERNS.button.secondary} text-sm`}
+              className={`flex items-center space-x-1 rounded px-4 py-2 ${COLOR_PATTERNS.button.secondary} text-sm`}
             >
               <X className="h-4 w-4" />
               <span>Cancel</span>
@@ -175,7 +174,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
             <button
               onClick={handleSave}
               disabled={!isValid}
-              className={`flex items-center space-x-1 px-4 py-2 rounded ${COLOR_PATTERNS.button.primary} disabled:bg-gray-300 disabled:cursor-not-allowed text-sm`}
+              className={`flex items-center space-x-1 rounded px-4 py-2 ${COLOR_PATTERNS.button.primary} text-sm disabled:cursor-not-allowed disabled:bg-gray-300`}
             >
               <Save className="h-4 w-4" />
               <span>Save</span>
@@ -187,4 +186,4 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
   );
 };
 
-export default EditTaskModal; 
+export default EditTaskModal;
