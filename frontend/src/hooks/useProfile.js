@@ -1,18 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { getDisplayName, isEmailUser, getAvatarUrl } from '@/utils/userUtils';
-import { updateUserPassword, signOutUser, validatePassword, uploadAvatar } from '@/services/profileService';
+import {
+  updateUserPassword,
+  signOutUser,
+  validatePassword,
+  uploadAvatar,
+} from '@/services/profileService';
 
 export const useProfile = () => {
   const { user, signOut, updatePassword } = useAuth();
   const navigate = useNavigate();
-  
+
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,9 +28,20 @@ export const useProfile = () => {
   const emailUser = isEmailUser(user);
   const avatarUrl = getAvatarUrl(user);
 
+  // Auto-dismiss success messages after 5 seconds (errors persist until user action)
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
+
     const validation = validatePassword(passwordData.newPassword, passwordData.confirmPassword);
     if (!validation.isValid) {
       setError(validation.error);
@@ -34,9 +50,9 @@ export const useProfile = () => {
 
     setIsLoading(true);
     setError('');
-    
+
     const result = await updateUserPassword(updatePassword, passwordData.newPassword);
-    
+
     if (result.success) {
       setSuccess(result.message);
       setPasswordData({ newPassword: '', confirmPassword: '' });
@@ -44,7 +60,7 @@ export const useProfile = () => {
     } else {
       setError(result.error);
     }
-    
+
     setIsLoading(false);
   };
 
@@ -61,9 +77,14 @@ export const useProfile = () => {
   };
 
   const handleSignOut = async () => {
-    const result = await signOutUser(signOut, navigate);
-    if (!result.success) {
-      setError(result.error);
+    try {
+      const result = await signOutUser(signOut, navigate);
+      if (!result.success) {
+        setError(result.error);
+      }
+    } catch (error) {
+      console.error('Sign out error in useProfile:', error);
+      setError('Failed to sign out. Please try again.');
     }
   };
 
@@ -71,6 +92,13 @@ export const useProfile = () => {
     setShowPasswordForm(false);
     setPasswordData({ newPassword: '', confirmPassword: '' });
     setError('');
+  };
+
+  // Clear error state when user starts typing in password fields
+  const clearErrorOnInput = () => {
+    if (error) {
+      setError('');
+    }
   };
 
   return {
@@ -89,6 +117,7 @@ export const useProfile = () => {
     handleSignOut,
     handleAvatarUpload,
     avatarLoading,
-    resetPasswordForm
+    resetPasswordForm,
+    clearErrorOnInput,
   };
-}; 
+};

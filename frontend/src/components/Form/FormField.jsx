@@ -1,12 +1,21 @@
 import React from 'react';
+import { COLOR_CLASSES } from '@/constants/colors';
 
 //  wrapper component: optional required indicator
-const FormField = ({ label, children, className = '', isRequired = false, requiredIndicator = '*' }) => {
+const FormField = ({
+  label,
+  children,
+  className = '',
+  isRequired = false,
+  requiredIndicator = '*',
+}) => {
   const renderLabel = () => {
     return (
-      <label className="mb-2 block text-sm font-medium text-gray-700">
+      <label className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}>
         {label}
-        {isRequired && <span className="text-red-500 ml-1">{requiredIndicator}</span>}
+        {isRequired && (
+          <span className="ml-1 text-red-500 dark:text-red-400">{requiredIndicator}</span>
+        )}
       </label>
     );
   };
