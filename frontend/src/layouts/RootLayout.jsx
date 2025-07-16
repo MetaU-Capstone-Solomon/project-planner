@@ -4,7 +4,7 @@ import { COLOR_CLASSES } from '../constants/colors';
 
 /**
  * RootLayout - Main application layout with navbar and footer
- * 
+ *
  * Features:
  * - Navbar with navigation and user actions
  * - Footer with copyright and links
@@ -13,15 +13,15 @@ import { COLOR_CLASSES } from '../constants/colors';
  */
 export default function RootLayout() {
   return (
-    <div className={`min-h-screen flex flex-col ${COLOR_CLASSES.surface.tertiary}`}>
+    <div className={`flex min-h-screen flex-col ${COLOR_CLASSES.surface.tertiary}`}>
       {/* Header */}
       <Navbar />
-      
+
       {/* Main Content */}
       <main className="flex-1">
         <Outlet />
       </main>
-      
+
       {/* Footer */}
       <Footer />
     </div>
