@@ -1,4 +1,5 @@
 import React from 'react';
+import { COLOR_CLASSES } from '@/constants/colors';
 
 const FileUpload = ({
   onFileSelect,
@@ -28,7 +29,7 @@ const FileUpload = ({
   return (
     <div className={className}>
       <div
-        className="cursor-pointer rounded-lg border-2 border-dashed border-gray-300 p-6 text-center transition-colors hover:border-gray-400"
+        className={`cursor-pointer rounded-lg border-2 border-dashed ${COLOR_CLASSES.border.input} p-6 text-center transition-colors hover:border-gray-400 dark:hover:border-gray-500`}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
@@ -43,7 +44,7 @@ const FileUpload = ({
           onChange={handleFileChange}
         />
         <label htmlFor="file-upload" className="cursor-pointer">
-          <div className="text-gray-600">
+          <div className={COLOR_CLASSES.text.body}>
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center">
               <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -55,11 +56,17 @@ const FileUpload = ({
               </svg>
             </div>
             <p className="text-sm">Click to upload or drag and drop</p>
-            <p className="mt-1 text-xs text-gray-500">PDF, DOC, DOCX, or TXT files</p>
+            <p className={`mt-1 text-xs ${COLOR_CLASSES.text.muted}`}>
+              PDF, DOC, DOCX, or TXT files
+            </p>
           </div>
         </label>
       </div>
-      {selectedFile && <p className="mt-2 text-sm text-green-600">Selected: {selectedFile.name}</p>}
+      {selectedFile && (
+        <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+          Selected: {selectedFile.name}
+        </p>
+      )}
     </div>
   );
 };
