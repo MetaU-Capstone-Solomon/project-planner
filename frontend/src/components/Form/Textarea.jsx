@@ -1,19 +1,13 @@
 import React from 'react';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 
-const Textarea = ({ placeholder, value, onChange, rows = 4, className = '', ...props }) => {
-  const baseClasses =
-    'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none';
+const Textarea = React.forwardRef(({ className = '', ...props }, ref) => {
+  const baseClasses = `${COLOR_PATTERNS.components.input} resize-y min-h-[120px]`;
+  const combinedClasses = `${baseClasses} ${className}`;
 
-  return (
-    <textarea
-      placeholder={placeholder}
-      rows={rows}
-      className={`${baseClasses} ${className}`}
-      value={value}
-      onChange={onChange}
-      {...props}
-    />
-  );
-};
+  return <textarea ref={ref} className={combinedClasses} {...props} />;
+});
+
+Textarea.displayName = 'Textarea';
 
 export default Textarea;

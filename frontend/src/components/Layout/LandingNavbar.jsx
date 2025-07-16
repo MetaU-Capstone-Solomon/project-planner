@@ -13,7 +13,7 @@ import ThemeToggle from './ThemeToggle';
  */
 const LandingNavbar = () => {
   return (
-    <header className="absolute left-0 right-0 top-0 z-10 border-b border-gray-100 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 shadow-sm backdrop-blur-sm">
+    <header className="absolute left-0 right-0 top-0 z-10 border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/95">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <div className="flex items-center">

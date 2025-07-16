@@ -21,13 +21,13 @@ export const ThemeProvider = ({ children }) => {
   });
 
   const toggleDarkMode = () => {
-    setIsDarkMode(prev => !prev);
+    setIsDarkMode((prev) => !prev);
   };
 
   useEffect(() => {
     // Save to localStorage
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-    
+
     // Apply to document
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -41,9 +41,5 @@ export const ThemeProvider = ({ children }) => {
     toggleDarkMode,
   };
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}; 
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+};
