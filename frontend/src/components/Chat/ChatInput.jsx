@@ -37,7 +37,7 @@ const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabl
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-start space-x-2 border-t border-gray-200 px-2 py-0"
+      className="flex items-start space-x-2 border-t border-gray-200 px-2 py-0 dark:border-gray-700"
     >
       <div className="flex-1">
         <textarea
@@ -48,13 +48,13 @@ const ChatInput = ({ onSendMessage, placeholder = 'Type your message...', disabl
           placeholder={placeholder}
           disabled={disabled}
           rows={1}
-          className="min-h-[40px] w-full resize-none overflow-y-auto rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100"
+          className="min-h-[40px] w-full resize-none overflow-y-auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:disabled:bg-gray-600"
         />
       </div>
       <button
         type="submit"
         disabled={disabled}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-600"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
