@@ -7,9 +7,9 @@ import { COLOR_CLASSES } from '../../constants/colors';
 
 /**
  * PhaseCard Component
- * 
+ *
  * Displays a project phase with milestone expansion functionality and real progress tracking.
- * 
+ *
  * @param {Object} props - Component props
  * @param {Object} props.phase - Phase data object
  * @param {string} props.phase.id - Phase unique identifier
@@ -21,32 +21,46 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * @param {Function} props.onToggle - Callback function to toggle phase expansion
  * @param {Set} props.expandedMilestones - Set of expanded milestone IDs
  * @param {Function} props.onMilestoneToggle - Callback function to toggle milestone expansion
- * 
+ *
  * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and real progress
  */
-const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMilestones, onMilestoneToggle }) => {
-  
+const PhaseCard = ({
+  phase,
+  isExpanded,
+  onToggle,
+  onTaskUpdate,
+  expandedMilestones,
+  onMilestoneToggle,
+}) => {
   const progress = calculatePhaseProgress(phase);
   const phaseColorClasses = getPhaseColor(phase.order);
-  
+
   // Calculate task counts for display
-  const totalTasks = phase.milestones ? 
-    phase.milestones.reduce((total, milestone) => 
-      total + (milestone.tasks ? milestone.tasks.length : 0), 0) : 0;
-  
-  const completedTasks = phase.milestones ? 
-    phase.milestones.reduce((total, milestone) => 
-      total + (milestone.tasks ? milestone.tasks.filter(task => task.status === TASK_STATUS.COMPLETED).length : 0), 0) : 0;
+  const totalTasks = phase.milestones
+    ? phase.milestones.reduce(
+        (total, milestone) => total + (milestone.tasks ? milestone.tasks.length : 0),
+        0
+      )
+    : 0;
+
+  const completedTasks = phase.milestones
+    ? phase.milestones.reduce(
+        (total, milestone) =>
+          total +
+          (milestone.tasks
+            ? milestone.tasks.filter((task) => task.status === TASK_STATUS.COMPLETED).length
+            : 0),
+        0
+      )
+    : 0;
 
   const handleTaskUpdate = (milestoneId, taskId, newStatus, updatedTasks) => {
     // Create updated milestones without mutating the original phase data
     if (phase.milestones) {
-      const updatedMilestones = phase.milestones.map(milestone => 
-        milestone.id === milestoneId 
-          ? { ...milestone, tasks: updatedTasks }
-          : milestone
+      const updatedMilestones = phase.milestones.map((milestone) =>
+        milestone.id === milestoneId ? { ...milestone, tasks: updatedTasks } : milestone
       );
-      
+
       // Notify parent components of the change with immutable data
       if (onTaskUpdate) {
         onTaskUpdate(phase.id, milestoneId, taskId, newStatus, updatedMilestones);
@@ -54,14 +68,11 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
     }
   };
 
-
-
   return (
-    <div className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 ${phaseColorClasses} mb-4`}>
-      <div 
-        className="p-6 cursor-pointer"
-        onClick={onToggle}
-      >
+    <div
+      className={`${COLOR_CLASSES.surface.card} rounded-lg shadow-sm ${COLOR_CLASSES.border.primary} border-l-4 ${phaseColorClasses} mb-4 transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-200`}
+    >
+      <div className="cursor-pointer p-6" onClick={onToggle}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {isExpanded ? (
@@ -73,7 +84,9 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
               <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.primary}`}>
                 Phase {phase.order}: {phase.title}
               </h3>
-              <div className={`flex items-center space-x-4 mt-2 text-sm ${COLOR_CLASSES.text.secondary}`}>
+              <div
+                className={`mt-2 flex items-center space-x-4 text-sm ${COLOR_CLASSES.text.secondary}`}
+              >
                 <div className="flex items-center space-x-1">
                   <Calendar className="h-4 w-4" />
                   <span>{phase.timeline}</span>
@@ -85,17 +98,19 @@ const PhaseCard = ({ phase, isExpanded, onToggle, onTaskUpdate, expandedMileston
               </div>
             </div>
           </div>
-          
+
           <div className="text-right">
             <div className={`text-2xl font-bold ${COLOR_CLASSES.text.primary}`}>{progress}%</div>
-            <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>{completedTasks}/{totalTasks} completed</div>
+            <div className={`text-sm ${COLOR_CLASSES.text.tertiary}`}>
+              {completedTasks}/{totalTasks} completed
+            </div>
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
+          <div className="h-2 w-full rounded-full bg-gray-200">
+            <div
+              className="h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>

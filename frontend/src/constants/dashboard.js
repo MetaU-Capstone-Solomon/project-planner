@@ -1,13 +1,8 @@
-import {
-  BarChart2,
-  CheckCircle,
-  TrendingUp,
-  Clock,
-} from 'lucide-react';
+import { BarChart2, CheckCircle, TrendingUp, Clock } from 'lucide-react';
 
 /**
  * Dashboard constants
- * 
+ *
  * Configuration for:
  * - Stats cards
  * - Icons and labels
@@ -16,28 +11,28 @@ import {
 
 export const STATS_CONFIG = {
   totalProjects: {
-    title: "Total Projects",
+    title: 'Total Projects',
     icon: BarChart2,
-    key: "totalProjects"
+    key: 'totalProjects',
   },
   completedProjects: {
-    title: "Completed Projects", 
+    title: 'Completed Projects',
     icon: CheckCircle,
-    key: "completedProjects"
+    key: 'completedProjects',
   },
   overallProgress: {
-    title: "Overall Progress",
+    title: 'Overall Progress',
     icon: TrendingUp,
-    key: "overallProgress"
+    key: 'overallProgress',
   },
   activeMilestones: {
-    title: "Active Milestones",
+    title: 'Active Milestones',
     icon: Clock,
-    key: "activeMilestones"
-  }
+    key: 'activeMilestones',
+  },
 };
 
 export const DASHBOARD_MESSAGES = {
-  WELCOME: "Track your learning journey and achieve your goals with personalized roadmaps",
-  NO_PROJECTS: "No projects yet. Start by creating a new roadmap."
-}; 
+  WELCOME: 'Track your learning journey and achieve your goals with personalized roadmaps',
+  NO_PROJECTS: 'No projects yet. Start by creating a new roadmap.',
+};

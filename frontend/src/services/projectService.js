@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 
 /**
  * Project Service
- * 
+ *
  * Handles all project-related database operations including:
  * - Saving new projects with roadmap content
  * - Retrieving projects by ID
@@ -10,13 +10,13 @@ import { supabase } from '@/lib/supabase';
  * - Updating project content for persistence
  * - User authentication validation
  * - Error handling and response formatting
- * 
+ *
  * All functions return response objects with success/error status.
  */
 
 /**
  * Save a new project to the database
- * 
+ *
  * @param {Object} projectData - Project data to save
  * @param {string} projectData.title - Project title
  * @param {string} projectData.content - Project roadmap content
@@ -25,7 +25,10 @@ import { supabase } from '@/lib/supabase';
 export const saveProject = async (projectData) => {
   try {
     // Get current authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError) throw authError;
     if (!user) throw new Error('You must be logged in to save a project.');
 
@@ -54,13 +57,16 @@ export const saveProject = async (projectData) => {
 
 /**
  * Retrieve all projects for the current user
- * 
+ *
  * @returns {Promise<Object>} Result with projects array or error
  */
 export const getUserProjects = async () => {
   try {
     // Get current authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError) throw authError;
     if (!user) throw new Error('You must be logged in to view projects.');
 
@@ -82,17 +88,14 @@ export const getUserProjects = async () => {
 
 /**
  * Update existing project content for persistence
- * 
+ *
  * @param {string} projectId - Project ID to update
  * @param {string} content - JSON string representing the updated roadmap
  * @returns {Promise<Object>} Result with success status or error
  */
 export const updateProject = async (projectId, content) => {
   try {
-    const { error } = await supabase
-      .from('roadmap')
-      .update({ content })
-      .eq('id', projectId);
+    const { error } = await supabase.from('roadmap').update({ content }).eq('id', projectId);
 
     if (error) throw error;
 
@@ -105,7 +108,7 @@ export const updateProject = async (projectId, content) => {
 
 /**
  * Retrieve a project by ID
- * 
+ *
  * @param {string} projectId - Project ID to retrieve
  * @returns {Promise<Object>} Result with project data or error
  */
