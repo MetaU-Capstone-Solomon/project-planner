@@ -22,7 +22,7 @@ const ChatMessage = ({ message }) => {
   return (
     <div className="mb-4 flex justify-start">
       <div
-        className="max-w-prose whitespace-pre-wrap rounded-lg bg-gray-100 px-4 py-3 text-left font-mono text-sm leading-relaxed text-gray-800 shadow-md"
+        className="max-w-4xl whitespace-pre-wrap rounded-lg bg-gray-100 px-4 py-3 text-left font-mono text-sm leading-relaxed text-gray-800 shadow-md dark:bg-gray-700 dark:text-white"
         style={{
           textIndent: '-2ch',
           paddingLeft: '2ch',
