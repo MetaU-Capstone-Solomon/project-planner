@@ -5,6 +5,7 @@ import Button from '@/components/Button/Button';
 import LandingNavbar from '@/components/Layout/LandingNavbar';
 import Footer from '@/components/Layout/Footer';
 import { ROUTES } from '@/constants/routes';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import prosperImg from '@/assets/images/testimonials/prosper.jpg';
 import sudeepImg from '@/assets/images/testimonials/sudeep.jpg';
 import vincentImg from '@/assets/images/testimonials/vincent.jpg';
@@ -53,31 +54,35 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${COLOR_CLASSES.landing.backgrounds.secondary}`}>
       {/* Header */}
       <LandingNavbar />
 
       {/* Hero Section */}
-      <section className="bg-white py-16">
+      <section className={COLOR_PATTERNS.landing.hero}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="mb-6 text-4xl font-bold text-gray-900">
+            <h1 className="mb-6 text-4xl font-bold text-white">
               Plan Your Projects
-              <span className="text-blue-600"> Smarter</span>
+              <span className={COLOR_CLASSES.landing.text.accent}> Smarter</span>
             </h1>
-            <p className="mx-auto mb-8 max-w-2xl text-xl text-gray-600">
+            <p className="mx-auto mb-8 max-w-2xl text-xl text-white">
               Streamline your workflow with our intuitive project management platform. Keep your
               team organized and projects on track.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-row justify-center gap-4 sm:gap-6">
               <Link to={ROUTES.AUTH}>
-                <Button variant="primary" size="lg" className="flex items-center">
+                <Button
+                  variant="outline"
+                  size="md"
+                  className={`flex items-center ${COLOR_PATTERNS.landing.heroButton}`}
+                >
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to={ROUTES.AUTH}>
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="md" className={COLOR_PATTERNS.landing.heroButton}>
                   Sign In
                 </Button>
               </Link>
@@ -87,28 +92,31 @@ const Home = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-gray-50 py-16">
+      <section className={COLOR_PATTERNS.landing.contentSection}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900">How it works</h2>
-            <p className="mx-auto max-w-2xl text-gray-600">
+            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
+              How it works
+            </h2>
+            <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
               Get started in just a few simple steps
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {steps.map((step, index) => (
-              <div
-                key={index}
-                className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-bold text-white">
+              <div key={index} className={COLOR_PATTERNS.landing.card}>
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-2xl font-bold text-white shadow-lg">
                   {step.number}
                 </div>
-                <h3 className="mb-2 text-center text-xl font-semibold text-gray-900">
+                <h3
+                  className={`mb-3 text-center text-xl font-semibold ${COLOR_CLASSES.landing.text.primary}`}
+                >
                   {step.title}
                 </h3>
-                <p className="text-center text-gray-600">{step.description}</p>
+                <p className={`text-center leading-relaxed ${COLOR_CLASSES.landing.text.muted}`}>
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
@@ -116,33 +124,41 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-white py-16">
+      <section className={COLOR_PATTERNS.landing.testimonialsSection}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-gray-900">What people are saying</h2>
-            <p className="mx-auto max-w-2xl text-gray-600">
+            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
+              What people are saying
+            </h2>
+            <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
               Hear from developers about their experience
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="rounded-lg bg-gray-50 p-6">
-                <div className="mb-4 flex items-center">
+              <div key={index} className={COLOR_PATTERNS.landing.card}>
+                <div className="mb-6 flex items-center">
                   <img
                     src={testimonial.image}
                     alt={testimonial.name}
-                    className="mr-4 h-12 w-12 rounded-full"
+                    className="mr-4 h-14 w-14 rounded-full ring-2 ring-blue-200"
                   />
                   <div>
-                    <h3 className="font-semibold text-gray-900">{testimonial.name}</h3>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <h3 className={`font-semibold ${COLOR_CLASSES.landing.text.primary}`}>
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                      {testimonial.role}
+                    </p>
                   </div>
                 </div>
-                <p className="text-gray-700">{testimonial.content}</p>
-                <div className="mt-4 flex">
+                <p className={`mb-6 leading-relaxed ${COLOR_CLASSES.landing.text.secondary}`}>
+                  {testimonial.content}
+                </p>
+                <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current text-yellow-400" />
+                    <Star key={i} className="mr-1 h-5 w-5 fill-current text-orange-500" />
                   ))}
                 </div>
               </div>
