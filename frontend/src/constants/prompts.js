@@ -1,6 +1,6 @@
 /**
  * AI Prompt Constants
- * 
+ *
  * Centralized prompt management for consistent AI interactions
  * and easy maintenance across the application
  */
@@ -11,7 +11,7 @@ export const PROMPT_VARIABLES = {
   TIMELINE: '[TIMELINE]',
   EXPERIENCE_LEVEL: '[EXPERIENCE_LEVEL]',
   TECHNOLOGIES: '[TECHNOLOGIES]',
-  PROJECT_SCOPE: '[PROJECT_SCOPE]'
+  PROJECT_SCOPE: '[PROJECT_SCOPE]',
 };
 
 export const ROADMAP_CONSTRAINTS = `
@@ -78,10 +78,10 @@ INSTRUCTIONS:
    }
 
 3. Adapt complexity based on experience level:
-   - Beginner: More detailed descriptions, simpler tech stack, longer timeline, higher hour estimates
-   - Intermediate: Balanced approach, industry best practices, moderate hour estimates
-   - Advanced: Advanced patterns, optimization strategies, shorter timeline, lower hour estimates
-   - Expert: Enterprise patterns, advanced optimization, shortest timeline, lowest hour estimates
+   - Beginner:simpler tech stack, longer timeline, higher hour estimates
+   - Intermediate: moderate hour estimates
+   - Advanced: Advanced patterns, optimization strategies
+   - Expert: Enterprise patterns, advanced optimization
 
 4. Ensure valid JSON format with proper escaping
 5. Create appropriate number of phases based on project complexity (typically 3-6 phases)
@@ -93,6 +93,7 @@ INSTRUCTIONS:
    - Long projects (3+ months): Use months or quarters
 10. Assign proper order numbers (1, 2, 3, etc.) for phases, milestones, and tasks
 11. Include relevant technologies and learning resources in the resources array with real URLs
+12. Write detailed task descriptions that explain step-by-step what needs to be done, including specific actions, tools, and expected outcomes. Each description should be comprehensive enough for someone to follow and complete the task.
 
 - ONLY respond to roadmap-related questions (timeline, tech stack, scope, milestones, tasks)
 - If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
@@ -102,4 +103,70 @@ export const ROADMAP_MODIFICATION_PROMPT = `You are helping the user modify thei
 
 User request: [USER_MESSAGE]
 
-${ROADMAP_CONSTRAINTS}`;
+INSTRUCTIONS:
+1. Modify the current roadmap according to the user's request
+2. ALWAYS respond with valid JSON using the EXACT structure below
+3. Maintain all existing IDs, order numbers, and structure
+4. Only modify the specific aspects requested by the user
+5. If timeline changes are involved, recalculate phase and milestone timelines proportionally
+6. Generate new unique IDs for any additions (phases, milestones, tasks)
+7. Ensure all timelines remain consistent and add up correctly
+8. Keep the original summary unless specifically asked to change it
+
+REQUIRED JSON STRUCTURE:
+{
+  "metadata": {
+    "title": "Project Title",
+    "description": "Project Description",
+    "timeline": "Project Timeline",
+    "experienceLevel": "Experience Level",
+    "technologies": "Technologies",
+    "scope": "Project Scope",
+    "version": "1.0"
+  },
+  "summary": "Brief 2-3 sentence summary",
+  "phases": [
+    {
+      "id": "phase-1",
+      "title": "Phase Title",
+      "timeline": "Phase Timeline",
+      "order": 1,
+      "milestones": [
+        {
+          "id": "milestone-1-1",
+          "title": "Milestone Title",
+          "timeline": "Milestone Timeline",
+          "order": 1,
+          "tasks": [
+            {
+              "id": "task-1-1-1",
+              "title": "Task Title",
+              "description": "Task Description",
+              "resources": [
+                {
+                  "name": "Resource Name",
+                  "url": "https://resource-url.com"
+                }
+              ],
+              "status": "pending",
+              "estimatedHours": "Hours"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+IMPORTANT: If the user asks something NOT related to roadmap modifications, respond with: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
+
+CRITICAL INSTRUCTIONS:
+1. DO NOT ask questions. Just make the requested modifications directly.
+2. Return ONLY valid JSON format - no markdown formatting, or markdown wrapping, no explanations, no questions.
+3. Modify the existing roadmap structure according to the user's request.
+4. Keep the same JSON structure but update the relevant parts.
+5. If the request is unclear but related to the roadmap, make reasonable assumptions and proceed.
+
+${ROADMAP_CONSTRAINTS}
+
+RESPONSE FORMAT: Return ONLY the modified JSON roadmap with no additional text, markdown, or formatting.`;
