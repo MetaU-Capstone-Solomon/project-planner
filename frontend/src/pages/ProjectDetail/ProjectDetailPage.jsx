@@ -133,12 +133,13 @@ const ProjectDetailPage = () => {
                     // Legacy format: just status
                     return { ...task, status: updates };
                   } else {
-                    // New format: object with title, description, status
+                    // New format: object with title, description, status, and resources
                     return { 
                       ...task, 
                       title: updates.title || task.title,
                       description: updates.description || task.description,
-                      status: updates.status || task.status
+                      status: updates.status || task.status,
+                      resources: updates.resources || task.resources || []
                     };
                   }
                 }
