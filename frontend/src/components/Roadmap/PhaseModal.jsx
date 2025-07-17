@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink, Edit2 } from 'lucide-react';
+import {
+  X,
+  ChevronDown,
+  ChevronRight,
+  Target,
+  Calendar,
+  ExternalLink,
+  Edit2,
+  Plus,
+} from 'lucide-react';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
@@ -52,6 +61,8 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const [addingToMilestone, setAddingToMilestone] = useState(null);
 
   if (!open || !phase) return null;
 
@@ -102,6 +113,35 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
       onTaskUpdate(phase.id, editingTask.milestoneId, editingTask.id, updatedTask);
     }
     handleCloseEditModal();
+  };
+
+  /**
+   * Start adding a new task to a milestone
+   * @param {string} milestoneId - The milestone ID to add the task to
+   */
+  const handleStartAddTask = (milestoneId) => {
+    setAddingToMilestone(milestoneId);
+    setIsAddTaskModalOpen(true);
+  };
+
+  /**
+   * Close add task modal
+   */
+  const handleCloseAddTaskModal = () => {
+    setIsAddTaskModalOpen(false);
+    setAddingToMilestone(null);
+  };
+
+  /**
+   * Save new task
+   * @param {Object} newTask - The new task data with generated ID
+   */
+  const handleSaveAddTask = (newTask) => {
+    if (onTaskUpdate && addingToMilestone) {
+      // Pass the new task to the parent for insertion
+      onTaskUpdate(phase.id, addingToMilestone, null, newTask, 'add');
+    }
+    handleCloseAddTaskModal();
   };
 
   return (
@@ -282,6 +322,21 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                           No tasks available for this milestone.
                         </div>
                       )}
+
+                      {/* Add Task Button */}
+                      <div className="flex justify-center pt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartAddTask(milestone.id);
+                          }}
+                          className={`flex items-center space-x-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${COLOR_PATTERNS.button.secondary} hover:bg-blue-100 dark:hover:bg-blue-900/30`}
+                          aria-label="Add new task"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span>Add Task</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -301,6 +356,14 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
         onClose={handleCloseEditModal}
         task={editingTask}
         onSave={handleSaveEdit}
+      />
+
+      {/* Add Task Modal */}
+      <EditTaskModal
+        isOpen={isAddTaskModalOpen}
+        onClose={handleCloseAddTaskModal}
+        task={null}
+        onSave={handleSaveAddTask}
       />
     </div>
   );

@@ -21,15 +21,15 @@ import useDebouncedCallback from '@/hooks/useDebouncedCallback';
  * - Clean, modern UI with consistent styling
  * - Maintains existing functionality for data display
  * - Modal task editing: Edit task titles and descriptions in a dedicated edit modal
- * 
+ *
  * MODAL TASK EDITING WORKFLOW:
  * 1. User clicks edit icon next to task status dropdown in PhaseModal
  * 2. Edit modal opens with form fields for title and description
  * 3. User modifies title and/or description
- * 4. User clicks "Save" button 
+ * 4. User clicks "Save" button
  * 5. User clicks "Cancel" button
  * 6. Changes are validated (empty titles prevented) and persisted to database
- * 
+ *
  */
 const ProjectDetailPage = () => {
   const navigate = useNavigate();
@@ -115,37 +115,47 @@ const ProjectDetailPage = () => {
   /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
+   * Also supports adding new tasks when action is 'add'
    * @param {string} phaseId - The phase ID containing the task
    * @param {string} milestoneId - The milestone ID containing the task
-   * @param {string} taskId - The task ID to update
-   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status
+   * @param {string} taskId - The task ID to update (null for new tasks)
+   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task object
+   * @param {string} action - 'update' (default) or 'add' for new tasks
    */
-  const handleTaskUpdate = (phaseId, milestoneId, taskId, updates) => {
+  const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
         if (phase.id === phaseId) {
           const newMilestones = phase.milestones.map((milestone) => {
             if (milestone.id === milestoneId) {
-              const newTasks = milestone.tasks.map((task) => {
-                if (task.id === taskId) {
-                  // Handle both our init and new format (object) 
-                  if (typeof updates === 'string') {
-                    // Legacy format: just status
-                    return { ...task, status: updates };
-                  } else {
-                    // New format: object with title, description, status, and resources
-                    return { 
-                      ...task, 
-                      title: updates.title || task.title,
-                      description: updates.description || task.description,
-                      status: updates.status || task.status,
-                      resources: updates.resources || task.resources || []
-                    };
+              if (action === 'add') {
+                // Add new task to the milestone
+                const newTask = updates; // updates is the complete new task object
+                const newTasks = [...milestone.tasks, newTask];
+                return { ...milestone, tasks: newTasks };
+              } else {
+                // Update existing task
+                const newTasks = milestone.tasks.map((task) => {
+                  if (task.id === taskId) {
+                    // Handle both our init and new format (object)
+                    if (typeof updates === 'string') {
+                      // Legacy format: just status
+                      return { ...task, status: updates };
+                    } else {
+                      // New format: object with title, description, status, and resources
+                      return {
+                        ...task,
+                        title: updates.title || task.title,
+                        description: updates.description || task.description,
+                        status: updates.status || task.status,
+                        resources: updates.resources || task.resources || [],
+                      };
+                    }
                   }
-                }
-                return task;
-              });
-              return { ...milestone, tasks: newTasks };
+                  return task;
+                });
+                return { ...milestone, tasks: newTasks };
+              }
             }
             return milestone;
           });
