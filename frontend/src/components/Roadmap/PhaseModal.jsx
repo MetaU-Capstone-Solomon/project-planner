@@ -9,10 +9,11 @@ import {
   Edit2,
   Plus,
 } from 'lucide-react';
-import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 import EditTaskModal from './EditTaskModal';
+import CreateMilestoneModal from './CreateMilestoneModal';
 
 /**
  * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks with modal editing
@@ -63,6 +64,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   const [editingTask, setEditingTask] = useState(null);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [addingToMilestone, setAddingToMilestone] = useState(null);
+  const [isAddMilestoneModalOpen, setIsAddMilestoneModalOpen] = useState(false);
 
   if (!open || !phase) return null;
 
@@ -142,6 +144,32 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
       onTaskUpdate(phase.id, addingToMilestone, null, newTask, 'add');
     }
     handleCloseAddTaskModal();
+  };
+
+  /**
+   * Start adding a new milestone to the phase
+   */
+  const handleStartAddMilestone = () => {
+    setIsAddMilestoneModalOpen(true);
+  };
+
+  /**
+   * Close add milestone modal
+   */
+  const handleCloseAddMilestoneModal = () => {
+    setIsAddMilestoneModalOpen(false);
+  };
+
+  /**
+   * Save new milestone
+   * @param {Object} newMilestone - The new milestone data with generated ID
+   */
+  const handleSaveAddMilestone = (newMilestone) => {
+    if (onTaskUpdate) {
+      // Pass the new milestone to the parent for insertion
+      onTaskUpdate(phase.id, null, null, newMilestone, 'addMilestone');
+    }
+    handleCloseAddMilestoneModal();
   };
 
   return (
@@ -347,6 +375,18 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
               No milestones available for this phase.
             </div>
           )}
+
+          {/* Add Milestone Button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={handleStartAddMilestone}
+              className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${COLOR_PATTERNS.button.primary} hover:bg-blue-600 dark:hover:bg-blue-500`}
+              aria-label="Add new milestone"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Milestone</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -364,6 +404,14 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
         onClose={handleCloseAddTaskModal}
         task={null}
         onSave={handleSaveAddTask}
+      />
+
+      {/* Add Milestone Modal */}
+      <CreateMilestoneModal
+        isOpen={isAddMilestoneModalOpen}
+        onClose={handleCloseAddMilestoneModal}
+        onSave={handleSaveAddMilestone}
+        nextOrder={phase.milestones ? phase.milestones.length + 1 : 1}
       />
     </div>
   );
