@@ -100,16 +100,59 @@ const ProjectDetailPage = () => {
     fetchProject();
   }, [projectId]);
 
+  // Save modal state to localStorage
+  const saveModalState = (phase) => {
+    localStorage.setItem('modalState', JSON.stringify({
+      modal: 'phase',
+      phaseId: phase.id
+    }));
+  };
+
+  // Restore modal state from localStorage
+  const restoreModalState = () => {
+    const saved = localStorage.getItem('modalState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      if (state.modal === 'phase' && state.phaseId) {
+        setModalOpen(true);
+        // selectedPhase will be set when data loads
+      }
+    }
+  };
+
+  // Restore modal state immediately 
+  useEffect(() => {
+    restoreModalState();
+  }, []); // Run immediately on component mount
+
+  // Set selectedPhase when data loads (if modal is open)
+  useEffect(() => {
+    if (modalOpen && roadmapData) {
+      const saved = localStorage.getItem('modalState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.modal === 'phase' && state.phaseId) {
+          const phase = roadmapData.phases.find(p => p.id === state.phaseId);
+          if (phase) {
+            setSelectedPhase(phase);
+          }
+        }
+      }
+    }
+  }, [modalOpen, roadmapData]);
+
   // Handler to open modal with selected phase
   const handlePhaseClick = (phase) => {
     setSelectedPhase(phase);
     setModalOpen(true);
+    saveModalState(phase);
   };
 
   // Handler to close modal
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedPhase(null);
+    localStorage.removeItem('modalState');
   };
 
   /**
