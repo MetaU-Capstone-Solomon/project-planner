@@ -115,12 +115,13 @@ const ProjectDetailPage = () => {
   /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
-   * Also supports adding new tasks when action is 'add' and new milestones when action is 'addMilestone'
+   * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
+   * and deleting milestones when action is 'deleteMilestone'
    * @param {string} phaseId - The phase ID containing the task
-   * @param {string} milestoneId - The milestone ID containing the task
+   * @param {string} milestoneId - The milestone ID containing the task (or to delete)
    * @param {string} taskId - The task ID to update (null for new tasks)
    * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
-   * @param {string} action - 'update' (default), 'add' for new tasks, or 'addMilestone' for new milestones
+   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, or 'deleteMilestone' for deleting milestones
    */
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
@@ -130,6 +131,12 @@ const ProjectDetailPage = () => {
             // Add new milestone to the phase
             const newMilestone = updates; // updates is the complete new milestone object
             const newMilestones = [...phase.milestones, newMilestone];
+            return { ...phase, milestones: newMilestones };
+          } else if (action === 'deleteMilestone') {
+            // Delete milestone from the phase
+            const newMilestones = phase.milestones
+              .filter((milestone) => milestone.id !== milestoneId)
+              .map((milestone, index) => ({ ...milestone, order: index + 1 })); // Reorder remaining milestones
             return { ...phase, milestones: newMilestones };
           } else {
             const newMilestones = phase.milestones.map((milestone) => {
