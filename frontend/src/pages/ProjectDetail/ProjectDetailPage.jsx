@@ -115,51 +115,58 @@ const ProjectDetailPage = () => {
   /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
-   * Also supports adding new tasks when action is 'add'
+   * Also supports adding new tasks when action is 'add' and new milestones when action is 'addMilestone'
    * @param {string} phaseId - The phase ID containing the task
    * @param {string} milestoneId - The milestone ID containing the task
    * @param {string} taskId - The task ID to update (null for new tasks)
-   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task object
-   * @param {string} action - 'update' (default) or 'add' for new tasks
+   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
+   * @param {string} action - 'update' (default), 'add' for new tasks, or 'addMilestone' for new milestones
    */
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
         if (phase.id === phaseId) {
-          const newMilestones = phase.milestones.map((milestone) => {
-            if (milestone.id === milestoneId) {
-              if (action === 'add') {
-                // Add new task to the milestone
-                const newTask = updates; // updates is the complete new task object
-                const newTasks = [...milestone.tasks, newTask];
-                return { ...milestone, tasks: newTasks };
-              } else {
-                // Update existing task
-                const newTasks = milestone.tasks.map((task) => {
-                  if (task.id === taskId) {
-                    // Handle both our init and new format (object)
-                    if (typeof updates === 'string') {
-                      // Legacy format: just status
-                      return { ...task, status: updates };
-                    } else {
-                      // New format: object with title, description, status, and resources
-                      return {
-                        ...task,
-                        title: updates.title || task.title,
-                        description: updates.description || task.description,
-                        status: updates.status || task.status,
-                        resources: updates.resources || task.resources || [],
-                      };
+          if (action === 'addMilestone') {
+            // Add new milestone to the phase
+            const newMilestone = updates; // updates is the complete new milestone object
+            const newMilestones = [...phase.milestones, newMilestone];
+            return { ...phase, milestones: newMilestones };
+          } else {
+            const newMilestones = phase.milestones.map((milestone) => {
+              if (milestone.id === milestoneId) {
+                if (action === 'add') {
+                  // Add new task to the milestone
+                  const newTask = updates; // updates is the complete new task object
+                  const newTasks = [...milestone.tasks, newTask];
+                  return { ...milestone, tasks: newTasks };
+                } else {
+                  // Update existing task
+                  const newTasks = milestone.tasks.map((task) => {
+                    if (task.id === taskId) {
+                      // Handle both our init and new format (object)
+                      if (typeof updates === 'string') {
+                        // Legacy format: just status
+                        return { ...task, status: updates };
+                      } else {
+                        // New format: object with title, description, status, and resources
+                        return {
+                          ...task,
+                          title: updates.title || task.title,
+                          description: updates.description || task.description,
+                          status: updates.status || task.status,
+                          resources: updates.resources || task.resources || [],
+                        };
+                      }
                     }
-                  }
-                  return task;
-                });
-                return { ...milestone, tasks: newTasks };
+                    return task;
+                  });
+                  return { ...milestone, tasks: newTasks };
+                }
               }
-            }
-            return milestone;
-          });
-          return { ...phase, milestones: newMilestones };
+              return milestone;
+            });
+            return { ...phase, milestones: newMilestones };
+          }
         }
         return phase;
       });
