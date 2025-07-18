@@ -178,8 +178,21 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
    * @param {string} milestoneId - The milestone ID to delete
    */
   const handleDeleteMilestone = (milestoneId) => {
+    // TODO: Add confirmation dialog before deletion
     if (onTaskUpdate) {
       onTaskUpdate(phase.id, milestoneId, null, null, 'deleteMilestone');
+    }
+  };
+
+  /**
+   * Handle task deletion
+   * @param {string} milestoneId - The milestone ID containing the task
+   * @param {string} taskId - The task ID to delete
+   */
+  const handleDeleteTask = (milestoneId, taskId) => {
+    // TODO: Add confirmation dialog before deletion
+    if (onTaskUpdate) {
+      onTaskUpdate(phase.id, milestoneId, taskId, null, 'deleteTask');
     }
   };
 
@@ -298,6 +311,16 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                     aria-label="Edit task"
                                   >
                                     <Edit2 className="h-4 w-4 text-gray-900 dark:text-white" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteTask(milestone.id, task.id);
+                                    }}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                                    aria-label="Delete task"
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
                                   </button>
                                   <select
                                     value={task.status || 'pending'}
