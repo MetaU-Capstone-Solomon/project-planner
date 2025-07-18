@@ -116,12 +116,12 @@ const ProjectDetailPage = () => {
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
    * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
-   * and deleting milestones when action is 'deleteMilestone'
+   * deleting milestones when action is 'deleteMilestone', and deleting tasks when action is 'deleteTask'
    * @param {string} phaseId - The phase ID containing the task
    * @param {string} milestoneId - The milestone ID containing the task (or to delete)
    * @param {string} taskId - The task ID to update (null for new tasks)
    * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
-   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, or 'deleteMilestone' for deleting milestones
+   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, 'deleteMilestone' for deleting milestones, or 'deleteTask' for deleting tasks
    */
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
@@ -145,6 +145,10 @@ const ProjectDetailPage = () => {
                   // Add new task to the milestone
                   const newTask = updates; // updates is the complete new task object
                   const newTasks = [...milestone.tasks, newTask];
+                  return { ...milestone, tasks: newTasks };
+                } else if (action === 'deleteTask') {
+                  // Delete task from the milestone
+                  const newTasks = milestone.tasks.filter((task) => task.id !== taskId);
                   return { ...milestone, tasks: newTasks };
                 } else {
                   // Update existing task
