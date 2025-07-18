@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Edit2,
   Plus,
+  Trash2,
 } from 'lucide-react';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
@@ -172,6 +173,16 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
     handleCloseAddMilestoneModal();
   };
 
+  /**
+   * Handle milestone deletion
+   * @param {string} milestoneId - The milestone ID to delete
+   */
+  const handleDeleteMilestone = (milestoneId) => {
+    if (onTaskUpdate) {
+      onTaskUpdate(phase.id, milestoneId, null, null, 'deleteMilestone');
+    }
+  };
+
   return (
     <div className={`${COLOR_PATTERNS.components.modal.overlay}`} onClick={onClose}>
       <div
@@ -232,10 +243,22 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div className={`text-sm ${COLOR_CLASSES.text.body}`}>
-                          {milestone.tasks ? milestone.tasks.length : 0} tasks
+                      <div className="flex items-center space-x-2">
+                        <div className="text-right">
+                          <div className={`text-sm ${COLOR_CLASSES.text.body}`}>
+                            {milestone.tasks ? milestone.tasks.length : 0} tasks
+                          </div>
                         </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteMilestone(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                          aria-label="Delete milestone"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        </button>
                       </div>
                     </div>
                   </div>
