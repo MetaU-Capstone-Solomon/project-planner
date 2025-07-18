@@ -13,6 +13,7 @@ import {
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
+import confirmAction from '@/utils/confirmAction';
 import EditTaskModal from './EditTaskModal';
 import CreateMilestoneModal from './CreateMilestoneModal';
 
@@ -178,9 +179,10 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
    * @param {string} milestoneId - The milestone ID to delete
    */
   const handleDeleteMilestone = (milestoneId) => {
-    // TODO: Add confirmation dialog before deletion
-    if (onTaskUpdate) {
-      onTaskUpdate(phase.id, milestoneId, null, null, 'deleteMilestone');
+    if (confirmAction('Do you want to delete this milestone?')) {
+      if (onTaskUpdate) {
+        onTaskUpdate(phase.id, milestoneId, null, null, 'deleteMilestone');
+      }
     }
   };
 
@@ -190,9 +192,10 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
    * @param {string} taskId - The task ID to delete
    */
   const handleDeleteTask = (milestoneId, taskId) => {
-    // TODO: Add confirmation dialog before deletion
-    if (onTaskUpdate) {
-      onTaskUpdate(phase.id, milestoneId, taskId, null, 'deleteTask');
+    if (confirmAction('Do you want to delete this task?')) {
+      if (onTaskUpdate) {
+        onTaskUpdate(phase.id, milestoneId, taskId, null, 'deleteTask');
+      }
     }
   };
 
