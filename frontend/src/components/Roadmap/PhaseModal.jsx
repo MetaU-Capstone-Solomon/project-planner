@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ChevronDown,
@@ -68,6 +68,27 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   const [addingToMilestone, setAddingToMilestone] = useState(null);
   const [isAddMilestoneModalOpen, setIsAddMilestoneModalOpen] = useState(false);
 
+  // Save expanded milestones to localStorage
+  const saveExpandedMilestones = (expandedSet) => {
+    localStorage.setItem('expandedMilestones', JSON.stringify(Array.from(expandedSet)));
+  };
+
+  // Restore expanded milestones from localStorage
+  const restoreExpandedMilestones = () => {
+    const saved = localStorage.getItem('expandedMilestones');
+    if (saved) {
+      const expandedArray = JSON.parse(saved);
+      setExpandedMilestones(new Set(expandedArray));
+    }
+  };
+
+  // Restore expanded milestones when modal opens
+  useEffect(() => {
+    if (open) {
+      restoreExpandedMilestones();
+    }
+  }, [open]); 
+
   if (!open || !phase) return null;
 
   // Toggle milestone expansion
@@ -79,6 +100,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
       } else {
         newSet.add(milestoneId);
       }
+      saveExpandedMilestones(newSet);
       return newSet;
     });
   };
