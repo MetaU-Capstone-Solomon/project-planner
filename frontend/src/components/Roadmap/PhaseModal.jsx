@@ -3,6 +3,8 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  ArrowUp,
+  ArrowDown,
   Target,
   Calendar,
   ExternalLink,
@@ -27,6 +29,7 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * - Update task status (pending/in progress/completed)
  * - Access learning resources and links
  * - Track progress through visual indicators
+ * - Reorder milestones using up/down buttons (UI only for this PR)
  *
  * KEY FEATURES:
  * - Responsive Design: Adapts to mobile, tablet, and desktop screens
@@ -35,6 +38,7 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * - Resource Access: Clickable links to external learning materials
  * - Progress Tracking: Visual feedback for task completion status
  * - Accessibility: Proper ARIA labels and keyboard navigation support
+ * - Milestone Reordering: Up/down buttons for reordering milestones (UI only)
  *
  * USER INTERACTION FLOW:
  * 1. User clicks phase card → Modal opens with phase overview
@@ -42,6 +46,7 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * 3. User changes task status → Updates immediately and persists to backend
  * 4. User clicks resource links → Opens in new tab
  * 5. User clicks overlay/close button → Modal closes
+ * 6. User clicks reorder buttons → TODO: Implement reorder logic in next PR
  *
  * STATE MANAGEMENT:
  * - Local state: expandedMilestones (Set of milestone IDs)
@@ -53,6 +58,13 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * 2. Modal Editing: User types in dedicated modal form for title and description
  * 3. Save Action: handleSaveEdit(updatedTask) - Validates and saves
  * 4. Cancel Action: handleCloseEditModal() - Discards changes and closes edit modal
+ *
+ * TODO - NEXT PR (Milestone Reordering Logic):
+ * - Implement handleMoveMilestoneUp and handleMoveMilestoneDown functions
+ * - Connect reorder buttons to actual reordering logic
+ * - Update milestone order in state and persist to database
+ * - Handle edge cases (first/last milestone)
+ * - Add visual feedback during reordering
  *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the modal is open
@@ -287,15 +299,38 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                             {milestone.tasks ? milestone.tasks.length : 0} tasks
                           </div>
                         </div>
+                        
+                        {/* Milestone Reorder Buttons - TODO: Implement logic in next PR */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Implement handleMoveMilestoneUp in next PR
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone up"
+                        >
+                          <ArrowUp className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Implement handleMoveMilestoneDown in next PR
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone down"
+                        >
+                          <ArrowDown className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteMilestone(milestone.id);
                           }}
-                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
                           aria-label="Delete milestone"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
                         </button>
                       </div>
                     </div>
@@ -332,20 +367,20 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                       e.stopPropagation();
                                       handleStartEdit(task.id, taskWithMilestone);
                                     }}
-                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors`}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
                                     aria-label="Edit task"
                                   >
-                                    <Edit2 className="h-4 w-4 text-gray-900 dark:text-white" />
+                                    <Edit2 className={`h-4 w-4 ${COLOR_CLASSES.action.edit.icon}`} />
                                   </button>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteTask(milestone.id, task.id);
                                     }}
-                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
                                     aria-label="Delete task"
                                   >
-                                    <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                    <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
                                   </button>
                                   <select
                                     value={task.status || 'pending'}
