@@ -166,6 +166,61 @@ const ProjectDetailPage = () => {
    * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
    * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, 'deleteMilestone' for deleting milestones, or 'deleteTask' for deleting tasks
    */
+  /**
+   * Handle milestone reordering - move milestone up or down in the list
+   * @param {string} phaseId - ID of the phase containing the milestone
+   * @param {string} milestoneId - ID of the milestone to reorder
+   * @param {string} direction - 'up' or 'down'
+   */
+  const handleMilestoneReorder = (phaseId, milestoneId, direction) => {
+    setRoadmapData((prevRoadmap) => {
+      const newPhases = prevRoadmap.phases.map((phase) => {
+        if (phase.id === phaseId) {
+          const milestones = [...phase.milestones];
+          const currentIndex = milestones.findIndex((m) => m.id === milestoneId);
+          
+          if (currentIndex === -1) return phase; // Milestone not found
+          
+          let newIndex;
+          if (direction === 'up' && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+          } else if (direction === 'down' && currentIndex < milestones.length - 1) {
+            newIndex = currentIndex + 1;
+          } else {
+            return phase; // Can't move further
+          }
+          
+          // Swap milestones
+          [milestones[currentIndex], milestones[newIndex]] = [milestones[newIndex], milestones[currentIndex]];
+          
+          // Update order numbers
+          const reorderedMilestones = milestones.map((milestone, index) => ({
+            ...milestone,
+            order: index + 1,
+          }));
+          
+          return { ...phase, milestones: reorderedMilestones };
+        }
+        return phase;
+      });
+
+      const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
+
+      // Update selectedPhase with the updated phase data
+      if (selectedPhase && selectedPhase.id === phaseId) {
+        const updatedPhase = newPhases.find((phase) => phase.id === phaseId);
+        if (updatedPhase) {
+          setSelectedPhase(updatedPhase);
+        }
+      }
+
+      // Persist changes to backend
+      persistRoadmap(updatedRoadmap);
+
+      return updatedRoadmap;
+    });
+  };
+
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
@@ -297,6 +352,7 @@ const ProjectDetailPage = () => {
                 onClose={handleCloseModal}
                 phase={selectedPhase}
                 onTaskUpdate={handleTaskUpdate}
+                onMilestoneReorder={handleMilestoneReorder}
               />
             </>
           ) : (
