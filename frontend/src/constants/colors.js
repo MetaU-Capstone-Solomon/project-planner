@@ -80,6 +80,22 @@ export const COLOR_CLASSES = {
     },
   },
 
+  // Action button colors
+  action: {
+    reorder: {
+      icon: 'text-blue-600 dark:text-blue-400',
+      hover: 'hover:bg-blue-100 dark:hover:bg-blue-900/30',
+    },
+    delete: {
+      icon: 'text-red-600 dark:text-red-400',
+      hover: 'hover:bg-red-100 dark:hover:bg-red-900/30',
+    },
+    edit: {
+      icon: 'text-gray-900 dark:text-white',
+      hover: 'hover:bg-gray-100 dark:hover:bg-gray-700',
+    },
+  },
+
   // Experience level colors
   experience: {
     beginner: {
