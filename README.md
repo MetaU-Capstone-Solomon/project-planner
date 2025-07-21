@@ -132,18 +132,20 @@ Basically, a student or a developer signs up for our app and inputs their projec
 - Enabling users to input project data from various sources, including direct text input and document uploads (such as PDFs or text files). The challenge was to process and extract relevant information from these diverse formats and summarize lengthy content into concise, actionable project descriptions. This goes beyond standard form handling and requires file parsing and natural language processing techniques.
 
 **How:**
-- The backend implements a file processing service that accepts uploaded documents, detects their type, and extracts raw text content. For large or unstructured documents, a text summarization module uses keyword extraction and sentence ranking algorithms to condense the content into a focused project summary. This summary is then used as input for the AI-powered roadmap generation. The flow ensures that users can start with minimal manual effort, regardless of their input format, and still receive a high-quality, tailored project plan. Technologies involved include file parsing libraries, custom keyword-based summarization logic, and integration with the AI roadmap generation pipeline.
+- The backend implements a file processing service that accepts uploaded documents, detects their type, and extracts raw text content. For both direct input and extracted document text, the system checks the length and structure. If the text is long or unstructured, a summarization module uses keyword extraction and sentence ranking algorithms to condense the content into a focused project summary. This summary is then used as input for the AI-powered roadmap generation. The flow ensures that users can start with minimal manual effort, regardless of their input format, and still receive a high-quality, tailored project plan. Technologies involved include file parsing libraries, custom keyword-based summarization logic, and integration with the AI roadmap generation pipeline.
 
 [Read the full technical documentation on text summarization here.](https://docs.google.com/document/d/1ASMo3flmZ7QqbIYGOMxCxO-qNuVpQD6KfXut4UkBpa4/edit?tab=t.0#heading=h.1frspbya81y)
 
 ```mermaid
 flowchart TD
   A["User submits project data (input or upload)"] --> B{"Input type?"}
-  B -- "Direct Input" --> C["Use input as project description"]
+  B -- "Direct Input" --> C["Get user description"]
   B -- "Document Upload" --> D["Extract raw text from document"]
-  D --> E{"Text length/structure?"}
-  E -- "Short/Structured" --> F["Use extracted text as description"]
-  E -- "Long/Unstructured" --> G["Summarize text"]
+  C --> E["Check text length/structure"]
+  D --> E
+  E{"Is text short/structured?"}
+  E -- "Yes" --> F["Use text as project description"]
+  E -- "No" --> G["Summarize text"]
   F --> H["Pass description to AI roadmap generator"]
   G --> H
   H --> I["Return roadmap to user"]
@@ -154,16 +156,18 @@ flowchart TD
 - Automatically prioritizing and sequencing project phases and tasks based on user constraints (such as timeline, experience level, and project scope). The challenge was to design an adaptive algorithm that intelligently reorders tasks and phases for optimal learning and project efficiency, rather than relying on static or manual ordering. This goes beyond basic sorting or if-else logic and requires multi-factor decision-making.
 
 **How:**
-- The backend implements a weighted scoring algorithm that analyzes project characteristics and user inputs. Each phase and task is scored based on factors like logical dependencies, timeline fit, user experience, project scope, and risk assessment. The algorithm then reorders phases and tasks to maximize learning progression and project success, while preserving critical dependencies. The system adapts to different project types (MVP, full-featured, enterprise) and user skill levels, ensuring a personalized and efficient roadmap for every user. Technologies involved include custom scoring utilities, configuration-driven weights, and dependency validation logic.
+- The backend implements a weighted scoring algorithm that analyzes project characteristics and user inputs. Before scoring, the system validates the roadmap and user constraints to ensure all required data is present and correct. If validation fails (e.g., missing data, invalid constraints), the system returns an error or the original roadmap. If validation passes, each phase and task is scored based on factors like logical dependencies, timeline fit, user experience, project scope, and risk assessment. The algorithm then reorders phases and tasks to maximize learning progression and project success, while preserving critical dependencies. The system adapts to different project types (MVP, full-featured, enterprise) and user skill levels, ensuring a personalized and efficient roadmap for every user. Technologies involved include custom scoring utilities, configuration-driven weights, and dependency validation logic.
 
 [Read the full technical documentation on roadmap prioritization here.](https://docs.google.com/document/d/1B9r1jldq8rVe78MBW-8oKfpAzeRJ9flpJGUBKGOPv7M/edit?tab=t.0#heading=h.6ncgqme60l4g)
 
 ```mermaid
 flowchart TD
-  A["Receive roadmap & user constraints"] --> B["Analyze project characteristics & user inputs"]
-  B --> C["Score phases/tasks (dependencies, timeline, experience, scope, risk)"]
-  C --> D["Reorder phases/tasks based on scores & dependencies"]
-  D --> E["Return optimized roadmap"]
+  A["Receive roadmap & user constraints"] --> B["Validate input data"]
+  B -- "Valid" --> C["Analyze project characteristics & user inputs"]
+  B -- "Invalid" --> F["Return error or original roadmap"]
+  C --> D["Score phases/tasks (dependencies, timeline, experience, scope, risk)"]
+  D --> E["Reorder phases/tasks based on scores & dependencies"]
+  E --> G["Return optimized roadmap"]
 ```
 
 ---
@@ -181,9 +185,14 @@ flowchart TD
 flowchart TD
   A["User views project roadmap"] --> B["User selects add/edit/delete task"]
   B --> C["Frontend validates input"]
-  C --> D["Send update request to backend"]
-  D --> E["Backend updates project data"]
-  E --> F["Frontend refreshes roadmap view"]
+  C --> D{"Is input valid?"}
+  D -- "No" --> E["Show validation error to user"]
+  D -- "Yes" --> F["Send update request to backend"]
+  F --> G{"Backend update successful?"}
+  G -- "No" --> H["Show error toast to user"]
+  G -- "Yes" --> I["Backend updates project data"]
+  I --> J["Frontend refreshes roadmap view"]
+  J --> K["Show success feedback"]
 ```
 
 TODO: Add documentation link here.
@@ -211,6 +220,7 @@ flowchart TD
   K -- "Yes" --> L["Backend updates milestones and order"]
   E --> L
   L --> M["Frontend refreshes milestones view"]
+  M --> N["Show success feedback"]
 ```
 
 TODO: Add documentation link here.
@@ -225,11 +235,16 @@ TODO: Add documentation link here.
 ```mermaid
 flowchart TD
   A["User loads dashboard or project detail page"] --> B{"Is cached data available?"}
-  B -- "Yes" --> C["Display cached data"]
+  B -- "Yes" --> C{"Is cache stale?"}
   B -- "No" --> D["Fetch data from backend"]
-  D --> C
-  E["User modifies project"] --> F["Invalidate cache"]
-  F --> D
+  C -- "No" --> E["Display cached data"]
+  C -- "Yes" --> D
+  D --> F{"Backend fetch successful?"}
+  F -- "No" --> G["Show error message and retry option"]
+  F -- "Yes" --> H["Update cache with fresh data"]
+  H --> E
+  I["User modifies project"] --> J["Invalidate cache"]
+  J --> D
 ```
 
 TODO: Add documentation link here.
