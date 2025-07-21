@@ -11,10 +11,19 @@ import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/constants/cache';
 
 /**
  * ProjectDetailPage - Card-based project details layout with modal task editing
  *
+ * HOW IT WORKS:
+ * - Loads and displays a single project's details.
+ * - Uses React Query to cache project data for fast loading.
+ * - After any edit (reorder, add, delete), invalidates the cache.
+ * - On refresh or revisit, always shows the latest data after edits.
+ * - Cache timing and keys are managed in the config file.
+ * 
  * Features:
  * - Card-based phase layout similar to dashboard
  * - Responsive grid layout for phase cards
@@ -39,6 +48,7 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(null);
+  const queryClient = useQueryClient();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
@@ -48,6 +58,10 @@ const ProjectDetailPage = () => {
       const result = await updateProject(projectId, payload);
       if (!result.success) {
         console.error('Error saving roadmap:', result.error);
+      } else {
+        // Invalidate project detail and user projects caches
+        queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
+        queryClient.invalidateQueries([QUERY_KEYS.USER_PROJECTS]);
       }
     },
     800,
@@ -102,10 +116,13 @@ const ProjectDetailPage = () => {
 
   // Save modal state to localStorage
   const saveModalState = (phase) => {
-    localStorage.setItem('modalState', JSON.stringify({
-      modal: 'phase',
-      phaseId: phase.id
-    }));
+    localStorage.setItem(
+      'modalState',
+      JSON.stringify({
+        modal: 'phase',
+        phaseId: phase.id,
+      })
+    );
   };
 
   // Restore modal state from localStorage
@@ -120,7 +137,7 @@ const ProjectDetailPage = () => {
     }
   };
 
-  // Restore modal state immediately 
+  // Restore modal state immediately
   useEffect(() => {
     restoreModalState();
   }, []); // Run immediately on component mount
@@ -132,7 +149,7 @@ const ProjectDetailPage = () => {
       if (saved) {
         const state = JSON.parse(saved);
         if (state.modal === 'phase' && state.phaseId) {
-          const phase = roadmapData.phases.find(p => p.id === state.phaseId);
+          const phase = roadmapData.phases.find((p) => p.id === state.phaseId);
           if (phase) {
             setSelectedPhase(phase);
           }
@@ -178,9 +195,9 @@ const ProjectDetailPage = () => {
         if (phase.id === phaseId) {
           const milestones = [...phase.milestones];
           const currentIndex = milestones.findIndex((m) => m.id === milestoneId);
-          
+
           if (currentIndex === -1) return phase; // Milestone not found
-          
+
           let newIndex;
           if (direction === 'up' && currentIndex > 0) {
             newIndex = currentIndex - 1;
@@ -189,16 +206,19 @@ const ProjectDetailPage = () => {
           } else {
             return phase; // Can't move further
           }
-          
+
           // Swap milestones
-          [milestones[currentIndex], milestones[newIndex]] = [milestones[newIndex], milestones[currentIndex]];
-          
+          [milestones[currentIndex], milestones[newIndex]] = [
+            milestones[newIndex],
+            milestones[currentIndex],
+          ];
+
           // Update order numbers
           const reorderedMilestones = milestones.map((milestone, index) => ({
             ...milestone,
             order: index + 1,
           }));
-          
+
           return { ...phase, milestones: reorderedMilestones };
         }
         return phase;
