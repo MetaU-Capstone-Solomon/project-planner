@@ -5,10 +5,11 @@ import { getInputClasses, getResourceCountClasses, getButtonClasses } from '../.
 import { useResourceManagement } from '../../hooks/useResourceManagement';
 
 /**
- * EditTaskModal - Dedicated modal for editing task title and description
+ * EditTaskModal - Dedicated modal for editing and creating tasks
  *
  * COMPONENT:
- * This modal provides a focused editing experience for tasks, replacing inline editing
+ * This modal provides a focused editing experience for tasks, supporting both
+ * editing existing tasks and creating new ones. It replaces inline editing
  * to provide better UX on both desktop and mobile devices.
  *
  * KEY FEATURES:
@@ -17,6 +18,7 @@ import { useResourceManagement } from '../../hooks/useResourceManagement';
  * - Form Validation: Prevents saving empty titles
  * - Keyboard Support: Enter to save, Escape to cancel
  * - Accessibility: Proper ARIA labels and focus management
+ * - Dual Mode: Supports both edit and create operations
  *
  * USER INTERACTION FLOW:
  * 1. User clicks edit icon → Phase modal closes, Edit modal opens
@@ -31,14 +33,15 @@ import { useResourceManagement } from '../../hooks/useResourceManagement';
  * @param {Object} props - Component props
  * @param {boolean} props.isOpen - Whether the modal is open
  * @param {Function} props.onClose - Function to close the modal and reopen phase modal
- * @param {Object} props.task - Task data to edit
+ * @param {Object|null} props.task - Task data to edit (null for create mode)
  * @param {Function} props.onSave - Callback to save task changes
+ * @param {string} props.mode - 'edit' or 'create' (defaults to 'edit' if task exists, 'create' if task is null)
  */
 const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
   const [formData, setFormData] = useState({ title: '', description: '', resources: [] });
   const [isValid, setIsValid] = useState(true);
   const [isResourcesExpanded, setIsResourcesExpanded] = useState(false);
-  
+
   // Use custom hook for resource management
   const {
     resources,
@@ -51,20 +54,34 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
     cancelEdit,
     deleteResource,
     updateDraft,
-    initialize
+    initialize,
   } = useResourceManagement();
+
+  // Determine mode based on task prop
+  const mode = task ? 'edit' : 'create';
 
   // Initialize form data when modal opens
   useEffect(() => {
-    if (isOpen && task) {
-      setFormData({
-        title: task.title || '',
-        description: task.description || '',
-        resources: Array.isArray(task.resources) ? task.resources : []
-      });
+    if (isOpen) {
+      if (task) {
+        // Edit mode: populate with existing task data
+        setFormData({
+          title: task.title || '',
+          description: task.description || '',
+          resources: Array.isArray(task.resources) ? task.resources : [],
+        });
+        initialize(task.resources || []);
+      } else {
+        // Create mode: start with empty form
+        setFormData({
+          title: '',
+          description: '',
+          resources: [],
+        });
+        initialize([]);
+      }
       setIsValid(true);
       setIsResourcesExpanded(false);
-      initialize(task.resources || []);
     }
   }, [isOpen, task]);
 
@@ -82,11 +99,24 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
       return;
     }
 
-    onSave({
-      title: formData.title.trim(),
-      description: formData.description,
-      resources: resources
-    });
+    if (mode === 'create') {
+      // Create mode: generate new task with unique ID
+      const newTask = {
+        id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: formData.title.trim(),
+        description: formData.description,
+        resources: resources,
+        status: 'pending',
+      };
+      onSave(newTask);
+    } else {
+      // Edit mode: update existing task
+      onSave({
+        title: formData.title.trim(),
+        description: formData.description,
+        resources: resources,
+      });
+    }
     onClose();
   };
 
@@ -115,7 +145,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
   const handleSaveResource = () => {
     if (saveResource()) {
       // Update form data with new resources from hook
-      setFormData(prev => ({ ...prev, resources: resources }));
+      setFormData((prev) => ({ ...prev, resources: resources }));
     }
   };
 
@@ -123,15 +153,15 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
   const handleDeleteResource = (idx) => {
     deleteResource(idx);
     // Update form data with new resources from hook
-    setFormData(prev => ({ ...prev, resources: resources }));
+    setFormData((prev) => ({ ...prev, resources: resources }));
   };
 
-  if (!isOpen || !task) return null;
+  if (!isOpen) return null;
 
   return (
     <div className={`${COLOR_PATTERNS.components.modal.overlay} z-50`} onClick={handleCancel}>
       <div
-        className={`${COLOR_PATTERNS.components.modal.container} mx-4 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`${COLOR_PATTERNS.components.modal.container} mx-4 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -139,7 +169,9 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
           className={`border-b border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal} flex-shrink-0`}
         >
           <div className="flex items-center justify-between">
-            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>Edit Task</h2>
+            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>
+              {mode === 'create' ? 'Add New Task' : 'Edit Task'}
+            </h2>
             <button
               onClick={handleCancel}
               className="rounded-full p-1 transition-colors duration-200 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-800"
@@ -151,7 +183,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
         </div>
 
         {/* Form */}
-        <div className={`p-4 ${COLOR_CLASSES.surface.modal} overflow-y-auto flex-1`}>
+        <div className={`p-4 ${COLOR_CLASSES.surface.modal} flex-1 overflow-y-auto`}>
           <div className="space-y-4">
             {/* Title Field */}
             <div>
@@ -204,7 +236,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
               <button
                 type="button"
                 onClick={handleToggleResources}
-                className={`flex items-center justify-between w-full p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${COLOR_CLASSES.text.heading}`}
+                className={`flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 ${COLOR_CLASSES.text.heading}`}
               >
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium">Resources</span>
@@ -213,9 +245,16 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className={`transform transition-transform duration-200 ${isResourcesExpanded ? 'rotate-180' : ''}`}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <div
+                    className={`transform transition-transform duration-200 ${isResourcesExpanded ? 'rotate-180' : ''}`}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -223,89 +262,122 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
 
               {/* Expanded Resources Content */}
               {isResourcesExpanded && (
-                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-                                  {resources.length === 0 && editingIndex === null && (
-                  <p className={`text-sm ${COLOR_CLASSES.text.body} py-3 px-3 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600 text-center`}>
-                    No resources added. Click "+ Add Resource" below to add more resources.
-                  </p>
-                )}
-                
-                {resources.map((resource, idx) => (
-                  <div key={idx} className="flex flex-col gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600">
-                    {editingIndex === idx ? (
-                      <>
-                        <div className="flex gap-2">
-                          <input
-                            className={`w-1/2 ${getInputClasses(errors.name, 'sm')}`}
-                            value={draft.name}
-                            onChange={e => updateDraft('name', e.target.value)}
-                            placeholder="Resource name"
-                          />
-                          <input
-                            className={`w-1/2 ${getInputClasses(errors.url, 'sm')}`}
-                            value={draft.url}
-                            onChange={e => updateDraft('url', e.target.value)}
-                            placeholder="https://example.com"
-                          />
-                        </div>
-                        <div className="flex items-center justify-center gap-2">
-                          <button onClick={handleSaveResource} className={`p-1 rounded ${COLOR_CLASSES.status.success.bg} ${COLOR_CLASSES.status.success.text}`} aria-label="Save resource">
-                            <Save className="h-4 w-4" />
-                          </button>
-                          <button onClick={cancelEdit} className={`p-1 rounded border border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30`} aria-label="Cancel edit">
-                            <X className="h-4 w-4" />
-                          </button>
-                          {(errors.name || errors.url) && (
-                            <span className="text-xs text-red-500">{errors.name || errors.url}</span>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <span className="flex-1 truncate text-sm font-medium ${COLOR_CLASSES.text.heading}">{resource.name}</span>
-                          <a 
-                            href={resource.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="text-xs text-blue-600 hover:text-blue-700 transition-colors px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 mr-2"
-                          >
-                            Link
-                          </a>
-                          <button onClick={() => editResource(idx)} className={`p-1 rounded ${COLOR_CLASSES.surface.cardHover}`} aria-label="Edit resource">
-                            <Edit2 className="h-4 w-4" />
-                          </button>
-                          <button onClick={() => handleDeleteResource(idx)} className={`p-1 rounded hover:${COLOR_CLASSES.status.error.bg}`} aria-label="Delete resource">
-                            <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.status.error.text}`} />
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-                  
-                                    {/* Add Resource Row */}
+                <div className="mt-3 max-h-64 space-y-2 overflow-y-auto">
+                  {resources.length === 0 && editingIndex === null && (
+                    <p
+                      className={`text-sm ${COLOR_CLASSES.text.body} rounded border border-gray-200 bg-gray-50 px-3 py-3 text-center dark:border-gray-600 dark:bg-gray-800`}
+                    >
+                      No resources added. Click "+ Add Resource" below to add more resources.
+                    </p>
+                  )}
+
+                  {resources.map((resource, idx) => (
+                    <div
+                      key={idx}
+                      className="flex flex-col gap-2 rounded border border-gray-200 bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-800"
+                    >
+                      {editingIndex === idx ? (
+                        <>
+                          <div className="flex gap-2">
+                            <input
+                              className={`w-1/2 ${getInputClasses(errors.name, 'sm')}`}
+                              value={draft.name}
+                              onChange={(e) => updateDraft('name', e.target.value)}
+                              placeholder="Resource name"
+                            />
+                            <input
+                              className={`w-1/2 ${getInputClasses(errors.url, 'sm')}`}
+                              value={draft.url}
+                              onChange={(e) => updateDraft('url', e.target.value)}
+                              placeholder="https://example.com"
+                            />
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={handleSaveResource}
+                              className={`rounded p-1 ${COLOR_CLASSES.status.success.bg} ${COLOR_CLASSES.status.success.text}`}
+                              aria-label="Save resource"
+                            >
+                              <Save className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className={`rounded border border-red-300 bg-red-50 p-1 text-red-600 hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30`}
+                              aria-label="Cancel edit"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                            {(errors.name || errors.url) && (
+                              <span className="text-xs text-red-500">
+                                {errors.name || errors.url}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="${COLOR_CLASSES.text.heading} flex-1 truncate text-sm font-medium">
+                              {resource.name}
+                            </span>
+                            <a
+                              href={resource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mr-2 rounded bg-gray-200 px-2 py-1 text-xs text-blue-600 transition-colors hover:text-blue-700 dark:bg-gray-700"
+                            >
+                              Link
+                            </a>
+                            <button
+                              onClick={() => editResource(idx)}
+                              className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover}`}
+                              aria-label="Edit resource"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResource(idx)}
+                              className={`rounded p-1 hover:${COLOR_CLASSES.status.error.bg}`}
+                              aria-label="Delete resource"
+                            >
+                              <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.status.error.text}`} />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add Resource Row */}
                   {editingIndex === resources.length && (
-                    <div className="flex flex-col gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-600">
+                    <div className="flex flex-col gap-2 rounded border border-gray-200 bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-800">
                       <div className="flex gap-2">
                         <input
                           className={`w-1/2 ${getInputClasses(errors.name, 'sm')}`}
                           value={draft.name}
-                          onChange={e => updateDraft('name', e.target.value)}
+                          onChange={(e) => updateDraft('name', e.target.value)}
                           placeholder="Resource name"
                         />
                         <input
                           className={`w-1/2 ${getInputClasses(errors.url, 'sm')}`}
                           value={draft.url}
-                          onChange={e => updateDraft('url', e.target.value)}
+                          onChange={(e) => updateDraft('url', e.target.value)}
                           placeholder="https://example.com"
                         />
                       </div>
                       <div className="flex items-center justify-center gap-2">
-                        <button onClick={handleSaveResource} className={`p-1 rounded ${COLOR_CLASSES.status.success.bg} ${COLOR_CLASSES.status.success.text}`} aria-label="Save resource">
+                        <button
+                          onClick={handleSaveResource}
+                          className={`rounded p-1 ${COLOR_CLASSES.status.success.bg} ${COLOR_CLASSES.status.success.text}`}
+                          aria-label="Save resource"
+                        >
                           <Save className="h-4 w-4" />
                         </button>
-                        <button onClick={cancelEdit} className={`p-1 rounded border border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30`} aria-label="Cancel add">
+                        <button
+                          onClick={cancelEdit}
+                          className={`rounded border border-red-300 bg-red-50 p-1 text-red-600 hover:bg-red-100 dark:border-red-600 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30`}
+                          aria-label="Cancel add"
+                        >
                           <X className="h-4 w-4" />
                         </button>
                         {(errors.name || errors.url) && (
@@ -314,13 +386,13 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Add Resource Button */}
                   {editingIndex === null && (
                     <button
                       type="button"
                       onClick={addResource}
-                      className={`flex items-center space-x-1 px-3 py-1 rounded ${COLOR_PATTERNS.button.secondary} text-sm`}
+                      className={`flex items-center space-x-1 rounded px-3 py-1 ${COLOR_PATTERNS.button.secondary} text-sm`}
                     >
                       <Plus className="h-4 w-4" />
                       <span>Add Resource</span>
