@@ -71,6 +71,7 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
           resources: Array.isArray(task.resources) ? task.resources : [],
         });
         initialize(task.resources || []);
+        setIsValid(true); // Valid because task has existing data
       } else {
         // Create mode: start with empty form
         setFormData({
@@ -79,8 +80,8 @@ const EditTaskModal = ({ isOpen, onClose, task, onSave }) => {
           resources: [],
         });
         initialize([]);
+        setIsValid(false); // Invalid because form is empty
       }
-      setIsValid(true);
       setIsResourcesExpanded(false);
     }
   }, [isOpen, task]);

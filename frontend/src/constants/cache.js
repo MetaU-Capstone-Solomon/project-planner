@@ -39,16 +39,16 @@ export const CACHE_CONFIG = {
 
 // Constants for query keys
 export const QUERY_KEYS = {
-  AI_RESPONSES: 'ai-response',
-  USER_PROJECTS: 'user-projects',
+  AI_RESPONSES: 'aiResponse',
+  USER_PROJECTS: 'userProjects',
   PROJECT_DETAILS: 'project',
-  USER_PROFILE: 'user-profile',
-  STATIC_CONTENT: 'static-content',
+  USER_PROFILE: 'userProfile',
+  STATIC_CONTENT: 'staticContent',
 };
 
 // Constants for storage keys
 export const STORAGE_KEYS = {
-  ROADMAP_CACHE: 'roadmap-cache',
+  ROADMAP_CACHE: 'roadmapCache',
   CHAT_MESSAGES: 'chatMessages',
   CHAT_STAGE: 'chatStage',
   PROJECT_TITLE: 'projectTitle',
