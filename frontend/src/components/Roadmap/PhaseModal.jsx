@@ -3,6 +3,8 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  ArrowUp,
+  ArrowDown,
   Target,
   Calendar,
   ExternalLink,
@@ -27,6 +29,7 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * - Update task status (pending/in progress/completed)
  * - Access learning resources and links
  * - Track progress through visual indicators
+ * - Reorder milestones using up/down buttons
  *
  * KEY FEATURES:
  * - Responsive Design: Adapts to mobile, tablet, and desktop screens
@@ -35,6 +38,7 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * - Resource Access: Clickable links to external learning materials
  * - Progress Tracking: Visual feedback for task completion status
  * - Accessibility: Proper ARIA labels and keyboard navigation support
+ * - Milestone Reordering: Up/down buttons for reordering milestones with persistence
  *
  * USER INTERACTION FLOW:
  * 1. User clicks phase card → Modal opens with phase overview
@@ -42,11 +46,13 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * 3. User changes task status → Updates immediately and persists to backend
  * 4. User clicks resource links → Opens in new tab
  * 5. User clicks overlay/close button → Modal closes
+ * 6. User clicks reorder buttons → Milestone reorders and persists to backend
  *
  * STATE MANAGEMENT:
  * - Local state: expandedMilestones (Set of milestone IDs)
  * - Props: phase data, modal open/close state
  * - Parent state: task status updates via onTaskUpdate callback
+ * - Parent state: milestone reordering via onMilestoneReorder callback
  *
  * MODAL TASK EDITING WORKFLOW:
  * 1. Edit Icon Click: handleStartEdit(taskId, task) - Opens edit modal
@@ -54,13 +60,20 @@ import CreateMilestoneModal from './CreateMilestoneModal';
  * 3. Save Action: handleSaveEdit(updatedTask) - Validates and saves
  * 4. Cancel Action: handleCloseEditModal() - Discards changes and closes edit modal
  *
+ * MILESTONE REORDERING WORKFLOW:
+ * 1. Up Arrow Click: handleMoveMilestoneUp(milestoneId) - Moves milestone up
+ * 2. Down Arrow Click: handleMoveMilestoneDown(milestoneId) - Moves milestone down
+ * 3. Reorder Logic: Swaps milestone positions and updates order numbers
+ * 4. Persistence: Changes are automatically saved to backend via persistRoadmap
+ *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the modal is open
  * @param {Function} props.onClose - Function to close the modal (handles overlay clicks)
  * @param {Object} props.phase - Phase data object with milestones and tasks
  * @param {Function} props.onTaskUpdate - Callback to update task status in parent state
+ * @param {Function} props.onMilestoneReorder - Callback to reorder milestones in parent state
  */
-const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
+const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -221,6 +234,26 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
     }
   };
 
+  /**
+   * Handle milestone reordering - move milestone up
+   * @param {string} milestoneId - ID of the milestone to move up
+   */
+  const handleMoveMilestoneUp = (milestoneId) => {
+    if (onMilestoneReorder) {
+      onMilestoneReorder(phase.id, milestoneId, 'up');
+    }
+  };
+
+  /**
+   * Handle milestone reordering - move milestone down
+   * @param {string} milestoneId - ID of the milestone to move down
+   */
+  const handleMoveMilestoneDown = (milestoneId) => {
+    if (onMilestoneReorder) {
+      onMilestoneReorder(phase.id, milestoneId, 'down');
+    }
+  };
+
   return (
     <div className={`${COLOR_PATTERNS.components.modal.overlay}`} onClick={onClose}>
       <div
@@ -287,15 +320,38 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                             {milestone.tasks ? milestone.tasks.length : 0} tasks
                           </div>
                         </div>
+                        
+                        {/* Milestone Reorder Buttons */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveMilestoneUp(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone up"
+                        >
+                          <ArrowUp className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveMilestoneDown(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone down"
+                        >
+                          <ArrowDown className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteMilestone(milestone.id);
                           }}
-                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
                           aria-label="Delete milestone"
                         >
-                          <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                          <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
                         </button>
                       </div>
                     </div>
@@ -332,20 +388,20 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                                       e.stopPropagation();
                                       handleStartEdit(task.id, taskWithMilestone);
                                     }}
-                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors`}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
                                     aria-label="Edit task"
                                   >
-                                    <Edit2 className="h-4 w-4 text-gray-900 dark:text-white" />
+                                    <Edit2 className={`h-4 w-4 ${COLOR_CLASSES.action.edit.icon}`} />
                                   </button>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteTask(milestone.id, task.id);
                                     }}
-                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors hover:bg-red-100 dark:hover:bg-red-900/30`}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
                                     aria-label="Delete task"
                                   >
-                                    <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                    <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
                                   </button>
                                   <select
                                     value={task.status || 'pending'}
@@ -377,7 +433,11 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                               </div>
 
                               <p
-                                className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
+                                className={`text-sm mb-3 leading-relaxed ${
+                                  task.status === 'completed'
+                                    ? COLOR_CLASSES.status.success.text
+                                    : COLOR_CLASSES.text.body
+                                }`}
                               >
                                 {task.description}
                               </p>
