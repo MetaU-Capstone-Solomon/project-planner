@@ -6,6 +6,8 @@ import { MESSAGE_TYPES } from '@/constants/messageTypes';
 import { CHAT_STAGES, MESSAGES } from '@/constants/messages';
 import { buildRoadmapPrompt, validateProjectData } from '@/utils/promptBuilder';
 import { ROADMAP_MODIFICATION_PROMPT } from '@/constants/prompts';
+import { useAICache } from '@/services/aiCacheService';
+import { STORAGE_KEYS } from '@/constants/cache';
 
 // Hook for managing AI chat interactions and roadmap generation
 const useChat = () => {
@@ -13,30 +15,31 @@ const useChat = () => {
   const [stage, setStage] = useState(CHAT_STAGES.INITIAL);
   const [loading, setLoading] = useState(false);
   const [projectTitle, setProjectTitle] = useState('');
+  const [currentPrompt, setCurrentPrompt] = useState('');
 
+  // Use cached AI response
+  const { data: aiResponse, isLoading: aiLoading, error: aiError } = useAICache(currentPrompt);
 
   // Save messages to localStorage
   const saveMessages = useCallback((newMessages) => {
-    localStorage.setItem('chatMessages', JSON.stringify(newMessages));
+    localStorage.setItem(STORAGE_KEYS.CHAT_MESSAGES, JSON.stringify(newMessages));
   }, []);
 
   // Save stage to localStorage
   const saveStage = useCallback((newStage) => {
-    localStorage.setItem('chatStage', newStage);
+    localStorage.setItem(STORAGE_KEYS.CHAT_STAGE, newStage);
   }, []);
 
   // Save project title to localStorage
   const saveProjectTitle = useCallback((title) => {
-    localStorage.setItem('projectTitle', title);
+    localStorage.setItem(STORAGE_KEYS.PROJECT_TITLE, title);
   }, []);
-
-
 
   // Load saved chat data on mount
   useEffect(() => {
-    const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-    const savedStage = localStorage.getItem('chatStage') || CHAT_STAGES.INITIAL;
-    const savedTitle = localStorage.getItem('projectTitle') || '';
+    const savedMessages = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES) || '[]');
+    const savedStage = localStorage.getItem(STORAGE_KEYS.CHAT_STAGE) || CHAT_STAGES.INITIAL;
+    const savedTitle = localStorage.getItem(STORAGE_KEYS.PROJECT_TITLE) || '';
 
     if (savedMessages.length > 0) {
       setMessages(savedMessages);
@@ -44,6 +47,38 @@ const useChat = () => {
       setProjectTitle(savedTitle);
     }
   }, []);
+
+  // Handle AI response when it's ready
+  useEffect(() => {
+    if (aiResponse && currentPrompt) {
+      appendMessage({
+        role: 'assistant',
+        content: aiResponse,
+        type:
+          stage === CHAT_STAGES.AWAITING_CONFIRMATION
+            ? MESSAGE_TYPES.ROADMAP
+            : MESSAGE_TYPES.EXPLANATION,
+      });
+      setCurrentPrompt(''); // Clear the prompt to prevent re-triggering
+    }
+  }, [aiResponse, currentPrompt]);
+
+  // Handle AI errors
+  useEffect(() => {
+    if (aiError && currentPrompt) {
+      appendMessage({
+        role: 'assistant',
+        content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${aiError.message}`,
+        type: MESSAGE_TYPES.ERROR,
+      });
+      setCurrentPrompt(''); // Clear the prompt to prevent re-triggering
+    }
+  }, [aiError, currentPrompt]);
+
+  // Update loading state based on AI loading
+  useEffect(() => {
+    setLoading(aiLoading);
+  }, [aiLoading]);
 
   // Adds a new message to the chat history
   const appendMessage = useCallback(
@@ -59,25 +94,6 @@ const useChat = () => {
     },
     [saveMessages]
   );
-
-  // Fetches AI response from the backend
-  const generateAiResponse = useCallback(async (prompt) => {
-    const response = await fetch(API_ENDPOINTS.CHAT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || MESSAGES.ERROR.BACKEND_API_FAILED);
-    }
-
-    const data = await response.json();
-    return data.content;
-  }, []);
 
   // Initiates chat with project details and file content
   const startChatWithDetails = useCallback(
@@ -117,8 +133,6 @@ const useChat = () => {
         const finalTitle = extractedTitle || MESSAGES.ACTIONS.DEFAULT_TITLE;
         setProjectTitle(finalTitle);
         saveProjectTitle(finalTitle);
-        
-
 
         // Start chat
         const userMessage = extractedTitle
@@ -158,12 +172,9 @@ const useChat = () => {
           }
         }
 
-        const aiResponse = await generateAiResponse(prompt);
-        appendMessage({
-          role: 'assistant',
-          content: aiResponse,
-          type: MESSAGE_TYPES.ROADMAP,
-        });
+        // Set the prompt to trigger cached AI call
+        setCurrentPrompt(prompt);
+
         const newStage = CHAT_STAGES.AWAITING_CONFIRMATION;
         setStage(newStage);
         saveStage(newStage);
@@ -174,11 +185,10 @@ const useChat = () => {
           content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${error.message}`,
           type: MESSAGE_TYPES.ERROR,
         });
-      } finally {
         setLoading(false);
       }
     },
-    [appendMessage, generateAiResponse, saveProjectTitle, saveStage]
+    [appendMessage, saveProjectTitle, saveStage]
   );
 
   // Handles user messages and generates AI responses
@@ -196,10 +206,6 @@ const useChat = () => {
       setLoading(true);
 
       try {
-        const history = messages
-          .map((m) => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`)
-          .join('\n');
-
         let prompt = '';
         let responseType = MESSAGE_TYPES.EXPLANATION;
 
@@ -221,6 +227,7 @@ const useChat = () => {
               const newStage = CHAT_STAGES.DONE;
               setStage(newStage);
               saveStage(newStage);
+              setLoading(false);
               return; // Don't generate new AI response
             }
           } else {
@@ -237,14 +244,8 @@ const useChat = () => {
           responseType = MESSAGE_TYPES.EXPLANATION;
         }
 
-        const aiText = await generateAiResponse(prompt);
-        appendMessage({
-          role: 'assistant',
-          content: aiText,
-          type: responseType,
-        });
-        
-
+        // Set the prompt to trigger cached AI call
+        setCurrentPrompt(prompt);
       } catch (err) {
         console.error('AI generate error', err);
         appendMessage({
@@ -252,11 +253,10 @@ const useChat = () => {
           content: `${MESSAGES.ERROR.AI_GENERATION_FAILED} ${err.message}`,
           type: MESSAGE_TYPES.ERROR,
         });
-      } finally {
         setLoading(false);
       }
     },
-    [stage, appendMessage, generateAiResponse, messages, projectTitle, saveStage]
+    [stage, appendMessage, messages, projectTitle, saveStage]
   );
 
   // Utility function to find roadmap message - get the latest one
@@ -274,6 +274,7 @@ const useChat = () => {
     setStage(CHAT_STAGES.INITIAL);
     setLoading(false);
     setProjectTitle('');
+    setCurrentPrompt('');
   }, []);
 
   return {
