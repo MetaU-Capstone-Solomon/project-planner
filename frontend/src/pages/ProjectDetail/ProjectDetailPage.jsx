@@ -11,10 +11,19 @@ import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/constants/cache';
 
 /**
  * ProjectDetailPage - Card-based project details layout with modal task editing
  *
+ * HOW IT WORKS:
+ * - Loads and displays a single project's details.
+ * - Uses React Query to cache project data for fast loading.
+ * - After any edit (reorder, add, delete), invalidates the cache.
+ * - On refresh or revisit, always shows the latest data after edits.
+ * - Cache timing and keys are managed in the config file.
+ * 
  * Features:
  * - Card-based phase layout similar to dashboard
  * - Responsive grid layout for phase cards
@@ -39,6 +48,7 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(null);
+  const queryClient = useQueryClient();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
@@ -48,6 +58,10 @@ const ProjectDetailPage = () => {
       const result = await updateProject(projectId, payload);
       if (!result.success) {
         console.error('Error saving roadmap:', result.error);
+      } else {
+        // Invalidate project detail and user projects caches
+        queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
+        queryClient.invalidateQueries([QUERY_KEYS.USER_PROJECTS]);
       }
     },
     800,
@@ -100,66 +114,188 @@ const ProjectDetailPage = () => {
     fetchProject();
   }, [projectId]);
 
+  // Save modal state to localStorage
+  const saveModalState = (phase) => {
+    localStorage.setItem(
+      'modalState',
+      JSON.stringify({
+        modal: 'phase',
+        phaseId: phase.id,
+      })
+    );
+  };
+
+  // Restore modal state from localStorage
+  const restoreModalState = () => {
+    const saved = localStorage.getItem('modalState');
+    if (saved) {
+      const state = JSON.parse(saved);
+      if (state.modal === 'phase' && state.phaseId) {
+        setModalOpen(true);
+        // selectedPhase will be set when data loads
+      }
+    }
+  };
+
+  // Restore modal state immediately
+  useEffect(() => {
+    restoreModalState();
+  }, []); // Run immediately on component mount
+
+  // Set selectedPhase when data loads (if modal is open)
+  useEffect(() => {
+    if (modalOpen && roadmapData) {
+      const saved = localStorage.getItem('modalState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.modal === 'phase' && state.phaseId) {
+          const phase = roadmapData.phases.find((p) => p.id === state.phaseId);
+          if (phase) {
+            setSelectedPhase(phase);
+          }
+        }
+      }
+    }
+  }, [modalOpen, roadmapData]);
+
   // Handler to open modal with selected phase
   const handlePhaseClick = (phase) => {
     setSelectedPhase(phase);
     setModalOpen(true);
+    saveModalState(phase);
   };
 
   // Handler to close modal
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedPhase(null);
+    localStorage.removeItem('modalState');
   };
 
   /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
-   * Also supports adding new tasks when action is 'add'
+   * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
+   * deleting milestones when action is 'deleteMilestone', and deleting tasks when action is 'deleteTask'
    * @param {string} phaseId - The phase ID containing the task
-   * @param {string} milestoneId - The milestone ID containing the task
+   * @param {string} milestoneId - The milestone ID containing the task (or to delete)
    * @param {string} taskId - The task ID to update (null for new tasks)
-   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task object
-   * @param {string} action - 'update' (default) or 'add' for new tasks
+   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
+   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, 'deleteMilestone' for deleting milestones, or 'deleteTask' for deleting tasks
    */
+  /**
+   * Handle milestone reordering - move milestone up or down in the list
+   * @param {string} phaseId - ID of the phase containing the milestone
+   * @param {string} milestoneId - ID of the milestone to reorder
+   * @param {string} direction - 'up' or 'down'
+   */
+  const handleMilestoneReorder = (phaseId, milestoneId, direction) => {
+    setRoadmapData((prevRoadmap) => {
+      const newPhases = prevRoadmap.phases.map((phase) => {
+        if (phase.id === phaseId) {
+          const milestones = [...phase.milestones];
+          const currentIndex = milestones.findIndex((m) => m.id === milestoneId);
+
+          if (currentIndex === -1) return phase; // Milestone not found
+
+          let newIndex;
+          if (direction === 'up' && currentIndex > 0) {
+            newIndex = currentIndex - 1;
+          } else if (direction === 'down' && currentIndex < milestones.length - 1) {
+            newIndex = currentIndex + 1;
+          } else {
+            return phase; // Can't move further
+          }
+
+          // Swap milestones
+          [milestones[currentIndex], milestones[newIndex]] = [
+            milestones[newIndex],
+            milestones[currentIndex],
+          ];
+
+          // Update order numbers
+          const reorderedMilestones = milestones.map((milestone, index) => ({
+            ...milestone,
+            order: index + 1,
+          }));
+
+          return { ...phase, milestones: reorderedMilestones };
+        }
+        return phase;
+      });
+
+      const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
+
+      // Update selectedPhase with the updated phase data
+      if (selectedPhase && selectedPhase.id === phaseId) {
+        const updatedPhase = newPhases.find((phase) => phase.id === phaseId);
+        if (updatedPhase) {
+          setSelectedPhase(updatedPhase);
+        }
+      }
+
+      // Persist changes to backend
+      persistRoadmap(updatedRoadmap);
+
+      return updatedRoadmap;
+    });
+  };
+
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
         if (phase.id === phaseId) {
-          const newMilestones = phase.milestones.map((milestone) => {
-            if (milestone.id === milestoneId) {
-              if (action === 'add') {
-                // Add new task to the milestone
-                const newTask = updates; // updates is the complete new task object
-                const newTasks = [...milestone.tasks, newTask];
-                return { ...milestone, tasks: newTasks };
-              } else {
-                // Update existing task
-                const newTasks = milestone.tasks.map((task) => {
-                  if (task.id === taskId) {
-                    // Handle both our init and new format (object)
-                    if (typeof updates === 'string') {
-                      // Legacy format: just status
-                      return { ...task, status: updates };
-                    } else {
-                      // New format: object with title, description, status, and resources
-                      return {
-                        ...task,
-                        title: updates.title || task.title,
-                        description: updates.description || task.description,
-                        status: updates.status || task.status,
-                        resources: updates.resources || task.resources || [],
-                      };
+          if (action === 'addMilestone') {
+            // Add new milestone to the phase
+            const newMilestone = updates; // updates is the complete new milestone object
+            const newMilestones = [...phase.milestones, newMilestone];
+            return { ...phase, milestones: newMilestones };
+          } else if (action === 'deleteMilestone') {
+            // Delete milestone from the phase
+            const newMilestones = phase.milestones
+              .filter((milestone) => milestone.id !== milestoneId)
+              .map((milestone, index) => ({ ...milestone, order: index + 1 })); // Reorder remaining milestones
+            return { ...phase, milestones: newMilestones };
+          } else {
+            const newMilestones = phase.milestones.map((milestone) => {
+              if (milestone.id === milestoneId) {
+                if (action === 'add') {
+                  // Add new task to the milestone
+                  const newTask = updates; // updates is the complete new task object
+                  const newTasks = [...milestone.tasks, newTask];
+                  return { ...milestone, tasks: newTasks };
+                } else if (action === 'deleteTask') {
+                  // Delete task from the milestone
+                  const newTasks = milestone.tasks.filter((task) => task.id !== taskId);
+                  return { ...milestone, tasks: newTasks };
+                } else {
+                  // Update existing task
+                  const newTasks = milestone.tasks.map((task) => {
+                    if (task.id === taskId) {
+                      // Handle both our init and new format (object)
+                      if (typeof updates === 'string') {
+                        // Legacy format: just status
+                        return { ...task, status: updates };
+                      } else {
+                        // New format: object with title, description, status, and resources
+                        return {
+                          ...task,
+                          title: updates.title || task.title,
+                          description: updates.description || task.description,
+                          status: updates.status || task.status,
+                          resources: updates.resources || task.resources || [],
+                        };
+                      }
                     }
-                  }
-                  return task;
-                });
-                return { ...milestone, tasks: newTasks };
+                    return task;
+                  });
+                  return { ...milestone, tasks: newTasks };
+                }
               }
-            }
-            return milestone;
-          });
-          return { ...phase, milestones: newMilestones };
+              return milestone;
+            });
+            return { ...phase, milestones: newMilestones };
+          }
         }
         return phase;
       });
@@ -236,6 +372,7 @@ const ProjectDetailPage = () => {
                 onClose={handleCloseModal}
                 phase={selectedPhase}
                 onTaskUpdate={handleTaskUpdate}
+                onMilestoneReorder={handleMilestoneReorder}
               />
             </>
           ) : (
