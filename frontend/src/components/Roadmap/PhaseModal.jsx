@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
-import { X, ChevronDown, ChevronRight, Target, Calendar, ExternalLink } from 'lucide-react';
-import { COLOR_CLASSES, COLOR_PATTERNS } from '../../constants/colors';
+import React, { useState, useEffect } from 'react';
+import {
+  X,
+  ChevronDown,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  Target,
+  Calendar,
+  ExternalLink,
+  Edit2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
+import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
+import confirmAction from '@/utils/confirmAction';
+import EditTaskModal from './EditTaskModal';
+import CreateMilestoneModal from './CreateMilestoneModal';
 
 /**
- * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks
+ * PhaseModal - Responsive modal for displaying phase details, milestones, and tasks with modal editing
  *
  * COMPONENT:
  * This modal provides a detailed view of a project phase, allowing users to:
  * - View all milestones within the phase
  * - Expand milestones to see individual tasks
- * - Update task status (pending/in progress/completed) TODO: add colors or tags to show state
+ * - Update task status (pending/in progress/completed)
  * - Access learning resources and links
  * - Track progress through visual indicators
+ * - Reorder milestones using up/down buttons
  *
  * KEY FEATURES:
  * - Responsive Design: Adapts to mobile, tablet, and desktop screens
@@ -22,6 +38,7 @@ import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
  * - Resource Access: Clickable links to external learning materials
  * - Progress Tracking: Visual feedback for task completion status
  * - Accessibility: Proper ARIA labels and keyboard navigation support
+ * - Milestone Reordering: Up/down buttons for reordering milestones with persistence
  *
  * USER INTERACTION FLOW:
  * 1. User clicks phase card → Modal opens with phase overview
@@ -29,20 +46,61 @@ import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
  * 3. User changes task status → Updates immediately and persists to backend
  * 4. User clicks resource links → Opens in new tab
  * 5. User clicks overlay/close button → Modal closes
+ * 6. User clicks reorder buttons → Milestone reorders and persists to backend
  *
  * STATE MANAGEMENT:
  * - Local state: expandedMilestones (Set of milestone IDs)
  * - Props: phase data, modal open/close state
  * - Parent state: task status updates via onTaskUpdate callback
+ * - Parent state: milestone reordering via onMilestoneReorder callback
+ *
+ * MODAL TASK EDITING WORKFLOW:
+ * 1. Edit Icon Click: handleStartEdit(taskId, task) - Opens edit modal
+ * 2. Modal Editing: User types in dedicated modal form for title and description
+ * 3. Save Action: handleSaveEdit(updatedTask) - Validates and saves
+ * 4. Cancel Action: handleCloseEditModal() - Discards changes and closes edit modal
+ *
+ * MILESTONE REORDERING WORKFLOW:
+ * 1. Up Arrow Click: handleMoveMilestoneUp(milestoneId) - Moves milestone up
+ * 2. Down Arrow Click: handleMoveMilestoneDown(milestoneId) - Moves milestone down
+ * 3. Reorder Logic: Swaps milestone positions and updates order numbers
+ * 4. Persistence: Changes are automatically saved to backend via persistRoadmap
  *
  * @param {Object} props - Component props
  * @param {boolean} props.open - Whether the modal is open
  * @param {Function} props.onClose - Function to close the modal (handles overlay clicks)
  * @param {Object} props.phase - Phase data object with milestones and tasks
  * @param {Function} props.onTaskUpdate - Callback to update task status in parent state
+ * @param {Function} props.onMilestoneReorder - Callback to reorder milestones in parent state
  */
-const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
+const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) => {
   const [expandedMilestones, setExpandedMilestones] = useState(new Set());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const [addingToMilestone, setAddingToMilestone] = useState(null);
+  const [isAddMilestoneModalOpen, setIsAddMilestoneModalOpen] = useState(false);
+
+  // Save expanded milestones to localStorage
+  const saveExpandedMilestones = (expandedSet) => {
+    localStorage.setItem('expandedMilestones', JSON.stringify(Array.from(expandedSet)));
+  };
+
+  // Restore expanded milestones from localStorage
+  const restoreExpandedMilestones = () => {
+    const saved = localStorage.getItem('expandedMilestones');
+    if (saved) {
+      const expandedArray = JSON.parse(saved);
+      setExpandedMilestones(new Set(expandedArray));
+    }
+  };
+
+  // Restore expanded milestones when modal opens
+  useEffect(() => {
+    if (open) {
+      restoreExpandedMilestones();
+    }
+  }, [open]); 
 
   if (!open || !phase) return null;
 
@@ -55,6 +113,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
       } else {
         newSet.add(milestoneId);
       }
+      saveExpandedMilestones(newSet);
       return newSet;
     });
   };
@@ -63,6 +122,135 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
   const handleTaskStatusChange = (milestoneId, taskId, newStatus) => {
     if (onTaskUpdate) {
       onTaskUpdate(phase.id, milestoneId, taskId, newStatus);
+    }
+  };
+
+  /**
+   * Start editing a task
+   * @param {string} taskId - The task ID to edit
+   * @param {Object} task - The task data
+   */
+  const handleStartEdit = (taskId, task) => {
+    setEditingTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  /**
+   * Close edit modal and reopen phase modal
+   */
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingTask(null);
+  };
+
+  /**
+   * Save task changes
+   * @param {Object} updatedTask - The updated task data
+   */
+  const handleSaveEdit = (updatedTask) => {
+    if (onTaskUpdate && editingTask) {
+      onTaskUpdate(phase.id, editingTask.milestoneId, editingTask.id, updatedTask);
+    }
+    handleCloseEditModal();
+  };
+
+  /**
+   * Start adding a new task to a milestone
+   * @param {string} milestoneId - The milestone ID to add the task to
+   */
+  const handleStartAddTask = (milestoneId) => {
+    setAddingToMilestone(milestoneId);
+    setIsAddTaskModalOpen(true);
+  };
+
+  /**
+   * Close add task modal
+   */
+  const handleCloseAddTaskModal = () => {
+    setIsAddTaskModalOpen(false);
+    setAddingToMilestone(null);
+  };
+
+  /**
+   * Save new task
+   * @param {Object} newTask - The new task data with generated ID
+   */
+  const handleSaveAddTask = (newTask) => {
+    if (onTaskUpdate && addingToMilestone) {
+      // Pass the new task to the parent for insertion
+      onTaskUpdate(phase.id, addingToMilestone, null, newTask, 'add');
+    }
+    handleCloseAddTaskModal();
+  };
+
+  /**
+   * Start adding a new milestone to the phase
+   */
+  const handleStartAddMilestone = () => {
+    setIsAddMilestoneModalOpen(true);
+  };
+
+  /**
+   * Close add milestone modal
+   */
+  const handleCloseAddMilestoneModal = () => {
+    setIsAddMilestoneModalOpen(false);
+  };
+
+  /**
+   * Save new milestone
+   * @param {Object} newMilestone - The new milestone data with generated ID
+   */
+  const handleSaveAddMilestone = (newMilestone) => {
+    if (onTaskUpdate) {
+      // Pass the new milestone to the parent for insertion
+      onTaskUpdate(phase.id, null, null, newMilestone, 'addMilestone');
+    }
+    handleCloseAddMilestoneModal();
+  };
+
+  /**
+   * Handle milestone deletion
+   * @param {string} milestoneId - The milestone ID to delete
+   */
+  const handleDeleteMilestone = (milestoneId) => {
+    if (confirmAction('Do you want to delete this milestone?')) {
+      if (onTaskUpdate) {
+        onTaskUpdate(phase.id, milestoneId, null, null, 'deleteMilestone');
+      }
+    }
+  };
+
+  /**
+   * Handle task deletion
+   * @param {string} milestoneId - The milestone ID containing the task
+   * @param {string} taskId - The task ID to delete
+   */
+  const handleDeleteTask = (milestoneId, taskId) => {
+    if (confirmAction('Do you want to delete this task?')) {
+      if (onTaskUpdate) {
+        onTaskUpdate(phase.id, milestoneId, taskId, null, 'deleteTask');
+      }
+    }
+  };
+
+  /**
+   * Handle milestone reordering - move milestone up
+   * @param {string} milestoneId - ID of the milestone to move up
+   */
+  const handleMoveMilestoneUp = (milestoneId) => {
+    if (onMilestoneReorder) {
+      onMilestoneReorder(phase.id, milestoneId, 'up');
+    }
+  };
+
+  /**
+   * Handle milestone reordering - move milestone down
+   * @param {string} milestoneId - ID of the milestone to move down
+   */
+  const handleMoveMilestoneDown = (milestoneId) => {
+    if (onMilestoneReorder) {
+      onMilestoneReorder(phase.id, milestoneId, 'down');
     }
   };
 
@@ -126,10 +314,45 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                         </div>
                       </div>
 
-                      <div className="text-right">
-                        <div className={`text-sm ${COLOR_CLASSES.text.body}`}>
-                          {milestone.tasks ? milestone.tasks.length : 0} tasks
+                      <div className="flex items-center space-x-2">
+                        <div className="text-right">
+                          <div className={`text-sm ${COLOR_CLASSES.text.body}`}>
+                            {milestone.tasks ? milestone.tasks.length : 0} tasks
+                          </div>
                         </div>
+                        
+                        {/* Milestone Reorder Buttons */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveMilestoneUp(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone up"
+                        >
+                          <ArrowUp className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleMoveMilestoneDown(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          aria-label="Move milestone down"
+                        >
+                          <ArrowDown className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteMilestone(milestone.id);
+                          }}
+                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
+                          aria-label="Delete milestone"
+                        >
+                          <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -138,93 +361,141 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
                   {expandedMilestones.has(milestone.id) && (
                     <div className="space-y-3 px-4 pb-4">
                       {milestone.tasks && milestone.tasks.length > 0 ? (
-                        milestone.tasks.map((task) => (
-                          <div
-                            key={task.id}
-                            className={`rounded-lg border-2 bg-white p-4 dark:bg-gray-700 ${
-                              task.status === 'completed'
-                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                                : task.status === 'in-progress'
-                                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                  : 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                            }`}
-                          >
-                            <div className="mb-3 flex items-start justify-between">
-                              <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
-                                {task.title}
-                              </h4>
-                              <select
-                                value={task.status || 'pending'}
-                                onChange={(e) =>
-                                  handleTaskStatusChange(milestone.id, task.id, e.target.value)
-                                }
-                                className={`rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-400 ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400`}
-                              >
-                                <option
-                                  value="pending"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                >
-                                  Pending
-                                </option>
-                                <option
-                                  value="in-progress"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                >
-                                  In Progress
-                                </option>
-                                <option
-                                  value="completed"
-                                  className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
-                                >
-                                  Completed
-                                </option>
-                              </select>
-                            </div>
+                        milestone.tasks.map((task) => {
+                          // Add milestoneId to task for edit functionality
+                          const taskWithMilestone = { ...task, milestoneId: milestone.id };
 
-                            <p
-                              className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
+                          return (
+                            <div
+                              key={task.id}
+                              className={`rounded-lg border-2 p-4 ${
+                                task.status === 'completed'
+                                  ? `${COLOR_CLASSES.status.success.border} ${COLOR_CLASSES.status.success.bg}`
+                                  : task.status === 'in-progress'
+                                    ? `${COLOR_CLASSES.status.info.border}`
+                                    : `${COLOR_CLASSES.status.warning.border}`
+                              }`}
                             >
-                              {task.description}
-                            </p>
-
-                            {/* Resources */}
-                            {task.resources && task.resources.length > 0 && (
-                              <div>
-                                <h5
-                                  className={`text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}
-                                >
-                                  Resources:
-                                </h5>
-                                <div className="space-y-1">
-                                  {task.resources.map((resource, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
-                                      {resource.url ? (
-                                        <a
-                                          href={resource.url}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="flex items-center space-x-1 text-sm text-blue-600 transition-colors duration-200 hover:text-blue-500 dark:text-cyan-200 dark:hover:text-cyan-100"
-                                        >
-                                          <span>{resource.name}</span>
-                                          <ExternalLink className="h-3 w-3" />
-                                        </a>
-                                      ) : (
-                                        <span className={`text-sm ${COLOR_CLASSES.text.body}`}>
-                                          {resource.name}
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
+                              <div className="mb-3 flex items-start justify-between">
+                                <div className="mr-4 flex-1">
+                                  <h4 className={`font-medium ${COLOR_CLASSES.text.heading}`}>
+                                    {task.title}
+                                  </h4>
+                                </div>
+                                <div className="flex flex-shrink-0 items-center space-x-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleStartEdit(task.id, taskWithMilestone);
+                                    }}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
+                                    aria-label="Edit task"
+                                  >
+                                    <Edit2 className={`h-4 w-4 ${COLOR_CLASSES.action.edit.icon}`} />
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteTask(milestone.id, task.id);
+                                    }}
+                                    className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
+                                    aria-label="Delete task"
+                                  >
+                                    <Trash2 className={`h-4 w-4 ${COLOR_CLASSES.action.delete.icon}`} />
+                                  </button>
+                                  <select
+                                    value={task.status || 'pending'}
+                                    onChange={(e) =>
+                                      handleTaskStatusChange(milestone.id, task.id, e.target.value)
+                                    }
+                                    className={`rounded ${COLOR_CLASSES.border.input} px-2 py-1 text-sm ${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading} focus:${COLOR_CLASSES.border.focus} focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400`}
+                                  >
+                                    <option
+                                      value="pending"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      Pending
+                                    </option>
+                                    <option
+                                      value="in-progress"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      In Progress
+                                    </option>
+                                    <option
+                                      value="completed"
+                                      className={`${COLOR_CLASSES.surface.input} ${COLOR_CLASSES.text.heading}`}
+                                    >
+                                      Completed
+                                    </option>
+                                  </select>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ))
+
+                              <p
+                                className={`text-sm mb-3 leading-relaxed ${
+                                  task.status === 'completed'
+                                    ? COLOR_CLASSES.status.success.text
+                                    : COLOR_CLASSES.text.body
+                                }`}
+                              >
+                                {task.description}
+                              </p>
+
+                              {/* Resources */}
+                              {task.resources && task.resources.length > 0 && (
+                                <div>
+                                  <h5
+                                    className={`text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}
+                                  >
+                                    Resources:
+                                  </h5>
+                                  <div className="space-y-1">
+                                    {task.resources.map((resource, index) => (
+                                      <div key={index} className="flex items-center space-x-2">
+                                        {resource.url ? (
+                                          <a
+                                            href={resource.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.link} hover:${COLOR_CLASSES.text.linkHover} transition-colors duration-200`}
+                                          >
+                                            <span>{resource.name}</span>
+                                            <ExternalLink className="h-3 w-3" />
+                                          </a>
+                                        ) : (
+                                          <span className={`text-sm ${COLOR_CLASSES.text.body}`}>
+                                            {resource.name}
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                       ) : (
                         <div className={`text-sm ${COLOR_CLASSES.text.body} py-4 text-center`}>
                           No tasks available for this milestone.
                         </div>
                       )}
+
+                      {/* Add Task Button */}
+                      <div className="flex justify-center pt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartAddTask(milestone.id);
+                          }}
+                          className={`flex items-center space-x-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${COLOR_PATTERNS.button.secondary} hover:bg-blue-100 dark:hover:bg-blue-900/30`}
+                          aria-label="Add new task"
+                        >
+                          <Plus className="h-4 w-4" />
+                          <span>Add Task</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -235,8 +506,44 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate }) => {
               No milestones available for this phase.
             </div>
           )}
+
+          {/* Add Milestone Button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={handleStartAddMilestone}
+              className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200 ${COLOR_PATTERNS.button.primary} hover:bg-blue-600 dark:hover:bg-blue-500`}
+              aria-label="Add new milestone"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Milestone</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        task={editingTask}
+        onSave={handleSaveEdit}
+      />
+
+      {/* Add Task Modal */}
+      <EditTaskModal
+        isOpen={isAddTaskModalOpen}
+        onClose={handleCloseAddTaskModal}
+        task={null}
+        onSave={handleSaveAddTask}
+      />
+
+      {/* Add Milestone Modal */}
+      <CreateMilestoneModal
+        isOpen={isAddMilestoneModalOpen}
+        onClose={handleCloseAddMilestoneModal}
+        onSave={handleSaveAddMilestone}
+        nextOrder={phase.milestones ? phase.milestones.length + 1 : 1}
+      />
     </div>
   );
 };
