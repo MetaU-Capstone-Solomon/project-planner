@@ -59,24 +59,24 @@ export const COLOR_CLASSES = {
   // Status colors
   status: {
     success: {
-      bg: 'bg-status-success-light',
-      text: 'text-status-success-text',
-      border: 'border-status-success-main',
+      bg: 'bg-green-50 dark:bg-green-900/20',
+      text: 'text-green-800 dark:text-white',
+      border: 'border-green-200 dark:border-green-700',
     },
     warning: {
-      bg: 'bg-status-warning-light',
-      text: 'text-status-warning-text',
-      border: 'border-status-warning-main',
+      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+      text: 'text-yellow-800 dark:text-yellow-200',
+      border: 'border-yellow-200 dark:border-yellow-700',
     },
     error: {
-      bg: 'bg-status-error-light',
-      text: 'text-status-error-text',
-      border: 'border-status-error-main',
+      bg: 'bg-red-50 dark:bg-red-900/20',
+      text: 'text-red-800 dark:text-red-200',
+      border: 'border-red-200 dark:border-red-700',
     },
     info: {
-      bg: 'bg-status-info-light',
-      text: 'text-status-info-text',
-      border: 'border-status-info-main',
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      text: 'text-blue-800 dark:text-blue-200',
+      border: 'border-blue-200 dark:border-blue-700',
     },
   },
 
