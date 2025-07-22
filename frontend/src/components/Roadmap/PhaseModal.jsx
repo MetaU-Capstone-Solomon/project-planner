@@ -433,7 +433,11 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
                               </div>
 
                               <p
-                                className={`text-sm ${COLOR_CLASSES.text.body} mb-3 leading-relaxed`}
+                                className={`text-sm mb-3 leading-relaxed ${
+                                  task.status === 'completed'
+                                    ? COLOR_CLASSES.status.success.text
+                                    : COLOR_CLASSES.text.body
+                                }`}
                               >
                                 {task.description}
                               </p>
