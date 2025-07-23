@@ -73,7 +73,6 @@ export const validateResources = (resources) => {
   const errors = {};
   let hasErrors = false;
 
-
   resources.forEach((resource, index) => {
     const resourceErrors = validateResource(resource);
     if (Object.keys(resourceErrors).length > 0) {
