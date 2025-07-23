@@ -203,7 +203,7 @@ const NewProjectChatPage = () => {
       <div className="border-b border-gray-200 p-6 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">AI Assistant</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-100">
-          Take advantage of our AI assistant (# questions max)
+          Take advantage of our AI assistant
         </p>
       </div>
       <div className="flex-1 overflow-hidden">
