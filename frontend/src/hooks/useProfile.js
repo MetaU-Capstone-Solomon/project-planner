@@ -23,10 +23,14 @@ export const useProfile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarTimestamp, setAvatarTimestamp] = useState(Date.now());
 
   const displayName = getDisplayName(user);
   const emailUser = isEmailUser(user);
   const avatarUrl = getAvatarUrl(user);
+
+  // Add cache busting to avatar URL
+  const avatarUrlWithCache = avatarUrl ? `${avatarUrl}?t=${avatarTimestamp}` : avatarUrl;
 
   // Auto-dismiss success messages after 5 seconds (errors persist until user action)
   useEffect(() => {
@@ -72,6 +76,8 @@ export const useProfile = () => {
     } else {
       // Propagate change
       setSuccess('Avatar updated');
+      // Update timestamp on successful upload
+      setAvatarTimestamp(Date.now());
     }
     setAvatarLoading(false);
   };
@@ -105,7 +111,7 @@ export const useProfile = () => {
     user,
     displayName,
     emailUser,
-    avatarUrl,
+    avatarUrl: avatarUrlWithCache, // Use the cached avatar URL
     showPasswordForm,
     setShowPasswordForm,
     passwordData,
