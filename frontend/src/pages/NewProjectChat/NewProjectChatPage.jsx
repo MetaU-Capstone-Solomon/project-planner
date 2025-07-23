@@ -36,8 +36,10 @@ import {
   FORM_FIELDS,
 } from '@/constants/projectOptions';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Plus } from 'lucide-react';
 import useIsMobile from '@/hooks/useIsMobile';
+import resetNewProjectState from '@/utils/resetNewProjectState';
+import confirmAction from '@/utils/confirmAction';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
@@ -89,6 +91,23 @@ const NewProjectChatPage = () => {
     } catch (error) {
       //not advance to chat step on mobile if there's an error
     }
+  };
+
+  const handleNewProject = () => {
+    const shouldProceed = confirmAction(
+      'Are you sure you want to start over? This will clear all your current progress.'
+    );
+
+    if (!shouldProceed) {
+      return; // User cancelled, nothing happens
+    }
+
+    // Reset state
+    resetNewProjectState();
+    clearFile();
+    resetChat();
+    resetForm();
+    setMobileStep(1);
   };
 
   // --- Form Section ---
@@ -215,10 +234,19 @@ const NewProjectChatPage = () => {
         />
       </div>
       {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
-        <div className="border-t border-gray-200 p-2 dark:border-gray-700">
-          <div className="text-center">
+        <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+          <div className="flex justify-center space-x-4">
             <Button onClick={handleSaveProject} disabled={saving} size="md" className="px-6 py-2">
               {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
+            </Button>
+            <Button 
+              onClick={handleNewProject} 
+              size="md" 
+              variant="secondary"
+              className="px-6 py-2 flex items-center space-x-2"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Project</span>
             </Button>
           </div>
         </div>
