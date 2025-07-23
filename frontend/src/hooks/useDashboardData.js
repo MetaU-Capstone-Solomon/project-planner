@@ -29,7 +29,7 @@ import { CACHE_CONFIG, QUERY_KEYS } from '@/constants/cache';
 const useDashboardData = () => {
   const {
     data: projects = [],
-    loading,
+    isLoading,
     error,
   } = useQuery({
     queryKey: [QUERY_KEYS.USER_PROJECTS],
@@ -54,7 +54,7 @@ const useDashboardData = () => {
 
   return {
     projects,
-    loading,
+    loading: isLoading,
     error,
     stats,
   };
