@@ -272,20 +272,14 @@ const ProjectDetailPage = () => {
                   // Update existing task
                   const newTasks = milestone.tasks.map((task) => {
                     if (task.id === taskId) {
-                      // Handle both our init and new format (object)
-                      if (typeof updates === 'string') {
-                        // Legacy format: just status
-                        return { ...task, status: updates };
-                      } else {
-                        // New format: object with title, description, status, and resources
-                        return {
-                          ...task,
-                          title: updates.title || task.title,
-                          description: updates.description || task.description,
-                          status: updates.status || task.status,
-                          resources: updates.resources || task.resources || [],
-                        };
-                      }
+                      // Update task with new format: object with title, description, status, and resources
+                      return {
+                        ...task,
+                        title: updates.title || task.title,
+                        description: updates.description || task.description,
+                        status: updates.status || task.status,
+                        resources: updates.resources || task.resources || [],
+                      };
                     }
                     return task;
                   });

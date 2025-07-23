@@ -14,8 +14,11 @@ import {
 } from 'lucide-react';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { MESSAGES } from '@/constants/messages';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 import confirmAction from '@/utils/confirmAction';
+import { showSuccessToast } from '@/utils/toastUtils';
+import { getReorderButtonState, getButtonClasses, getDisabledButtonClasses } from '@/utils/buttonUtils';
 import EditTaskModal from './EditTaskModal';
 import CreateMilestoneModal from './CreateMilestoneModal';
 
@@ -241,6 +244,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
   const handleMoveMilestoneUp = (milestoneId) => {
     if (onMilestoneReorder) {
       onMilestoneReorder(phase.id, milestoneId, 'up');
+      showSuccessToast(MESSAGES.SUCCESS.MILESTONE_MOVED_UP);
     }
   };
 
@@ -251,6 +255,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
   const handleMoveMilestoneDown = (milestoneId) => {
     if (onMilestoneReorder) {
       onMilestoneReorder(phase.id, milestoneId, 'down');
+      showSuccessToast(MESSAGES.SUCCESS.MILESTONE_MOVED_DOWN);
     }
   };
 
@@ -283,7 +288,10 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
         <div className={`flex-1 overflow-y-auto p-6 ${COLOR_CLASSES.surface.modal}`}>
           {phase.milestones && phase.milestones.length > 0 ? (
             <div className="space-y-4">
-              {phase.milestones.map((milestone) => (
+              {phase.milestones.map((milestone, index) => {
+                const { isFirst, isLast } = getReorderButtonState(index, phase.milestones.length);
+                
+                return (
                 <div
                   key={milestone.id}
                   className="rounded-lg border border-gray-200 bg-gray-50 shadow-lg dark:border-gray-500 dark:bg-gray-800"
@@ -327,7 +335,12 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
                             e.stopPropagation();
                             handleMoveMilestoneUp(milestone.id);
                           }}
-                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          disabled={isFirst}
+                          className={`rounded p-1 transition-colors ${getButtonClasses(
+                            isFirst,
+                            `${COLOR_CLASSES.surface.cardHover} ${COLOR_CLASSES.action.reorder.hover}`,
+                            getDisabledButtonClasses()
+                          )}`}
                           aria-label="Move milestone up"
                         >
                           <ArrowUp className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
@@ -337,7 +350,12 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
                             e.stopPropagation();
                             handleMoveMilestoneDown(milestone.id);
                           }}
-                          className={`rounded p-1 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.reorder.hover}`}
+                          disabled={isLast}
+                          className={`rounded p-1 transition-colors ${getButtonClasses(
+                            isLast,
+                            `${COLOR_CLASSES.surface.cardHover} ${COLOR_CLASSES.action.reorder.hover}`,
+                            getDisabledButtonClasses()
+                          )}`}
                           aria-label="Move milestone down"
                         >
                           <ArrowDown className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
@@ -499,7 +517,8 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
                     </div>
                   )}
                 </div>
-              ))}
+              );
+            })}
             </div>
           ) : (
             <div className={`py-8 text-center ${COLOR_CLASSES.text.body}`}>
