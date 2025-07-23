@@ -9,6 +9,8 @@ export const MESSAGES = {
   SUCCESS: {
     PROJECT_SAVED: 'Project saved successfully!',
     FILE_PROCESSED: '✓ Document processed successfully!',
+    MILESTONE_MOVED_UP: 'Milestone moved up successfully',
+    MILESTONE_MOVED_DOWN: 'Milestone moved down successfully',
   },
   ERROR: {
     PROJECT_SAVE_FAILED: 'Failed to save project. Please try again.',
