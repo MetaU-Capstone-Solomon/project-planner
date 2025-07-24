@@ -128,7 +128,7 @@ const NewProjectChatPage = () => {
             onChange={handleChange}
           />
         </FormField>
-        <FormField label="Project Description">
+        <FormField label="Project Description" isRequired={true}>
           <Textarea
             name={FORM_FIELDS.DESCRIPTION}
             placeholder="Describe your project idea"
