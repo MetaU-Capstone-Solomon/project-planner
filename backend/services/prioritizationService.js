@@ -79,14 +79,14 @@ class RoadmapPrioritizationService {
    */
   async prioritizeRoadmap(roadmap, userConstraints) {
     try {
-      this.validateInputs(roadmap, userConstraints);
+      this._validateInputs(roadmap, userConstraints);
       
       // Get dynamic configuration based on project analysis
       const projectConfig = this.config.getProjectConfig(roadmap, userConstraints);
-      const constraints = this.parseConstraints(userConstraints, projectConfig.timelineParsers);
+      const constraints = this._parseConstraints(userConstraints, projectConfig.timelineParsers);
       
-      const optimizedPhases = this.optimizePhaseOrder(roadmap.phases, constraints, projectConfig);
-      const finalPhases = this.optimizeTaskOrder(optimizedPhases, constraints, projectConfig);
+      const optimizedPhases = this._optimizePhaseOrder(roadmap.phases, constraints, projectConfig);
+      const finalPhases = this._optimizeTaskOrder(optimizedPhases, constraints, projectConfig);
       
       // Validate dependencies with standard rules
       const dependencies = {
@@ -118,10 +118,10 @@ class RoadmapPrioritizationService {
    * @param {Object} projectConfig - Configuration with weights and scoring patterns.
    * @returns {Array} Reordered phases with updated order property.
    */
-  optimizePhaseOrder(phases, constraints, projectConfig) {
+  _optimizePhaseOrder(phases, constraints, projectConfig) {
     const scoredPhases = phases.map((phase, index) => ({
       phase,
-      score: this.calculatePhaseScore(phase, constraints, projectConfig, index),
+      score: this._calculatePhaseScore(phase, constraints, projectConfig, index),
       originalIndex: index
     }));
     scoredPhases.sort((a, b) => b.score - a.score);
@@ -139,7 +139,7 @@ class RoadmapPrioritizationService {
    * @param {number} originalIndex - Original position of the phase (for tie-breaking).
    * @returns {number} Weighted score (higher = higher priority).
    */
-  calculatePhaseScore(phase, constraints, projectConfig, originalIndex) {
+  _calculatePhaseScore(phase, constraints, projectConfig, originalIndex) {
     const scores = {
       logicalOrder: getLogicalOrderScore(phase, projectConfig.phasePatterns),
       timeline: getTimelineScore(phase, constraints.timeline, projectConfig.timelineParsers),
@@ -162,12 +162,12 @@ class RoadmapPrioritizationService {
    * @param {Object} projectConfig - Configuration with task patterns and weights.
    * @returns {Array} Phases with reordered tasks within each milestone.
    */
-  optimizeTaskOrder(phases, constraints, projectConfig) {
+  _optimizeTaskOrder(phases, constraints, projectConfig) {
     return phases.map(phase => ({
       ...phase,
       milestones: phase.milestones.map(milestone => ({
         ...milestone,
-        tasks: this.reorderTasks(milestone.tasks, constraints, projectConfig)
+        tasks: this._reorderTasks(milestone.tasks, constraints, projectConfig)
       }))
     }));
   }
@@ -179,7 +179,7 @@ class RoadmapPrioritizationService {
    * @param {Object} projectConfig - Configuration with task patterns and scoring.
    * @returns {Array} Reordered tasks based on priority scoring.
    */
-  reorderTasks(tasks, constraints, projectConfig) {
+  _reorderTasks(tasks, constraints, projectConfig) {
     const taskScores = tasks.map((task, index) => ({
       task,
       score: getTaskScore(task, projectConfig.taskPatterns, index),
@@ -195,7 +195,7 @@ class RoadmapPrioritizationService {
    * @param {Object} timelineParsers - Configuration for parsing timeline strings.
    * @returns {Object} Normalized constraints object.
    */
-  parseConstraints(userConstraints, timelineParsers) {
+  _parseConstraints(userConstraints, timelineParsers) {
     return {
       timeline: parseTimeline(userConstraints.timeline, timelineParsers),
       experience: userConstraints.experienceLevel || 'beginner',
@@ -208,27 +208,13 @@ class RoadmapPrioritizationService {
    * @param {Object} roadmap
    * @param {Object} userConstraints
    */
-  validateInputs(roadmap, userConstraints) {
+  _validateInputs(roadmap, userConstraints) {
     if (!roadmap || !roadmap.phases || !Array.isArray(roadmap.phases)) {
       throw new Error('Invalid roadmap structure');
     }
     if (!userConstraints) {
       throw new Error('User constraints are required');
     }
-  }
-
-  /**
-   * Returns optimization factors for metadata.
-   * @param {Object} constraints
-   * @returns {Object}
-   */
-  getOptimizationFactors(constraints) {
-    return {
-      weights: this.weights,
-      riskMatrix: this.riskMatrix,
-      learningPatterns: this.learningPatterns,
-      appliedConstraints: constraints
-    };
   }
 }
 
