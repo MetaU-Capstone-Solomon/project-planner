@@ -91,12 +91,16 @@ Basically, a student or a developer signs up for our app and inputs their projec
 - User can view response from AI
 - User can add or modify inputs
 - User can save response
-- Users can track their progress
 
 ### Optional
-- User can get reminders of deadlines
+- Users can track their progress
 - User can edit their profile information
 - Users can delete project
+- Users can have full control of their roadmap
+
+## Documentation
+
+- **[Database Documentation](./DATABASE_DOCUMENTATION.md)** - Comprehensive guide to the Supabase database schema, including tables, relationships, security policies, and usage examples.
 
 ---
 
@@ -195,7 +199,7 @@ flowchart TD
   J --> K["Show success feedback"]
 ```
 
-TODO: Add documentation link here.
+[Read the full technical documentation on editable tasks here.](https://docs.google.com/document/d/1D-pU7AEL3BPqhi7GoVCNPoi5lMSZsoYKhuzNDATksxw/edit?tab=t.0#heading=h.4zppa3kwupf8)
 
 ### Stretch Goal #2 - Milestone Edit, Delete, and Reordering
 **What:**
@@ -223,7 +227,7 @@ flowchart TD
   M --> N["Show success feedback"]
 ```
 
-TODO: Add documentation link here.
+[Read the full technical documentation on milestone modification here.](https://docs.google.com/document/d/1lfyf-JqpecPdTc5dTqjFPdEIBxwG69Z67OUQ3yTVJGU/edit?tab=t.0)
 
 ### Stretch Goal #3 - Caching Implementation for Dashboard and Project Detail
 **What:**
@@ -247,4 +251,28 @@ flowchart TD
   J --> D
 ```
 
-TODO: Add documentation link here.
+[Read the full technical documentation on caching implementation here.](https://docs.google.com/document/d/1wZPFsTe2ZeJecbOWk8NwgGJVeWQ2w5CpjkDSWYPECVI/edit?tab=t.0#heading=h.w927rluwcrby)
+
+### Stretch Goal #4 - Progress Tracking System
+**What:**
+- Implement a comprehensive progress tracking system that allows users to mark tasks as completed, track progress across all project levels (tasks, milestones, phases, and overall project), and visualize their advancement through interactive progress bars and completion indicators.
+
+**How:**
+- The frontend provides interactive controls (dropdowns) for users to update task status (pending, in-progress, completed). When a user toggles a task status, the system immediately calculates progress percentages at multiple hierarchy levels using utility functions. Progress is displayed through the progress bar, percentage indicators, and completion ratios. All status changes are persisted to the backend database and cached for performance. The system provides real-time visual feedback and maintains data consistency across all components.
+
+```mermaid
+flowchart TD
+  A["User toggles task status dropdown"] --> B["Immediate local state update"]
+  B --> C["Callback propagation through component hierarchy"]
+  C --> D["Update roadmap state in ProjectDetailPage"]
+  D --> E["Progress calculations trigger automatically"]
+  E --> F["Visual indicators update in real-time"]
+  F --> G["Debounced backend persistence (800ms delay)"]
+  G --> H{"Backend update successful?"}
+  H -- "No" --> I["Show error toast"]
+  H -- "Yes" --> J["Invalidate React Query cache"]
+  J --> K["Cache invalidation triggers re-fetch"]
+  K --> L["UI reflects final state"]
+```
+
+[Read the full technical documentation on progress tracking here.](https://docs.google.com/document/d/186Ik8ukTwMn-h6FgXegn_9YJ1FubEPx3dGui451r-Zw/edit?tab=t.0)

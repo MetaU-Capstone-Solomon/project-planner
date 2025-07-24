@@ -124,7 +124,7 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
   // Handle task status update
   const handleTaskStatusChange = (milestoneId, taskId, newStatus) => {
     if (onTaskUpdate) {
-      onTaskUpdate(phase.id, milestoneId, taskId, newStatus);
+      onTaskUpdate(phase.id, milestoneId, taskId, { status: newStatus });
     }
   };
 

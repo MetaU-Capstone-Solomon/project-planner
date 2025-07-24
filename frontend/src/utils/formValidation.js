@@ -18,12 +18,13 @@
  */
 export const hasRequiredFields = (values) => {
   const hasTitle = values.title?.trim();
+  const hasDescription = values.description?.trim();
   const hasTimeline =
     values.timeline && (values.timeline !== 'custom' || values.customTimeline?.trim());
   const hasExperienceLevel = values.experienceLevel;
   const hasProjectScope = values.projectScope;
 
-  return hasTitle && hasTimeline && hasExperienceLevel && hasProjectScope;
+  return hasTitle && hasDescription && hasTimeline && hasExperienceLevel && hasProjectScope;
 };
 
 /**

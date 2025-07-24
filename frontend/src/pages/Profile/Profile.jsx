@@ -48,7 +48,7 @@ const Profile = () => {
         {/* Main Profile Container */}
         <div className="relative z-0 overflow-hidden rounded-xl bg-white shadow-lg dark:bg-gray-900">
           {/* Header Banner */}
-          <div className="relative z-[-1] h-32 bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="relative h-32 bg-gradient-to-r from-blue-600 to-purple-600">
             <div className="absolute -bottom-16 left-8">
               <div className="relative">
                 <img
