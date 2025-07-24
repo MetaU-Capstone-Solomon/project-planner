@@ -98,6 +98,10 @@ Basically, a student or a developer signs up for our app and inputs their projec
 - Users can delete project
 - Users can have full control of their roadmap
 
+## Documentation
+
+- **[Database Documentation](./DATABASE_DOCUMENTATION.md)** - Comprehensive guide to the Supabase database schema, including tables, relationships, security policies, and usage examples.
+
 ---
 
 ## User Personas
