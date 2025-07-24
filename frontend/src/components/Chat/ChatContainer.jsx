@@ -17,7 +17,7 @@ const ChatContainer = ({ messages, loading, stage, sendMessage }) => {
   }, [messages]);
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-gray-200 bg-white pb-2 dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-full flex-col border border-gray-200 bg-white pb-2 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-200">

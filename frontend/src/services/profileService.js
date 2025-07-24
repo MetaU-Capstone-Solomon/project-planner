@@ -38,9 +38,11 @@ export const updateUserPassword = async (updatePassword, newPassword) => {
 export const uploadAvatar = async (supabase, userId, file) => {
   // Validate image type & size (<=2MB)
   if (!FILE_UPLOAD_CONSTANTS.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    showErrorToast('Unsupported file type');
     return { success: false, error: 'Unsupported file type' };
   }
   if (file.size > FILE_UPLOAD_CONSTANTS.MAX_FILE_SIZE_BYTES) {
+    showErrorToast('File too large (max 2MB)');
     return { success: false, error: 'File too large (max 2MB)' };
   }
 
@@ -54,6 +56,7 @@ export const uploadAvatar = async (supabase, userId, file) => {
     contentType: file.type,
   });
   if (uploadError) {
+    showErrorToast(uploadError.message);
     return { success: false, error: uploadError.message };
   }
 
@@ -67,9 +70,11 @@ export const uploadAvatar = async (supabase, userId, file) => {
     data: { avatar_url: publicUrl },
   });
   if (updateError) {
+    showErrorToast(updateError.message);
     return { success: false, error: updateError.message };
   }
 
+  showSuccessToast('Avatar updated successfully!');
   return { success: true, url: publicUrl };
 };
 
