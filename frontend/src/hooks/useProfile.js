@@ -71,12 +71,9 @@ export const useProfile = () => {
   const handleAvatarUpload = async (file) => {
     setAvatarLoading(true);
     const { success, error, url } = await uploadAvatar(supabase, user.id, file);
-    if (!success) {
-      setError(error);
-    } else {
+    if (success) {
       // Update timestamp immediately for instant display
       setAvatarTimestamp(Date.now());
-      setSuccess('Avatar updated successfully!');
     }
     setAvatarLoading(false);
   };
