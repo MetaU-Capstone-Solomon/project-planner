@@ -74,10 +74,9 @@ export const useProfile = () => {
     if (!success) {
       setError(error);
     } else {
-      // Propagate change
-      setSuccess('Avatar updated');
-      // Update timestamp on successful upload
+      // Update timestamp immediately for instant display
       setAvatarTimestamp(Date.now());
+      setSuccess('Avatar updated successfully!');
     }
     setAvatarLoading(false);
   };
