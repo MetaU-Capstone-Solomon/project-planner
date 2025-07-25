@@ -20,55 +20,55 @@ class TextSummarizer {
     }
 
     // Check cache first
-    const cacheKey = this._generateCacheKey(text);
+    const cacheKey = this.#generateCacheKey(text);
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
 
     // Quick mode for very large files
     if (text.length > SUMMARIZATION_CONFIG.QUICK_MODE_THRESHOLD) {
-      const quickSummary = this._quickSummarize(text);
+      const quickSummary = this.#quickSummarize(text);
       this.cache.set(cacheKey, quickSummary);
       return quickSummary;
     }
 
-    const cleanedText = this._cleanText(text);
-    const sentences = this._splitIntoSentences(cleanedText);
+    const cleanedText = this.#cleanText(text);
+    const sentences = this.#splitIntoSentences(cleanedText);
 
     if (sentences.length > SUMMARIZATION_CONFIG.MAX_SENTENCES) {
-      const quickSummary = this._quickSummarize(text);
+      const quickSummary = this.#quickSummarize(text);
       this.cache.set(cacheKey, quickSummary);
       return quickSummary;
     }
 
     // Score sentences based on relevance and position
-    const scoredSentences = this._scoreSentencesOptimized(sentences);
-    const selectedSentences = this._selectSentencesOptimized(scoredSentences);
-    const summary = this._reconstructSummary(selectedSentences);
+    const scoredSentences = this.#scoreSentencesOptimized(sentences);
+    const selectedSentences = this.#selectSentencesOptimized(scoredSentences);
+    const summary = this.#reconstructSummary(selectedSentences);
 
     this.cache.set(cacheKey, summary);
     return summary;
   }
 
   // Simple word-based summary for large files
-  _quickSummarize(text) {
+  #quickSummarize(text) {
     const words = text.split(/\s+/);
     const targetWords = Math.floor(this.targetLength / 5);
     return words.slice(0, targetWords).join(' ') + '...';
   }
 
   // Creates a unique key for caching based on text length and content samples
-  _generateCacheKey(text) {
+  #generateCacheKey(text) {
     return `${text.length}_${text.substring(0, 100)}_${text.substring(text.length - 100)}`;
   }
 
   // Normalizes whitespace and removes extra spaces
-  _cleanText(text) {
+  #cleanText(text) {
     return text.replace(/\s+/g, ' ').trim();
   }
 
   // Breaks text into sentences and filters out very short ones
-  _splitIntoSentences(text) {
+  #splitIntoSentences(text) {
     const sentences = text.split(/(?<=[.!?])\s+/);
     return sentences.filter(
       (sentence) => sentence.length > SUMMARIZATION_CONFIG.MIN_SENTENCE_LENGTH
@@ -76,10 +76,10 @@ class TextSummarizer {
   }
 
   // Assigns importance scores to sentences based on keywords and position
-  _scoreSentencesOptimized(sentences) {
+  #scoreSentencesOptimized(sentences) {
     const totalSentences = sentences.length;
     const results = new Array(totalSentences);
-    const positionScores = this._calculatePositionScores(totalSentences);
+    const positionScores = this.#calculatePositionScores(totalSentences);
 
     // Process in batches for better performance
     const batchSize = SUMMARIZATION_CONFIG.BATCH_SIZE;
@@ -87,7 +87,7 @@ class TextSummarizer {
       const end = Math.min(i + batchSize, totalSentences);
       for (let j = i; j < end; j++) {
         const sentence = sentences[j];
-        const score = this._calculateSentenceScoreOptimized(
+        const score = this.#calculateSentenceScoreOptimized(
           sentence,
           j,
           totalSentences,
@@ -101,7 +101,7 @@ class TextSummarizer {
   }
 
   // Calculates scores based on sentence position in the document
-  _calculatePositionScores(total) {
+  #calculatePositionScores(total) {
     const scores = new Array(total);
     for (let i = 0; i < total; i++) {
       const normalizedPosition = i / total;
@@ -118,7 +118,7 @@ class TextSummarizer {
   }
 
   // Scores individual sentences based on multiple factors
-  _calculateSentenceScoreOptimized(sentence, index, total, positionScores) {
+  #calculateSentenceScoreOptimized(sentence, index, total, positionScores) {
     let score = positionScores[index];
 
     // Prefer medium-length sentences
@@ -150,7 +150,7 @@ class TextSummarizer {
   }
 
   // Picks the highest scoring sentences that fit within target length
-  _selectSentencesOptimized(scoredSentences) {
+  #selectSentencesOptimized(scoredSentences) {
     const sorted = scoredSentences
       .sort((a, b) => b.score - a.score)
       .slice(0, Math.ceil(this.targetLength / 50));
@@ -173,7 +173,7 @@ class TextSummarizer {
   }
 
   // Combines selected sentences into final summary text
-  _reconstructSummary(selectedSentences) {
+  #reconstructSummary(selectedSentences) {
     if (selectedSentences.length === 0) return '';
 
     const summary = selectedSentences.map((s) => s.text).join(' ');
