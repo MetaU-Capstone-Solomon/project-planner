@@ -12,21 +12,21 @@ class FileProcessingService {
   // Processes uploaded files and returns original and summarized text
   async processFile(file) {
     try {
-      const fileExtension = this.getFileExtension(file.originalname);
+      const fileExtension = this.#getFileExtension(file.originalname);
       let extractedText = '';
 
       switch (fileExtension) {
         case '.txt':
-          extractedText = await this.extractTextFromTxt(file);
+          extractedText = await this.#extractTextFromTxt(file);
           break;
         case '.docx':
-          extractedText = await this.extractTextFromDocx(file);
+          extractedText = await this.#extractTextFromDocx(file);
           break;
         case '.pdf':
-          extractedText = await this.extractTextFromPdf(file);
+          extractedText = await this.#extractTextFromPdf(file);
           break;
         case '.doc':
-          extractedText = await this.extractTextFromDoc(file);
+          extractedText = await this.#extractTextFromDoc(file);
           break;
         default:
           throw new Error(`Unsupported file type: ${fileExtension}`);
@@ -52,17 +52,17 @@ class FileProcessingService {
   }
 
   // Gets the lowercase file extension from filename
-  getFileExtension(filename) {
+  #getFileExtension(filename) {
     return '.' + filename.split('.').pop().toLowerCase();
   }
 
   // Extracts text from TXT files using UTF-8 encoding
-  async extractTextFromTxt(file) {
+  async #extractTextFromTxt(file) {
     return file.buffer.toString('utf-8');
   }
 
   // Extracts raw text from DOCX files using mammoth
-  async extractTextFromDocx(file) {
+  async #extractTextFromDocx(file) {
     try {
       const result = await mammoth.extractRawText({ buffer: file.buffer });
       return result.value;
@@ -72,7 +72,7 @@ class FileProcessingService {
   }
 
   // Extracts text content from PDF files
-  async extractTextFromPdf(file) {
+  async #extractTextFromPdf(file) {
     try {
       const data = await pdfParse(file.buffer);
       return data.text;
@@ -82,7 +82,7 @@ class FileProcessingService {
   }
 
   // Extracts text from legacy DOC files using textract
-  async extractTextFromDoc(file) {
+  async #extractTextFromDoc(file) {
     try {
       return new Promise((resolve, reject) => {
         textract.fromBufferWithName(file.originalname, file.buffer, (error, text) => {
@@ -99,12 +99,12 @@ class FileProcessingService {
   }
 
   // Returns current summarizer cache statistics
-  getCacheStats() {
+  #getCacheStats() {
     return this.summarizer.getCacheStats();
   }
 
   // Clears the summarizer cache
-  clearCache() {
+  #clearCache() {
     this.summarizer.clearCache();
   }
 }
