@@ -69,7 +69,7 @@ const Navbar = () => {
 
   // Navigation items
   const navItems = [
-    { path: ROUTES.DASHBOARD, label: 'Home', isActive: location.pathname === ROUTES.DASHBOARD },
+    { path: ROUTES.DASHBOARD, label: 'Dashboard', isActive: location.pathname === ROUTES.DASHBOARD },
   ];
 
   return (

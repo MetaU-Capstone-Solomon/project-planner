@@ -26,7 +26,7 @@
  * @param {number} index - Phase index for numbering
  * @returns {string} - Formatted phase text with proper indentation
  */
-const formatPhaseText = (phase, index) => {
+const _formatPhaseText = (phase, index) => {
   let text = `Phase ${index + 1}: ${phase.title}\n`;
   if (phase.timeline) {
     text += `Timeline: ${phase.timeline}\n`;
@@ -35,7 +35,7 @@ const formatPhaseText = (phase, index) => {
 
   if (phase.milestones && Array.isArray(phase.milestones)) {
     phase.milestones.forEach((milestone, mIndex) => {
-      text += formatMilestoneText(milestone, mIndex);
+      text += _formatMilestoneText(milestone, mIndex);
     });
   }
 
@@ -48,7 +48,7 @@ const formatPhaseText = (phase, index) => {
  * @param {number} index - Milestone index
  * @returns {string} - Formatted milestone text
  */
-const formatMilestoneText = (milestone, index) => {
+const _formatMilestoneText = (milestone, index) => {
   let text = `  Milestone ${index + 1}: ${milestone.title}\n`;
   if (milestone.timeline) {
     text += `  Timeline: ${milestone.timeline}\n`;
@@ -58,7 +58,7 @@ const formatMilestoneText = (milestone, index) => {
   if (milestone.tasks && Array.isArray(milestone.tasks)) {
     text += '  Tasks:\n';
     milestone.tasks.forEach((task, tIndex) => {
-      text += formatTaskText(task, tIndex);
+      text += _formatTaskText(task, tIndex);
     });
   }
 
@@ -71,7 +71,7 @@ const formatMilestoneText = (milestone, index) => {
  * @param {number} index - Task index
  * @returns {string} - Formatted task text
  */
-const formatTaskText = (task, index) => {
+const _formatTaskText = (task, index) => {
   let text = `    ${index + 1}. ${task.title}\n`;
 
   if (task.estimatedHours) {
@@ -87,7 +87,7 @@ const formatTaskText = (task, index) => {
  * @param {string} text - The text to clean
  * @returns {string} - Text without code block markers
  */
-const removeCodeBlockMarkers = (text) => {
+const _removeCodeBlockMarkers = (text) => {
   if (!text || typeof text !== 'string') return text;
 
   // Remove ```json and ``` markers
@@ -99,7 +99,7 @@ const removeCodeBlockMarkers = (text) => {
  * @param {string} text - The text to clean
  * @returns {string} - Text without markdown formatting
  */
-const removeMarkdownFormatting = (text) => {
+const _removeMarkdownFormatting = (text) => {
   if (!text || typeof text !== 'string') return text;
   
   return text
@@ -118,7 +118,7 @@ const removeMarkdownFormatting = (text) => {
  * @param {string} content - The content to parse
  * @returns {Object|null} Parsed content or null if invalid
  */
-const safeParseJSON = (content) => {
+const _safeParseJSON = (content) => {
   if (!content) return null;
 
   try {
@@ -143,10 +143,10 @@ export const formatAIResponse = (content) => {
   if (!content) return content;
 
   // Remove markdown code block markers first
-  const cleanedContent = removeCodeBlockMarkers(content);
+  const cleanedContent = _removeCodeBlockMarkers(content);
 
   // Try to parse as roadmap content using safe parser
-  const roadmapData = safeParseJSON(cleanedContent);
+  const roadmapData = _safeParseJSON(cleanedContent);
 
   if (roadmapData) {
     let formattedText = '';
@@ -161,7 +161,7 @@ export const formatAIResponse = (content) => {
     if (roadmapData.phases && Array.isArray(roadmapData.phases)) {
       formattedText += 'Project Phases:\n\n';
       roadmapData.phases.forEach((phase, index) => {
-        formattedText += formatPhaseText(phase, index);
+        formattedText += _formatPhaseText(phase, index);
       });
     }
 
@@ -169,5 +169,5 @@ export const formatAIResponse = (content) => {
   }
 
   // If not roadmap content, return cleaned content with markdown formatting removed
-  return removeMarkdownFormatting(cleanedContent);
+  return _removeMarkdownFormatting(cleanedContent);
 };
