@@ -67,7 +67,7 @@ const PhaseCardNew = ({ phase, onClick, onEdit }) => {
       className={`${COLOR_PATTERNS.landing.card} border-l-4 ${phaseColorClasses} cursor-pointer`}
       onClick={onClick}
     >
-      <div className="px-2 py-4">
+      <div className="px-1 py-4">
         {/* Header */}
         <div className="mb-3 flex items-start justify-between">
           <div className="min-w-0 flex-1">
