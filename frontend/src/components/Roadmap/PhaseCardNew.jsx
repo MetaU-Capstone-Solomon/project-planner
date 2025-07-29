@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, Edit2 } from 'lucide-react';
 import { calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
@@ -33,8 +33,9 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {Array} props.phase.milestones[].tasks - Array of task objects
  * @param {string} props.phase.milestones[].tasks[].status - Task status ('pending', 'completed', etc.)
  * @param {Function} [props.onClick] - Optional click handler for opening modal
+ * @param {Function} [props.onEdit] - Optional edit handler for editing phase title
  */
-const PhaseCardNew = ({ phase, onClick }) => {
+const PhaseCardNew = ({ phase, onClick, onEdit }) => {
   // Calculate phase progress percentage (0-100)
   const progress = calculatePhaseProgress(phase);
 
@@ -66,18 +67,30 @@ const PhaseCardNew = ({ phase, onClick }) => {
       className={`${COLOR_PATTERNS.landing.card} border-l-4 ${phaseColorClasses} cursor-pointer`}
       onClick={onClick}
     >
-      <div className="p-6">
+      <div className="px-2 py-4">
         {/* Header */}
-        <div className="mb-4 flex items-start justify-between">
+        <div className="mb-3 flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate`}>
+            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate text-left`}>
               Phase {phase.order}: {phase.title}
             </h3>
           </div>
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(phase);
+              }}
+              className={`ml-2 rounded p-0.5 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
+              aria-label="Edit phase title"
+            >
+              <Edit2 className={`h-3 w-3 ${COLOR_CLASSES.action.edit.icon}`} />
+            </button>
+          )}
         </div>
 
         {/* Progress */}
-        <div className="mb-4">
+        <div className="mb-3">
           <div className="mb-2 flex items-center justify-between">
             <span className={`text-sm font-medium ${COLOR_CLASSES.text.body}`}>Progress</span>
             <span className={`text-sm font-semibold ${COLOR_CLASSES.text.heading}`}>

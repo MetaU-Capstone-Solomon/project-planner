@@ -11,6 +11,7 @@ export const MESSAGES = {
     FILE_PROCESSED: '✓ Document processed successfully!',
     MILESTONE_MOVED_UP: 'Milestone moved up successfully',
     MILESTONE_MOVED_DOWN: 'Milestone moved down successfully',
+    PHASE_UPDATED: 'Phase updated successfully',
   },
   ERROR: {
     PROJECT_SAVE_FAILED: 'Failed to save project. Please try again.',
