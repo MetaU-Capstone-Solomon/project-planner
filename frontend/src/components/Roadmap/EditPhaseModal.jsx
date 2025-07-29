@@ -1,43 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
+import { MESSAGES } from '@/constants/messages';
 
 /**
- * Modal for editing phase titles
+ * Modal for editing and creating phase titles
  *
  * HOW IT WORKS:
  *
- * 1. FORM STATE: Manages local form state with title input and validation status.
- *    - formData: Current form values (title)
+ * 1. MODE DETECTION: Determines if this is 'edit' mode (existing phase) or 'create' mode (new phase)
+ *    based on whether the 'phase' prop is provided or null.
+ *
+ * 2. FORM STATE: Manages local form state with title and timeline inputs and validation status.
+ *    - formData: Current form values (title, timeline)
  *    - isValid: Real-time validation state for immediate user feedback
  *
- * 2. INITIALIZATION: When modal opens, pre-populates form with existing phase data
- *    using useEffect to ensure form reflects current phase title.
+ * 3. INITIALIZATION: When modal opens, pre-populates form with existing phase data
+ *    or clears it for new phase creation using useEffect.
  *
- * 3. VALIDATION: Real-time validation ensures title is not empty before allowing save.
+ * 4. VALIDATION: Real-time validation ensures title is not empty before allowing save.
  *    Shows error message and disables save button if validation fails.
  *
- * 4. SAVE HANDLING: Sends only the updated title back to parent component for processing.
+ * 5. SAVE HANDLING:
+ *    - EDIT MODE: Sends updated title and timeline back to parent component
+ *    - CREATE MODE: Generates complete new phase object with unique ID and user-provided values
  *
- * 5. KEYBOARD SHORTCUTS: Supports Ctrl+Enter to save and Escape to cancel for better UX.
+ * 6. KEYBOARD SHORTCUTS: Supports Ctrl+Enter to save and Escape to cancel for better UX.
  *
  * @param {Object} props - Component props
  * @param {boolean} props.isOpen - Whether the modal is open
  * @param {Function} props.onClose - Function to close the modal
- * @param {Object} props.phase - Phase data to edit
+ * @param {Object|null} props.phase - Phase data to edit (null for create mode)
  * @param {Function} props.onSave - Callback to save phase changes
+ * @param {number} props.nextOrder - Next order number for new phases (create mode only)
  */
-const EditPhaseModal = ({ isOpen, onClose, phase, onSave }) => {
-  const [formData, setFormData] = useState({ title: '' });
+const EditPhaseModal = ({ isOpen, onClose, phase, onSave, nextOrder }) => {
+  const [formData, setFormData] = useState({ title: '', timeline: '' });
   const [isValid, setIsValid] = useState(true);
+
+  // Determine mode based on phase prop
+  const mode = phase ? 'edit' : 'create';
 
   // Initialize form data when modal opens
   useEffect(() => {
-    if (isOpen && phase) {
-      setFormData({
-        title: phase.title || '',
-      });
-      setIsValid(true);
+    if (isOpen) {
+      if (phase) {
+        setFormData({
+          title: phase.title || '',
+          timeline: phase.timeline || '',
+        });
+        setIsValid(true);
+      } else {
+        setFormData({
+          title: '',
+          timeline: '',
+        });
+        setIsValid(false);
+      }
     }
   }, [isOpen, phase]);
 
@@ -55,9 +74,27 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave }) => {
       return;
     }
 
-    onSave({
-      title: formData.title.trim(),
-    });
+    if (mode === 'create') {
+      const newPhase = {
+        id: `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: formData.title.trim(),
+        timeline: formData.timeline.trim() || MESSAGES.PLACEHOLDERS.PHASE_TIMELINE,
+        order: nextOrder || 1,
+        milestones: [],
+      };
+      onSave(newPhase);
+    } else {
+      const updates = {
+        title: formData.title.trim(),
+      };
+
+      // Only include timeline if it's not empty
+      if (formData.timeline.trim()) {
+        updates.timeline = formData.timeline.trim();
+      }
+
+      onSave(updates);
+    }
     onClose();
   };
 
@@ -90,7 +127,9 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave }) => {
           className={`border-b border-gray-200 p-4 dark:border-gray-600 ${COLOR_CLASSES.surface.modal} flex-shrink-0`}
         >
           <div className="flex items-center justify-between">
-            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>Edit Phase</h2>
+            <h2 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading}`}>
+              {mode === 'create' ? 'Add New Phase' : 'Edit Phase'}
+            </h2>
             <button
               onClick={handleCancel}
               className="rounded-full p-1 transition-colors duration-200 hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-800"
@@ -130,6 +169,29 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave }) => {
               )}
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {formData.title.length}/100 characters
+              </p>
+            </div>
+
+            {/* Timeline Field */}
+            <div>
+              <label
+                htmlFor="phase-timeline"
+                className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}
+              >
+                Timeline
+              </label>
+              <input
+                id="phase-timeline"
+                type="text"
+                className={`w-full ${COLOR_CLASSES.text.heading} rounded border border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 focus:${COLOR_CLASSES.border.focus} outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800`}
+                value={formData.timeline}
+                onChange={(e) => handleInputChange('timeline', e.target.value)}
+                onKeyDown={handleKeyDown}
+                maxLength={50}
+                placeholder="e.g., 2-3 weeks"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {formData.timeline.length}/50 characters
               </p>
             </div>
           </div>

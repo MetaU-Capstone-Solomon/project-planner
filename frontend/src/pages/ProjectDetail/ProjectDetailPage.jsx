@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
@@ -24,7 +25,7 @@ import { QUERY_KEYS } from '@/constants/cache';
  * - After any edit (reorder, add, delete), invalidates the cache.
  * - On refresh or revisit, always shows the latest data after edits.
  * - Cache timing and keys are managed in the config file.
- * 
+ *
  * Features:
  * - Card-based phase layout similar to dashboard
  * - Responsive grid layout for phase cards
@@ -51,6 +52,7 @@ const ProjectDetailPage = () => {
   const [selectedPhase, setSelectedPhase] = useState(null);
   const [isEditPhaseModalOpen, setIsEditPhaseModalOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState(null);
+  const [isCreatePhaseModalOpen, setIsCreatePhaseModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Debounced persist function to minimize network overhead during rapid interactions
@@ -194,6 +196,20 @@ const ProjectDetailPage = () => {
   };
 
   /**
+   * Opens phase create modal
+   */
+  const handleCreatePhase = () => {
+    setIsCreatePhaseModalOpen(true);
+  };
+
+  /**
+   * Closes phase create modal
+   */
+  const handleCloseCreatePhaseModal = () => {
+    setIsCreatePhaseModalOpen(false);
+  };
+
+  /**
    * Saves phase edits and updates roadmap data
    * @param {Object} updatedPhase - Updated phase data
    */
@@ -216,6 +232,24 @@ const ProjectDetailPage = () => {
 
     // Show immediate success feedback
     showSuccessToast(MESSAGES.SUCCESS.PHASE_UPDATED);
+  };
+
+  /**
+   * Saves new phase and adds it to roadmap data
+   * @param {Object} newPhase - New phase data
+   */
+  const handleSaveNewPhase = (newPhase) => {
+    setRoadmapData((prevRoadmap) => {
+      const updatedRoadmap = { ...prevRoadmap, phases: [...prevRoadmap.phases, newPhase] };
+
+      // Save to backend
+      persistRoadmap(updatedRoadmap);
+
+      return updatedRoadmap;
+    });
+
+    // Show immediate success feedback
+    showSuccessToast(MESSAGES.SUCCESS.PHASE_CREATED);
   };
 
   /**
@@ -392,9 +426,19 @@ const ProjectDetailPage = () => {
 
                 {/* Phase Cards Grid */}
                 <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Project Phases
-                  </h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Project Phases
+                    </h2>
+                    <button
+                      onClick={handleCreatePhase}
+                      className="flex items-center space-x-2 rounded-lg border border-blue-600 bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
+                      aria-label="Add new phase"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>Add Phase</span>
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {roadmapData.phases.map((phase) => (
                       <PhaseCardNew
@@ -422,6 +466,15 @@ const ProjectDetailPage = () => {
                 onClose={handleCloseEditPhaseModal}
                 phase={editingPhase}
                 onSave={handleSavePhaseEdit}
+              />
+
+              {/* Create Phase Modal */}
+              <EditPhaseModal
+                isOpen={isCreatePhaseModalOpen}
+                onClose={handleCloseCreatePhaseModal}
+                phase={null}
+                onSave={handleSaveNewPhase}
+                nextOrder={roadmapData.phases.length + 1}
               />
             </>
           ) : (
