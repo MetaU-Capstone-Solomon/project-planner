@@ -6,8 +6,9 @@ import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
+import EditPhaseModal from '@/components/Roadmap/EditPhaseModal';
 import { getProject, updateProject } from '@/services/projectService';
-import { showErrorToast } from '@/utils/toastUtils';
+import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MARKDOWN } from '@/constants/roadmap';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
@@ -48,6 +49,8 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(null);
+  const [isEditPhaseModalOpen, setIsEditPhaseModalOpen] = useState(false);
+  const [editingPhase, setEditingPhase] = useState(null);
   const queryClient = useQueryClient();
 
   // Debounced persist function to minimize network overhead during rapid interactions
@@ -58,6 +61,7 @@ const ProjectDetailPage = () => {
       const result = await updateProject(projectId, payload);
       if (!result.success) {
         console.error('Error saving roadmap:', result.error);
+        showErrorToast(MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       } else {
         // Invalidate project detail and user projects caches
         queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
@@ -173,6 +177,48 @@ const ProjectDetailPage = () => {
   };
 
   /**
+   * Opens phase edit modal
+   * @param {Object} phase - Phase data to edit
+   */
+  const handlePhaseEdit = (phase) => {
+    setEditingPhase(phase);
+    setIsEditPhaseModalOpen(true);
+  };
+
+  /**
+   * Closes phase edit modal
+   */
+  const handleCloseEditPhaseModal = () => {
+    setIsEditPhaseModalOpen(false);
+    setEditingPhase(null);
+  };
+
+  /**
+   * Saves phase edits and updates roadmap data
+   * @param {Object} updatedPhase - Updated phase data
+   */
+  const handleSavePhaseEdit = (updatedPhase) => {
+    setRoadmapData((prevRoadmap) => {
+      const newPhases = prevRoadmap.phases.map((phase) => {
+        if (phase.id === editingPhase.id) {
+          return { ...phase, ...updatedPhase };
+        }
+        return phase;
+      });
+
+      const updatedRoadmap = { ...prevRoadmap, phases: newPhases };
+
+      // Save to backend
+      persistRoadmap(updatedRoadmap);
+
+      return updatedRoadmap;
+    });
+
+    // Show immediate success feedback
+    showSuccessToast(MESSAGES.SUCCESS.PHASE_UPDATED);
+  };
+
+  /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
    * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
@@ -234,7 +280,7 @@ const ProjectDetailPage = () => {
         }
       }
 
-      // Persist changes to backend
+      // Save to backend
       persistRoadmap(updatedRoadmap);
 
       return updatedRoadmap;
@@ -304,7 +350,7 @@ const ProjectDetailPage = () => {
         }
       }
 
-      // Persist changes to backend
+      // Save to backend
       persistRoadmap(updatedRoadmap);
 
       return updatedRoadmap;
@@ -355,6 +401,7 @@ const ProjectDetailPage = () => {
                         key={phase.id}
                         phase={phase}
                         onClick={() => handlePhaseClick(phase)}
+                        onEdit={handlePhaseEdit}
                       />
                     ))}
                   </div>
@@ -367,6 +414,14 @@ const ProjectDetailPage = () => {
                 phase={selectedPhase}
                 onTaskUpdate={handleTaskUpdate}
                 onMilestoneReorder={handleMilestoneReorder}
+              />
+
+              {/* Edit Phase Modal */}
+              <EditPhaseModal
+                isOpen={isEditPhaseModalOpen}
+                onClose={handleCloseEditPhaseModal}
+                phase={editingPhase}
+                onSave={handleSavePhaseEdit}
               />
             </>
           ) : (
