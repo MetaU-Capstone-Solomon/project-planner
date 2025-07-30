@@ -258,18 +258,7 @@ const ProjectDetailPage = () => {
    * @param {Object} phase - Phase to delete
    */
   const handlePhaseDelete = (phase) => {
-    // Check if phase has content
-    const hasMilestones = phase.milestones && phase.milestones.length > 0;
-    const hasTasks =
-      phase.milestones && phase.milestones.some((m) => m.tasks && m.tasks.length > 0);
-
-    let confirmationMessage = 'Are you sure you want to delete this phase?';
-
-    if (hasMilestones || hasTasks) {
-      confirmationMessage = `This phase contains ${hasMilestones ? `${phase.milestones.length} milestone${phase.milestones.length > 1 ? 's' : ''}` : ''}${hasMilestones && hasTasks ? ' and ' : ''}${hasTasks ? 'tasks' : ''}. Are you sure you want to delete this phase and all its content?`;
-    }
-
-    if (confirmAction(confirmationMessage, 'Delete Phase')) {
+    if (confirmAction('Are you sure you want to delete this phase?')) {
       setRoadmapData((prevRoadmap) => {
         const updatedRoadmap = {
           ...prevRoadmap,
