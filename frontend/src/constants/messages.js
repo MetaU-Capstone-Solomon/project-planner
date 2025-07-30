@@ -14,6 +14,7 @@ export const MESSAGES = {
     PHASE_UPDATED: 'Phase updated successfully',
     PHASE_CREATED: 'Phase created successfully',
     PHASE_DELETED: 'Phase deleted successfully',
+    PHASE_REORDERED: 'Phase reordered successfully',
   },
   PLACEHOLDERS: {
     PHASE_TIMELINE: 'Not yet set',
