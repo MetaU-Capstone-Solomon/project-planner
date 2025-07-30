@@ -288,6 +288,48 @@ const ProjectDetailPage = () => {
   };
 
   /**
+   * Handles phase reordering - move phase to previous or next position
+   * @param {string} phaseId - ID of the phase to reorder
+   * @param {string} direction - 'previous' or 'next'
+   */
+  const handlePhaseReorder = (phaseId, direction) => {
+    setRoadmapData((prevRoadmap) => {
+      const phases = [...prevRoadmap.phases];
+      const currentIndex = phases.findIndex((phase) => phase.id === phaseId);
+
+      if (currentIndex === -1) return prevRoadmap; // Phase not found
+
+      let newIndex;
+      if (direction === 'previous' && currentIndex > 0) {
+        newIndex = currentIndex - 1;
+      } else if (direction === 'next' && currentIndex < phases.length - 1) {
+        newIndex = currentIndex + 1;
+      } else {
+        return prevRoadmap; // Can't move further
+      }
+
+      // Swap phases
+      [phases[currentIndex], phases[newIndex]] = [phases[newIndex], phases[currentIndex]];
+
+      // Update order numbers
+      const reorderedPhases = phases.map((phase, index) => ({
+        ...phase,
+        order: index + 1,
+      }));
+
+      const updatedRoadmap = { ...prevRoadmap, phases: reorderedPhases };
+
+      // Save to backend
+      persistRoadmap(updatedRoadmap);
+
+      return updatedRoadmap;
+    });
+
+    // Show immediate success feedback
+    showSuccessToast(MESSAGES.SUCCESS.PHASE_REORDERED);
+  };
+
+  /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
    * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
@@ -475,13 +517,16 @@ const ProjectDetailPage = () => {
                     </button>
                   </div>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {roadmapData.phases.map((phase) => (
+                    {roadmapData.phases.map((phase, index) => (
                       <PhaseCardNew
                         key={phase.id}
                         phase={phase}
                         onClick={() => handlePhaseClick(phase)}
                         onEdit={handlePhaseEdit}
                         onDelete={handlePhaseDelete}
+                        onReorder={handlePhaseReorder}
+                        isFirst={index === 0}
+                        isLast={index === roadmapData.phases.length - 1}
                       />
                     ))}
                   </div>
