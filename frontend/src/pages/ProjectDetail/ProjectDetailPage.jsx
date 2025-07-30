@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import Button from '@/components/Button/Button';
+import confirmAction from '@/utils/confirmAction';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
@@ -253,6 +254,40 @@ const ProjectDetailPage = () => {
   };
 
   /**
+   * Handles phase deletion with confirmation
+   * @param {Object} phase - Phase to delete
+   */
+  const handlePhaseDelete = (phase) => {
+    // Check if phase has content
+    const hasMilestones = phase.milestones && phase.milestones.length > 0;
+    const hasTasks =
+      phase.milestones && phase.milestones.some((m) => m.tasks && m.tasks.length > 0);
+
+    let confirmationMessage = 'Are you sure you want to delete this phase?';
+
+    if (hasMilestones || hasTasks) {
+      confirmationMessage = `This phase contains ${hasMilestones ? `${phase.milestones.length} milestone${phase.milestones.length > 1 ? 's' : ''}` : ''}${hasMilestones && hasTasks ? ' and ' : ''}${hasTasks ? 'tasks' : ''}. Are you sure you want to delete this phase and all its content?`;
+    }
+
+    if (confirmAction(confirmationMessage, 'Delete Phase')) {
+      setRoadmapData((prevRoadmap) => {
+        const updatedRoadmap = {
+          ...prevRoadmap,
+          phases: prevRoadmap.phases.filter((p) => p.id !== phase.id),
+        };
+
+        // Save to backend
+        persistRoadmap(updatedRoadmap);
+
+        return updatedRoadmap;
+      });
+
+      // Show immediate success feedback
+      showSuccessToast(MESSAGES.SUCCESS.PHASE_DELETED);
+    }
+  };
+
+  /**
    * Handler to update task status and content from modal
    * Supports both legacy format (status string) and new format (object with title, description, status)
    * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
@@ -446,6 +481,7 @@ const ProjectDetailPage = () => {
                         phase={phase}
                         onClick={() => handlePhaseClick(phase)}
                         onEdit={handlePhaseEdit}
+                        onDelete={handlePhaseDelete}
                       />
                     ))}
                   </div>

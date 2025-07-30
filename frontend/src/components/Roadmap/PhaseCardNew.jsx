@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, CheckCircle, Edit2 } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, Edit2, Trash2 } from 'lucide-react';
 import { calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
@@ -34,8 +34,9 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {string} props.phase.milestones[].tasks[].status - Task status ('pending', 'completed', etc.)
  * @param {Function} [props.onClick] - Optional click handler for opening modal
  * @param {Function} [props.onEdit] - Optional edit handler for editing phase title
+ * @param {Function} [props.onDelete] - Optional delete handler for deleting phase
  */
-const PhaseCardNew = ({ phase, onClick, onEdit }) => {
+const PhaseCardNew = ({ phase, onClick, onEdit, onDelete }) => {
   // Calculate phase progress percentage (0-100)
   const progress = calculatePhaseProgress(phase);
 
@@ -71,22 +72,38 @@ const PhaseCardNew = ({ phase, onClick, onEdit }) => {
         {/* Header */}
         <div className="mb-3 flex items-start justify-between">
           <div className="min-w-0 flex-1">
-            <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate text-left`}>
+            <h3
+              className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate text-left`}
+            >
               Phase {phase.order}: {phase.title}
             </h3>
           </div>
-          {onEdit && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(phase);
-              }}
-              className={`ml-2 rounded p-0.5 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
-              aria-label="Edit phase title"
-            >
-              <Edit2 className={`h-3 w-3 ${COLOR_CLASSES.action.edit.icon}`} />
-            </button>
-          )}
+          <div className="flex items-center space-x-1">
+            {onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(phase);
+                }}
+                className={`rounded p-0.5 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.edit.hover}`}
+                aria-label="Edit phase title"
+              >
+                <Edit2 className={`h-3 w-3 ${COLOR_CLASSES.action.edit.icon}`} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(phase);
+                }}
+                className={`rounded p-0.5 ${COLOR_CLASSES.surface.cardHover} transition-colors ${COLOR_CLASSES.action.delete.hover}`}
+                aria-label="Delete phase"
+              >
+                <Trash2 className={`h-3 w-3 ${COLOR_CLASSES.action.delete.icon}`} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Progress */}
