@@ -11,11 +11,13 @@ export const MESSAGES = {
     FILE_PROCESSED: '✓ Document processed successfully!',
     MILESTONE_MOVED_UP: 'Milestone moved up successfully',
     MILESTONE_MOVED_DOWN: 'Milestone moved down successfully',
-              PHASE_UPDATED: 'Phase updated successfully',
-          PHASE_CREATED: 'Phase created successfully',
-        },
-        PLACEHOLDERS: {
-          PHASE_TIMELINE: 'Not yet set',
+    PHASE_UPDATED: 'Phase updated successfully',
+    PHASE_CREATED: 'Phase created successfully',
+    PHASE_DELETED: 'Phase deleted successfully',
+    PHASE_REORDERED: 'Phase reordered successfully',
+  },
+  PLACEHOLDERS: {
+    PHASE_TIMELINE: 'Not yet set',
   },
   ERROR: {
     PROJECT_SAVE_FAILED: 'Failed to save project. Please try again.',
