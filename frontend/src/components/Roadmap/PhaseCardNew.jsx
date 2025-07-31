@@ -1,7 +1,8 @@
 import React from 'react';
-import { Calendar, Clock, CheckCircle, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, Edit2, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
+import { getButtonClasses, getDisabledButtonClasses } from '@/utils/buttonUtils';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
 import { getPhaseColor } from '@/utils/roadmapUtils';
 
@@ -35,8 +36,11 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {Function} [props.onClick] - Optional click handler for opening modal
  * @param {Function} [props.onEdit] - Optional edit handler for editing phase title
  * @param {Function} [props.onDelete] - Optional delete handler for deleting phase
+ * @param {Function} [props.onReorder] - Optional reorder handler for reordering phase
+ * @param {boolean} [props.isFirst] - Whether this is the first phase
+ * @param {boolean} [props.isLast] - Whether this is the last phase
  */
-const PhaseCardNew = ({ phase, onClick, onEdit, onDelete }) => {
+const PhaseCardNew = ({ phase, onClick, onEdit, onDelete, onReorder, isFirst, isLast }) => {
   // Calculate phase progress percentage (0-100)
   const progress = calculatePhaseProgress(phase);
 
@@ -141,6 +145,42 @@ const PhaseCardNew = ({ phase, onClick, onEdit, onDelete }) => {
             <span>{phase.milestones ? phase.milestones.length : 0} milestones</span>
           </div>
         </div>
+
+        {/* Reorder Controls */}
+        {onReorder && (
+          <div className="mt-3 flex justify-end space-x-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReorder(phase.id, 'previous');
+              }}
+              disabled={isFirst}
+              className={`rounded p-1 transition-colors ${getButtonClasses(
+                isFirst,
+                `${COLOR_CLASSES.surface.cardHover} ${COLOR_CLASSES.action.reorder.hover}`,
+                getDisabledButtonClasses()
+              )}`}
+              aria-label="Move phase earlier"
+            >
+              <ArrowLeft className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReorder(phase.id, 'next');
+              }}
+              disabled={isLast}
+              className={`rounded p-1 transition-colors ${getButtonClasses(
+                isLast,
+                `${COLOR_CLASSES.surface.cardHover} ${COLOR_CLASSES.action.reorder.hover}`,
+                getDisabledButtonClasses()
+              )}`}
+              aria-label="Move phase later"
+            >
+              <ArrowRight className={`h-4 w-4 ${COLOR_CLASSES.action.reorder.icon}`} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
