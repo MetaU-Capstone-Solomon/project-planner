@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { UserPlus } from 'lucide-react';
 import Button from '@/components/Button/Button';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
 import ProgressBar from '@/components/Roadmap/ProgressBar';
 import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
-import { getProject, updateProject } from '@/services/projectService';
-import { showErrorToast } from '@/utils/toastUtils';
+import InviteCollaboratorsModal from '@/components/Collaboration/InviteCollaboratorsModal';
+import { getProject, updateProject, checkUserPermission } from '@/services/projectService';
+import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MARKDOWN } from '@/constants/roadmap';
+import { getButtonClasses } from '@/utils/formUtils';
+import { BUTTON_CONFIGS } from '@/constants/forms';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/cache';
@@ -48,12 +52,16 @@ const ProjectDetailPage = () => {
   const [roadmapData, setRoadmapData] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(null);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const queryClient = useQueryClient();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
     async (updatedRoadmap) => {
-      if (!projectId) return;
+      if (!projectId) {
+        return;
+      }
       const payload = JSON.stringify(updatedRoadmap);
       const result = await updateProject(projectId, payload);
       if (!result.success) {
@@ -71,13 +79,21 @@ const ProjectDetailPage = () => {
   // Fetch project data when component mounts or projectId changes
   useEffect(() => {
     const fetchProject = async () => {
-      if (!projectId) return;
+      if (!projectId) {
+        return;
+      }
 
       setLoading(true);
       try {
         const result = await getProject(projectId);
         if (result.success) {
           setProject(result.project);
+
+          // Check user permissions for collaboration features
+          const permissionResult = await checkUserPermission(projectId, MESSAGES.COLLABORATION.PERMISSIONS.INVITE);
+          if (permissionResult.success) {
+            setUserRole(permissionResult.role);
+          }
 
           // Try to parse content as JSON roadmap
           try {
@@ -196,7 +212,9 @@ const ProjectDetailPage = () => {
           const milestones = [...phase.milestones];
           const currentIndex = milestones.findIndex((m) => m.id === milestoneId);
 
-          if (currentIndex === -1) return phase; // Milestone not found
+          if (currentIndex === -1) {
+            return phase; // Milestone not found
+          }
 
           let newIndex;
           if (direction === 'up' && currentIndex > 0) {
@@ -311,6 +329,13 @@ const ProjectDetailPage = () => {
     });
   };
 
+  // Handle invite collaborators
+  const handleInviteCollaborators = async (inviteData) => {
+    // TODO: Implement actual invitation sending
+    console.log('Inviting collaborator:', inviteData);
+    showSuccessToast(MESSAGES.SUCCESS.INVITATION_SENT);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -341,7 +366,26 @@ const ProjectDetailPage = () => {
           {roadmapData ? (
             <>
               <div className="space-y-6">
-                <ProgressBar phases={roadmapData.phases} />
+                {/* Progress Bar with Collaboration Button */}
+                <div className="flex items-start gap-4">
+                  <div className="flex-1">
+                    <ProgressBar phases={roadmapData.phases} />
+                  </div>
+                  {userRole === MESSAGES.COLLABORATION.ROLES.ADMIN && (
+                    <div className="flex items-center justify-center mt-5">
+                      <button
+                        onClick={() => setInviteModalOpen(true)}
+                        className={BUTTON_CONFIGS.INVITE_BUTTON.CLASSES}
+                        title={BUTTON_CONFIGS.INVITE_BUTTON.TITLE}
+                        aria-label={BUTTON_CONFIGS.INVITE_BUTTON.ARIA_LABEL}
+                      >
+                        <UserPlus className={BUTTON_CONFIGS.INVITE_BUTTON.ICON_SIZE} />
+                        <span className={BUTTON_CONFIGS.INVITE_BUTTON.TEXT_SIZE}>Invite</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
 
                 {/* Phase Cards Grid */}
@@ -367,6 +411,14 @@ const ProjectDetailPage = () => {
                 phase={selectedPhase}
                 onTaskUpdate={handleTaskUpdate}
                 onMilestoneReorder={handleMilestoneReorder}
+              />
+
+              {/* Invite Collaborators Modal */}
+              <InviteCollaboratorsModal
+                isOpen={inviteModalOpen}
+                onClose={() => setInviteModalOpen(false)}
+                onInvite={handleInviteCollaborators}
+                projectName={project?.title || 'this project'}
               />
             </>
           ) : (
