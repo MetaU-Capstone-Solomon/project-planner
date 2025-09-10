@@ -24,6 +24,12 @@ export const MESSAGES = {
     ROADMAP_OPTIMIZATION_FAILED: 'Failed to optimize roadmap.',
     OPTIMIZATION_FAILED: 'Optimization failed.',
     DESCRIPTION_SUMMARIZATION_FAILED: 'Failed to summarize description. Using original text.',
+    // Collaboration permission errors
+    PERMISSION_DENIED: 'You do not have permission to perform this action.',
+    PROJECT_ACCESS_DENIED: 'You do not have access to this project.',
+    PROJECT_EDIT_DENIED: 'You do not have permission to edit this project.',
+    PROJECT_DELETE_DENIED: 'You do not have permission to delete this project.',
+    PERMISSION_CHECK_FAILED: 'Failed to verify permissions. Please try again.',
   },
   LOADING: {
     DEFAULT: 'Loading...',
@@ -36,6 +42,19 @@ export const MESSAGES = {
     SAVE_PROJECT: 'Save Project',
     VIEW_ROADMAP: 'View Roadmap',
     DEFAULT_TITLE: 'Untitled Project',
+  },
+  COLLABORATION: {
+    ROLES: {
+      ADMIN: 'admin',
+      EDITOR: 'editor',
+      VIEWER: 'viewer',
+    },
+    PERMISSIONS: {
+      VIEW: 'view',
+      EDIT: 'edit',
+      DELETE: 'delete',
+      INVITE: 'invite',
+    },
   },
   CONTENT: {
     NO_CONTENT_AVAILABLE: 'No content available',
