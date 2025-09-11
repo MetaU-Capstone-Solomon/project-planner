@@ -151,10 +151,10 @@ const InviteCollaboratorsModal = ({ isOpen, onClose, onInvite, projectName }) =>
                 <UserPlus className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className={`text-xl font-bold ${COLOR_CLASSES.text.heading}`}>
+                <h2 className={`text-2xl font-bold ${COLOR_CLASSES.text.heading}`}>
                   Invite Collaborators
                 </h2>
-                <p className={`text-sm ${COLOR_CLASSES.text.muted}`}>
+                <p className={`text-base ${COLOR_CLASSES.text.muted}`}>
                   Add team members to "{projectName}"
                 </p>
               </div>
@@ -174,7 +174,7 @@ const InviteCollaboratorsModal = ({ isOpen, onClose, onInvite, projectName }) =>
           <div className="space-y-6">
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className={`block text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
+              <label htmlFor="email" className={`block text-base font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
                 Email Address *
               </label>
               <div className="relative">
@@ -186,55 +186,52 @@ const InviteCollaboratorsModal = ({ isOpen, onClose, onInvite, projectName }) =>
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`${getInputClasses(!!errors.email)} pl-10`}
+                  className={`${getInputClasses(!!errors.email)} pl-10 text-base`}
                   placeholder="colleague@company.com"
                   autoComplete="email"
                   required
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                <p className="mt-1 text-base text-red-600 dark:text-red-400">{errors.email}</p>
               )}
             </div>
 
             {/* Role Selection */}
             <div>
-              <label htmlFor="role" className={`block text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
+              <label htmlFor="role" className={`block text-base font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
                 Role
               </label>
               <select
                 id="role"
                 value={formData.role}
                 onChange={(e) => handleInputChange('role', e.target.value)}
-                className={getInputClasses()}
+                className={`${getInputClasses()} text-base`}
               >
                 <option value={MESSAGES.COLLABORATION.ROLES.EDITOR}>
-                  Editor - {MESSAGES.COLLABORATION.ROLE_DESCRIPTIONS.editor}
+                  Editor
                 </option>
                 <option value={MESSAGES.COLLABORATION.ROLES.VIEWER}>
-                  Viewer - {MESSAGES.COLLABORATION.ROLE_DESCRIPTIONS.viewer}
+                  Viewer
                 </option>
               </select>
-              <p className={`mt-1 text-xs ${COLOR_CLASSES.text.muted}`}>
-                {MESSAGES.COLLABORATION.ROLE_DESCRIPTIONS[formData.role]}
-              </p>
             </div>
 
             {/* Optional Message */}
             <div>
-              <label htmlFor="message" className={`block text-sm font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
+              <label htmlFor="message" className={`block text-base font-medium ${COLOR_CLASSES.text.heading} mb-2`}>
                 Personal Message (Optional)
               </label>
               <textarea
                 id="message"
                 value={formData.message}
                 onChange={(e) => handleInputChange('message', e.target.value)}
-                className={`${getInputClasses()} resize-none`}
+                className={`${getInputClasses()} resize-none text-base`}
                 placeholder="Add a personal note to your invitation..."
                 rows={3}
                 maxLength={FORM_LIMITS.MESSAGE_MAX_LENGTH}
               />
-              <p className={`mt-1 text-xs ${COLOR_CLASSES.text.muted}`}>
+              <p className={`mt-1 text-sm ${COLOR_CLASSES.text.muted}`}>
                 {formData.message.length}/{FORM_LIMITS.MESSAGE_MAX_LENGTH} characters
               </p>
             </div>
