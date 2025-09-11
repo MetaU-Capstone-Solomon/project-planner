@@ -17,6 +17,7 @@ import { BUTTON_CONFIGS } from '@/constants/forms';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/cache';
+import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * ProjectDetailPage - Card-based project details layout with modal task editing
@@ -55,6 +56,7 @@ const ProjectDetailPage = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
@@ -331,9 +333,34 @@ const ProjectDetailPage = () => {
 
   // Handle invite collaborators
   const handleInviteCollaborators = async (inviteData) => {
-    // TODO: Implement actual invitation sending
-    console.log('Inviting collaborator:', inviteData);
-    showSuccessToast(MESSAGES.SUCCESS.INVITATION_SENT);
+    try {
+      const response = await fetch('http://localhost:3001/api/invite-collaborator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: inviteData.email,
+          role: inviteData.role,
+          projectId: project.id,
+          projectName: project.title,
+          inviterName: user?.user_metadata?.full_name || user?.email || 'Project Admin',
+          inviterId: user?.id,
+          message: inviteData.message || null
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        showSuccessToast(MESSAGES.SUCCESS.INVITATION_SENT);
+      } else {
+        showErrorToast(result.error || MESSAGES.ERROR.INVITATION_FAILED);
+      }
+    } catch (error) {
+      console.error('Failed to send invitation:', error);
+      showErrorToast(MESSAGES.ERROR.INVITATION_FAILED);
+    }
   };
 
   if (loading) {

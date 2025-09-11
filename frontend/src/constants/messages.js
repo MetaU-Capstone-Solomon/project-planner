@@ -79,6 +79,9 @@ export const MESSAGES = {
   SUCCESS: {
     INVITATION_SENT: 'Invitation sent successfully!',
   },
+  ERROR: {
+    INVITATION_FAILED: 'Failed to send invitation. Please try again.',
+  },
 };
 
 export const CHAT_STAGES = {
