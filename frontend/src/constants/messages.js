@@ -31,6 +31,12 @@ export const MESSAGES = {
     ROADMAP_OPTIMIZATION_FAILED: 'Failed to optimize roadmap.',
     OPTIMIZATION_FAILED: 'Optimization failed.',
     DESCRIPTION_SUMMARIZATION_FAILED: 'Failed to summarize description. Using original text.',
+    // Collaboration permission errors
+    PERMISSION_DENIED: 'You do not have permission to perform this action.',
+    PROJECT_ACCESS_DENIED: 'You do not have access to this project.',
+    PROJECT_EDIT_DENIED: 'You do not have permission to edit this project.',
+    PROJECT_DELETE_DENIED: 'You do not have permission to delete this project.',
+    PERMISSION_CHECK_FAILED: 'Failed to verify permissions. Please try again.',
   },
   LOADING: {
     DEFAULT: 'Loading...',
@@ -44,17 +50,44 @@ export const MESSAGES = {
     VIEW_ROADMAP: 'View Roadmap',
     DEFAULT_TITLE: 'Untitled Project',
   },
+        COLLABORATION: {
+          ROLES: {
+            ADMIN: 'admin',
+            EDITOR: 'editor',
+            VIEWER: 'viewer',
+          },
+          ROLE_DESCRIPTIONS: {
+            admin: 'Can manage everything including deleting the project',
+            editor: 'Can edit and manage tasks, milestones, and project content',
+            viewer: 'Can only view the project and track progress',
+          },
+          PERMISSIONS: {
+            VIEW: 'view',
+            EDIT: 'edit',
+            DELETE: 'delete',
+            INVITE: 'invite',
+          },
+        },
   CONTENT: {
     NO_CONTENT_AVAILABLE: 'No content available',
   },
   VALIDATION: {
     INVALID_DATE: 'Invalid Date',
+    EMAIL_REQUIRED: 'Email is required',
+    EMAIL_INVALID: 'Please enter a valid email address',
+    MESSAGE_TOO_LONG: 'Message is too long',
     NO_DATE: 'N/A',
     INVALID_ROADMAP_CONTENT: 'Failed to parse roadmap content',
     ROADMAP_PARSE_FAILED:
       'Roadmap data could not be parsed. Please regenerate your project roadmap.',
     ROADMAP_INCOMPLETE: 'Roadmap data is incomplete. Please regenerate your project roadmap.',
     ROADMAP_VALIDATION_FAILED: 'Roadmap validation failed. Please regenerate your project roadmap.',
+  },
+  SUCCESS: {
+    INVITATION_SENT: 'Invitation sent successfully!',
+  },
+  ERROR: {
+    INVITATION_FAILED: 'Failed to send invitation. Please try again.',
   },
 };
 

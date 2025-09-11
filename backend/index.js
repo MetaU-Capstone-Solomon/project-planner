@@ -5,8 +5,9 @@ require('dotenv').config();
 const FileProcessingService = require('./services/fileProcessingService');
 const RoadmapPrioritizationService = require('./services/prioritizationService');
 const TextSummarizer = require('./utils/textSummarizer');
+const InvitationService = require('./services/invitationService');
 
-// Environment variables
+// Environment variable
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const port = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -21,6 +22,7 @@ const app = express();
 const fileProcessingService = new FileProcessingService();
 const prioritizationService = new RoadmapPrioritizationService();
 const textSummarizer = new TextSummarizer();
+const invitationService = new InvitationService();
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -197,6 +199,56 @@ app.post('/api/prioritize', async (req, res) => {
   } catch (error) {
     console.error('Prioritization error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Invitation endpoint
+app.post('/api/invite-collaborator', async (req, res) => {
+  try {
+    const { email, role, projectId, projectName, inviterName, inviterId, message } = req.body;
+
+    // Validate required fields
+    if (!email || !role || !projectId || !projectName || !inviterName || !inviterId) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: email, role, projectId, projectName, inviterName, inviterId' 
+      });
+    }
+
+    // Additional validation is handled by the InvitationService
+
+    // Send invitation
+    const result = await invitationService.sendInvitation({
+      email,
+      role,
+      projectId,
+      projectName,
+      inviterName,
+      inviterId,
+      message
+    });
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message,
+        invitationId: result.invitationId
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+
+  } catch (error) {
+    console.error('Invitation endpoint error:', {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+    res.status(500).json({ 
+      error: 'Internal server error' 
+    });
   }
 });
 
