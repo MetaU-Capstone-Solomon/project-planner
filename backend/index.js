@@ -7,7 +7,7 @@ const RoadmapPrioritizationService = require('./services/prioritizationService')
 const TextSummarizer = require('./utils/textSummarizer');
 const InvitationService = require('./services/invitationService');
 
-// Environment variables
+// Environment variable
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const port = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
