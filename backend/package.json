@@ -20,6 +20,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "pdf-parse": "^1.1.1",
+    "resend": "^6.0.3",
     "textract": "^2.5.0"
   }
 }

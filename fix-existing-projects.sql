@@ -9,7 +9,7 @@ SELECT
   'accepted' as status
 FROM roadmap r
 WHERE r.user_id IS NOT NULL
-AND NOT EXISTS (
+AND NOT EXISTS (frone
   SELECT 1 FROM project_collaborators pc 
   WHERE pc.project_id = r.id 
   AND pc.user_id = r.user_id
