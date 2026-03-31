@@ -1,6 +1,7 @@
 const express = require('express');
 const https = require('https');
 const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 const FileProcessingService = require('./services/fileProcessingService');
 const RoadmapPrioritizationService = require('./services/prioritizationService');
@@ -18,11 +19,17 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 const app = express();
 const fileProcessingService = new FileProcessingService();
 const prioritizationService = new RoadmapPrioritizationService();
 const textSummarizer = new TextSummarizer();
 const invitationService = new InvitationService();
+const userRouter = require('./routes/user');
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -31,8 +38,8 @@ app.use(express.urlencoded({ extended: true }));
 // CORS middleware
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL);
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     res.sendStatus(204);
@@ -40,6 +47,9 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// User settings routes
+app.use('/api/user', userRouter);
 
 // Multer configuration for file uploads
 const upload = multer({
@@ -249,6 +259,99 @@ app.post('/api/invite-collaborator', async (req, res) => {
     res.status(500).json({ 
       error: 'Internal server error' 
     });
+  }
+});
+
+// Accept invitation endpoint
+app.post('/api/accept-invitation', async (req, res) => {
+  try {
+    const { token, projectId } = req.body;
+    const authHeader = req.headers.authorization;
+
+    if (!token || !projectId) {
+      return res.status(400).json({ error: 'Token and projectId are required' });
+    }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const jwt = authHeader.substring(7);
+
+    // Decode JWT to get user identity (works across all Supabase client versions)
+    let userId, userEmail;
+    try {
+      const base64 = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
+      userId = payload.sub;
+      userEmail = payload.email;
+      if (!userId || !userEmail) throw new Error('Missing user info in token');
+    } catch {
+      return res.status(401).json({ error: 'Invalid authentication token' });
+    }
+
+    // Look up the invitation
+    const { data: invitation, error: inviteError } = await supabase
+      .from('project_invitations')
+      .select('*')
+      .eq('token', token)
+      .eq('project_id', projectId)
+      .single();
+
+    if (inviteError || !invitation) {
+      return res.status(404).json({ error: 'Invitation not found' });
+    }
+
+    if (invitation.status !== 'pending') {
+      return res.status(400).json({ error: `This invitation has already been ${invitation.status}` });
+    }
+
+    if (new Date(invitation.expires_at) < new Date()) {
+      await supabase.from('project_invitations').update({ status: 'expired' }).eq('id', invitation.id);
+      return res.status(400).json({ error: 'This invitation has expired' });
+    }
+
+    if (invitation.email.toLowerCase() !== userEmail.toLowerCase()) {
+      return res.status(403).json({ error: 'This invitation was sent to a different email address' });
+    }
+
+    // Check if already a collaborator
+    const { data: existing } = await supabase
+      .from('project_collaborators')
+      .select('id')
+      .eq('project_id', projectId)
+      .eq('user_id', userId)
+      .single();
+
+    if (existing) {
+      return res.json({ success: true, projectId, role: invitation.role, alreadyMember: true });
+    }
+
+    // Add user as collaborator
+    const { error: insertError } = await supabase
+      .from('project_collaborators')
+      .insert({
+        project_id: projectId,
+        user_id: userId,
+        role: invitation.role,
+        invited_by: invitation.invited_by,
+        status: 'accepted',
+        responded_at: new Date().toISOString(),
+      });
+
+    if (insertError) {
+      throw new Error(`Failed to add collaborator: ${insertError.message}`);
+    }
+
+    // Mark invitation as accepted
+    await supabase
+      .from('project_invitations')
+      .update({ status: 'accepted', responded_at: new Date().toISOString() })
+      .eq('id', invitation.id);
+
+    return res.json({ success: true, projectId, role: invitation.role });
+  } catch (error) {
+    console.error('Accept invitation error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
