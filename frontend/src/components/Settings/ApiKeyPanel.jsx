@@ -43,7 +43,6 @@ export default function ApiKeyPanel() {
       }
       setStatus('success');
       setKeyInput('');
-      setShowInput(false);
       await invalidate();
       toast.success('API key saved and verified.');
     } catch {
