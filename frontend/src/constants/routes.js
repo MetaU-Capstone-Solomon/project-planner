@@ -6,6 +6,8 @@ export const ROUTES = {
   NEW_PROJECT_CHAT: '/new-project-chat',
   PROFILE: '/profile',
   PROJECT_DETAIL: '/project/:projectId',
+  ACCEPT_INVITATION: '/accept-invitation',
+  SETTINGS: '/settings',
 };
 // function to generate project detail URL with project ID
 export const getProjectDetailPath = (projectId) => `/project/${projectId}`;

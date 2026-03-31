@@ -15,6 +15,11 @@ export const MESSAGES = {
     PHASE_CREATED: 'Phase created successfully',
     PHASE_DELETED: 'Phase deleted successfully',
     PHASE_REORDERED: 'Phase reordered successfully',
+    INVITATION_SENT: 'Invitation sent successfully!',
+    COLLABORATOR_REMOVED: 'Team member removed.',
+    ROLE_SAVED: 'Your preferences have been saved.',
+    API_KEY_SAVED: 'API key saved and verified.',
+    API_KEY_REMOVED: "API key removed. You're back on the free tier.",
   },
   PLACEHOLDERS: {
     PHASE_TIMELINE: 'Not yet set',
@@ -31,12 +36,19 @@ export const MESSAGES = {
     ROADMAP_OPTIMIZATION_FAILED: 'Failed to optimize roadmap.',
     OPTIMIZATION_FAILED: 'Optimization failed.',
     DESCRIPTION_SUMMARIZATION_FAILED: 'Failed to summarize description. Using original text.',
-    // Collaboration permission errors
     PERMISSION_DENIED: 'You do not have permission to perform this action.',
     PROJECT_ACCESS_DENIED: 'You do not have access to this project.',
     PROJECT_EDIT_DENIED: 'You do not have permission to edit this project.',
     PROJECT_DELETE_DENIED: 'You do not have permission to delete this project.',
     PERMISSION_CHECK_FAILED: 'Failed to verify permissions. Please try again.',
+    INVITATION_FAILED: 'Failed to send invitation. Please try again.',
+    INVITATION_ACCEPT_FAILED: 'Failed to accept invitation. The link may be expired or invalid.',
+    PROJECTS_LOAD_FAILED: 'Failed to load projects. Please try again.',
+    COLLABORATORS_LOAD_FAILED: 'Failed to load team members.',
+    API_KEY_INVALID: 'Invalid or expired key. Please check it and try again.',
+    API_KEY_SAVE_FAILED: 'Failed to save API key. Please try again.',
+    USAGE_LIMIT_REACHED: 'Monthly limit reached. Add your API key in Settings to continue.',
+    SETTINGS_LOAD_FAILED: 'Failed to load settings.',
   },
   LOADING: {
     DEFAULT: 'Loading...',
@@ -50,24 +62,24 @@ export const MESSAGES = {
     VIEW_ROADMAP: 'View Roadmap',
     DEFAULT_TITLE: 'Untitled Project',
   },
-        COLLABORATION: {
-          ROLES: {
-            ADMIN: 'admin',
-            EDITOR: 'editor',
-            VIEWER: 'viewer',
-          },
-          ROLE_DESCRIPTIONS: {
-            admin: 'Can manage everything including deleting the project',
-            editor: 'Can edit and manage tasks, milestones, and project content',
-            viewer: 'Can only view the project and track progress',
-          },
-          PERMISSIONS: {
-            VIEW: 'view',
-            EDIT: 'edit',
-            DELETE: 'delete',
-            INVITE: 'invite',
-          },
-        },
+  COLLABORATION: {
+    ROLES: {
+      ADMIN: 'admin',
+      EDITOR: 'editor',
+      VIEWER: 'viewer',
+    },
+    ROLE_DESCRIPTIONS: {
+      admin: 'Can manage everything including deleting the project',
+      editor: 'Can edit and manage tasks, milestones, and project content',
+      viewer: 'Can only view the project and track progress',
+    },
+    PERMISSIONS: {
+      VIEW: 'view',
+      EDIT: 'edit',
+      DELETE: 'delete',
+      INVITE: 'invite',
+    },
+  },
   CONTENT: {
     NO_CONTENT_AVAILABLE: 'No content available',
   },
@@ -82,12 +94,6 @@ export const MESSAGES = {
       'Roadmap data could not be parsed. Please regenerate your project roadmap.',
     ROADMAP_INCOMPLETE: 'Roadmap data is incomplete. Please regenerate your project roadmap.',
     ROADMAP_VALIDATION_FAILED: 'Roadmap validation failed. Please regenerate your project roadmap.',
-  },
-  SUCCESS: {
-    INVITATION_SENT: 'Invitation sent successfully!',
-  },
-  ERROR: {
-    INVITATION_FAILED: 'Failed to send invitation. Please try again.',
   },
 };
 

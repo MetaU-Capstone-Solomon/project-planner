@@ -1,23 +1,25 @@
 /**
  * AI Cache Service
  *
- * This hook wraps my AI API call with React Query caching and persistence.
- * - On first request for a prompt, it fetches from the backend and caches the result.
- * - Subsequent requests for the same prompt within the cache window return instantly from cache.
- * - If the cache is invalidated or expires, it fetches fresh data again.
- * - All cache timing and retry logic is located in the cache.js file.
+ * This hook wraps the AI API call with React Query caching.
+ * Sends the Supabase session token so the backend can identify the user
+ * for usage tracking and BYOK routing.
  */
 import { useQuery } from '@tanstack/react-query';
 import { API_ENDPOINTS } from '@/config/api';
 import { CACHE_CONFIG, QUERY_KEYS } from '@/constants/cache';
+import { supabase } from '@/lib/supabase';
 
-// existing AI call function
 const callAI = async (prompt) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers = { 'Content-Type': 'application/json' };
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   const response = await fetch(API_ENDPOINTS.CHAT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({ prompt }),
   });
 
@@ -30,7 +32,6 @@ const callAI = async (prompt) => {
   return data.content;
 };
 
-//hook that caches AI responses
 export const useAICache = (prompt) => {
   return useQuery({
     queryKey: [QUERY_KEYS.AI_RESPONSES, prompt],
