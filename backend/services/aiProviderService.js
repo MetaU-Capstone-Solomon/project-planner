@@ -131,10 +131,13 @@ class AIProviderService {
   }
 
   async _incrementUsage(userId, currentUsage) {
-    await this.supabase
+    const { error } = await this.supabase
       .from('user_settings')
       .update({ monthly_usage: currentUsage + 1, updated_at: new Date().toISOString() })
       .eq('user_id', userId);
+    if (error) {
+      console.error('Failed to increment usage for user', userId, error.message);
+    }
   }
 
   async _generateWithAppKey(prompt) {
@@ -145,9 +148,14 @@ class AIProviderService {
   }
 
   async _generateWithUserKey(key, provider, prompt) {
-    if (provider === 'gemini') return await this._generateWithGemini(key, prompt);
-    if (provider === 'claude') return await this._generateWithClaude(key, prompt);
-    throw new ProviderError(`Unsupported provider: ${provider}`);
+    try {
+      if (provider === 'gemini') return await this._generateWithGemini(key, prompt);
+      if (provider === 'claude') return await this._generateWithClaude(key, prompt);
+      throw new ProviderError(`Unsupported provider: ${provider}`);
+    } catch (err) {
+      if (err instanceof ProviderError) throw err;
+      throw new ProviderError(err.message || 'AI provider request failed');
+    }
   }
 
   async _generateWithGemini(key, prompt) {
@@ -164,6 +172,9 @@ class AIProviderService {
       max_tokens: 8192,
       messages: [{ role: 'user', content: prompt }],
     });
+    if (!message.content || !message.content[0]) {
+      throw new ProviderError('Claude returned empty response');
+    }
     return { text: message.content[0].text, provider: 'claude' };
   }
 }
