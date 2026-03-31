@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { UserPlus, Plus, Users } from 'lucide-react';
 import Button from '@/components/Button/Button';
@@ -10,7 +10,6 @@ import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
 import EditPhaseModal from '@/components/Roadmap/EditPhaseModal';
 import InviteCollaboratorsModal from '@/components/Collaboration/InviteCollaboratorsModal';
-import TeamPanel from '@/components/Collaboration/TeamPanel';
 import { getProject, updateProject, checkUserPermission } from '@/services/projectService';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
@@ -22,7 +21,6 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/cache';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
 import { API_ENDPOINTS } from '@/config/api';
 
 /**
@@ -60,10 +58,8 @@ const ProjectDetailPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  const [teamPanelOpen, setTeamPanelOpen] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [isEditPhaseModalOpen, setIsEditPhaseModalOpen] = useState(false);
-  const realtimeChannelRef = useRef(null);
   const [editingPhase, setEditingPhase] = useState(null);
   const [isCreatePhaseModalOpen, setIsCreatePhaseModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -143,44 +139,6 @@ const ProjectDetailPage = () => {
     };
 
     fetchProject();
-  }, [projectId]);
-
-  // Realtime subscription — refresh project when a teammate saves a change
-  useEffect(() => {
-    if (!projectId) return;
-
-    const channel = supabase
-      .channel(`project-${projectId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'roadmap', filter: `id=eq.${projectId}` },
-        async (payload) => {
-          // Only update if the change came from someone else
-          if (payload.new && payload.new.content) {
-            try {
-              let jsonContent = payload.new.content.trim();
-              if (jsonContent.startsWith(MARKDOWN.JSON_CODE_BLOCK)) {
-                jsonContent = jsonContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-              }
-              const parsed = JSON.parse(jsonContent);
-              if (parsed.metadata && parsed.phases) {
-                setRoadmapData(parsed);
-              }
-            } catch {
-              // ignore parse errors from realtime payload
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    realtimeChannelRef.current = channel;
-
-    return () => {
-      if (realtimeChannelRef.current) {
-        supabase.removeChannel(realtimeChannelRef.current);
-      }
-    };
   }, [projectId]);
 
   // Save modal state to localStorage
@@ -591,7 +549,7 @@ const ProjectDetailPage = () => {
                   <div className="mt-5 flex items-center gap-2">
                     {role === 'founder_pm' ? (
                       <button
-                        onClick={() => setTeamPanelOpen(true)}
+                        onClick={() => setInviteModalOpen(true)}
                         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors bg-white dark:bg-zinc-800"
                       >
                         <Users size={15} />
@@ -599,7 +557,7 @@ const ProjectDetailPage = () => {
                       </button>
                     ) : (
                       <button
-                        onClick={() => setTeamPanelOpen(true)}
+                        onClick={() => setInviteModalOpen(true)}
                         className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         title="View team members"
                       >
@@ -671,15 +629,6 @@ const ProjectDetailPage = () => {
                 onClose={() => setInviteModalOpen(false)}
                 onInvite={handleInviteCollaborators}
                 projectName={project?.title || 'this project'}
-              />
-
-              {/* Team Panel */}
-              <TeamPanel
-                isOpen={teamPanelOpen}
-                onClose={() => setTeamPanelOpen(false)}
-                projectId={projectId}
-                currentUserId={user?.id}
-                isAdmin={userRole === MESSAGES.COLLABORATION.ROLES.ADMIN}
               />
 
               {/* Edit Phase Modal */}
