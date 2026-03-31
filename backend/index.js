@@ -7,6 +7,8 @@ const FileProcessingService = require('./services/fileProcessingService');
 const RoadmapPrioritizationService = require('./services/prioritizationService');
 const TextSummarizer = require('./utils/textSummarizer');
 const InvitationService = require('./services/invitationService');
+const { AIProviderService, UsageLimitError } = require('./services/aiProviderService');
+const { extractUserId } = require('./middleware/auth');
 
 // Environment variable
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -29,6 +31,7 @@ const fileProcessingService = new FileProcessingService();
 const prioritizationService = new RoadmapPrioritizationService();
 const textSummarizer = new TextSummarizer();
 const invitationService = new InvitationService();
+const aiProviderService = new AIProviderService();
 const userRouter = require('./routes/user');
 
 // Middleware
@@ -88,79 +91,24 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 });
 
 // Chat endpoint
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', extractUserId, async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    // Prepare data for Gemini API
-    const postData = JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt,
-            },
-          ],
-        },
-      ],
-    });
-
-    const options = {
-      hostname: 'generativelanguage.googleapis.com',
-      path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-      },
-    };
-
-    const geminiReq = https.request(options, (geminiRes) => {
-      let geminiBody = '';
-      geminiRes.on('data', (chunk) => {
-        geminiBody += chunk;
-      });
-      geminiRes.on('end', () => {
-        try {
-          const parsedResponse = JSON.parse(geminiBody);
-
-          // Check for API errors
-          if (parsedResponse.error) {
-            console.error('Gemini API Error:', parsedResponse.error.message);
-            return res
-              .status(500)
-              .json({ error: `AI Service Error: ${parsedResponse.error.message}` });
-          }
-
-          // Check for blocked responses
-          if (!parsedResponse.candidates || parsedResponse.candidates.length === 0) {
-            const blockReason = parsedResponse.promptFeedback?.blockReason || 'No content returned';
-            console.error('Gemini Response Blocked:', blockReason);
-            return res.status(500).json({ error: `AI response was blocked: ${blockReason}` });
-          }
-
-          const text = parsedResponse.candidates[0].content.parts[0].text;
-          res.json({ content: text });
-        } catch (e) {
-          console.error('Error parsing Gemini response:', e);
-          res.status(500).json({ error: 'Failed to parse AI response' });
-        }
-      });
-    });
-
-    geminiReq.on('error', (e) => {
-      console.error('Error with Gemini request:', e);
-      res.status(500).json({ error: 'Failed to communicate with AI service' });
-    });
-
-    geminiReq.write(postData);
-    geminiReq.end();
-  } catch (e) {
-    console.error('Error processing request:', e);
-    res.status(400).json({ error: 'Invalid JSON in request body' });
+    const { text } = await aiProviderService.generate(req.userId, prompt);
+    res.json({ content: text });
+  } catch (err) {
+    if (err.name === 'UsageLimitError') {
+      return res.status(429).json({ error: err.message, code: 'USAGE_LIMIT_REACHED' });
+    }
+    if (err.name === 'ProviderError') {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error('Chat endpoint error:', err);
+    res.status(500).json({ error: 'AI generation failed. Please try again.' });
   }
 });
 
