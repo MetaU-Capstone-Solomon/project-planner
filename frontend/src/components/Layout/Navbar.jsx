@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, Plus, Settings } from 'lucide-react';
+import { User, Plus, Settings, LayoutDashboard } from 'lucide-react';
 import { COLOR_CLASSES } from '@/constants/colors';
 import { ROUTES } from '@/constants/routes';
 import Logo from '@/components/Logo/Logo';
@@ -69,7 +69,7 @@ const Navbar = () => {
 
   // Navigation items
   const navItems = [
-    { path: ROUTES.DASHBOARD, label: 'Dashboard', isActive: location.pathname === ROUTES.DASHBOARD },
+    { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: <LayoutDashboard size={16} />, isActive: location.pathname === ROUTES.DASHBOARD },
     { path: ROUTES.SETTINGS, label: 'Settings', icon: <Settings size={16} />, isActive: location.pathname === ROUTES.SETTINGS },
   ];
 
@@ -93,7 +93,11 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className="flex items-center space-x-1 rounded-lg border border-blue-600 bg-blue-600 px-3 py-2 text-base font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
+              className={`flex items-center space-x-1 rounded-lg border px-3 py-2 text-base font-medium shadow-sm transition-all duration-200 ${
+                item.isActive
+                  ? 'border-blue-600 bg-blue-600 text-white hover:border-blue-700 hover:bg-blue-700 hover:shadow-md'
+                  : 'border-gray-300 bg-gray-100 text-gray-700 hover:border-gray-400 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-600'
+              }`}
             >
               {item.icon && item.icon}
               <span>{item.label}</span>
@@ -107,7 +111,11 @@ const Navbar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className="flex items-center space-x-1 rounded border border-blue-600 bg-blue-600 px-1.5 py-0.5 text-xs font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
+              className={`flex items-center space-x-1 rounded border px-1.5 py-0.5 text-xs font-medium shadow-sm transition-all duration-200 ${
+                item.isActive
+                  ? 'border-blue-600 bg-blue-600 text-white hover:border-blue-700 hover:bg-blue-700 hover:shadow-md'
+                  : 'border-gray-300 bg-gray-100 text-gray-700 hover:border-gray-400 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-600'
+              }`}
             >
               {item.icon && item.icon}
               <span>{item.label}</span>
