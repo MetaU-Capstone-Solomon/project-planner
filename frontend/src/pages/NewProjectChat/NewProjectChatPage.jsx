@@ -41,7 +41,8 @@ import useIsMobile from '@/hooks/useIsMobile';
 import resetNewProjectState from '@/utils/resetNewProjectState';
 import confirmAction from '@/utils/confirmAction';
 import OnboardingModal from '@/components/Onboarding/OnboardingModal';
-import { useUserSettings } from '@/hooks/useUserSettings';
+import BYOKModal from '@/components/BYOK/BYOKModal';
+import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
@@ -74,8 +75,10 @@ const NewProjectChatPage = () => {
   const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
 
   const { data: userSettings } = useUserSettings();
+  const invalidateSettings = useInvalidateUserSettings();
   const [showOnboarding, setShowOnboarding] = React.useState(false);
   const [onboardingDone, setOnboardingDone] = React.useState(false);
+  const [byokTrigger, setByokTrigger] = React.useState(null);
 
   // Show onboarding once if role has not been set
   React.useEffect(() => {
@@ -83,6 +86,27 @@ const NewProjectChatPage = () => {
       setShowOnboarding(true);
     }
   }, [userSettings, onboardingDone]);
+
+  // one-remaining trigger: show when user has used limit-1 generations and has no API key
+  React.useEffect(() => {
+    if (!userSettings) return;
+    if (userSettings.apiProvider) return; // user already has a key
+    const { used, limit } = userSettings.usage;
+    if (used === limit - 1 && byokTrigger === null) {
+      setByokTrigger('one-remaining');
+    }
+  }, [userSettings]);
+
+  // first-generation trigger: fires when roadmap generation completes for the first time
+  React.useEffect(() => {
+    if (stage === CHAT_STAGES.AWAITING_CONFIRMATION) {
+      invalidateSettings().then(() => {
+        if (userSettings && !userSettings.apiProvider && !userSettings.byokNudgeDismissed && userSettings.usage.used === 0) {
+          setByokTrigger('first-generation');
+        }
+      });
+    }
+  }, [stage]);
 
   // Listen for reset event from navbar
   React.useEffect(() => {
@@ -276,6 +300,12 @@ const NewProjectChatPage = () => {
             setShowOnboarding(false);
             setOnboardingDone(true);
           }}
+        />
+      )}
+      {byokTrigger && (
+        <BYOKModal
+          trigger={byokTrigger}
+          onDismiss={() => setByokTrigger(null)}
         />
       )}
       <div className="mx-auto max-w-7xl">
