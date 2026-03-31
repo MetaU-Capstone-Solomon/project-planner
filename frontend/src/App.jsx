@@ -12,6 +12,8 @@ import Dashboard from '@/pages/Dashboard/Dashboard';
 import NewProjectChatPage from '@/pages/NewProjectChat/NewProjectChatPage';
 import Profile from '@/pages/Profile/Profile';
 import ProjectDetailPage from '@/pages/ProjectDetail/ProjectDetailPage';
+import AcceptInvitationPage from '@/pages/AcceptInvitation/AcceptInvitationPage';
+import SettingsPage from '@/pages/Settings/SettingsPage';
 
 /**
  * ProtectedRoute Component
@@ -54,6 +56,7 @@ function AppRoutes() {
       <Route path={ROUTES.HOME} element={<Home />} />
       <Route path={ROUTES.AUTH} element={<Auth />} />
       <Route path={ROUTES.AUTH_CALLBACK} element={<Callback />} />
+      <Route path={ROUTES.ACCEPT_INVITATION} element={<AcceptInvitationPage />} />
 
       {/* Protected routes - require authentication */}
       <Route
@@ -67,6 +70,7 @@ function AppRoutes() {
         <Route path={ROUTES.NEW_PROJECT_CHAT} element={<NewProjectChatPage />} />
         <Route path={ROUTES.PROFILE} element={<Profile />} />
         <Route path={ROUTES.PROJECT_DETAIL} element={<ProjectDetailPage />} />
+        <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
       </Route>
     </Routes>
   );
