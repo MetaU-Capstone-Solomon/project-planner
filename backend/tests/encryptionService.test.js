@@ -35,6 +35,11 @@ describe('encryptionService', () => {
     expect(() => decrypt(tampered)).toThrow();
   });
 
+  test('decrypt throws on invalid ciphertext format', () => {
+    expect(() => decrypt('invalid')).toThrow('Invalid ciphertext format');
+    expect(() => decrypt('a:b')).toThrow('Invalid ciphertext format');
+  });
+
   test('throws if ENCRYPTION_KEY is not set', () => {
     const savedKey = process.env.ENCRYPTION_KEY;
     delete process.env.ENCRYPTION_KEY;

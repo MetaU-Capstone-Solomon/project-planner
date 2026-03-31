@@ -28,7 +28,11 @@ function encrypt(plaintext) {
  */
 function decrypt(ciphertext) {
   const key = getKey();
-  const [ivHex, authTagHex, encryptedHex] = ciphertext.split(':');
+  const parts = ciphertext.split(':');
+  if (parts.length !== 3 || parts[0].length !== 32 || parts[1].length !== 32) {
+    throw new Error('Invalid ciphertext format');
+  }
+  const [ivHex, authTagHex, encryptedHex] = parts;
   const decipher = crypto.createDecipheriv(ALGORITHM, key, Buffer.from(ivHex, 'hex'));
   decipher.setAuthTag(Buffer.from(authTagHex, 'hex'));
   return Buffer.concat([
