@@ -79,6 +79,7 @@ const NewProjectChatPage = () => {
   const [showOnboarding, setShowOnboarding] = React.useState(false);
   const [onboardingDone, setOnboardingDone] = React.useState(false);
   const [byokTrigger, setByokTrigger] = React.useState(null);
+  const pendingByokCheck = React.useRef(false);
 
   // Show onboarding once if role has not been set
   React.useEffect(() => {
@@ -97,16 +98,23 @@ const NewProjectChatPage = () => {
     }
   }, [userSettings]);
 
-  // first-generation trigger: fires when roadmap generation completes for the first time
+  // first-generation trigger (effect 1): set pending flag and invalidate settings when stage is reached
   React.useEffect(() => {
     if (stage === CHAT_STAGES.AWAITING_CONFIRMATION) {
-      invalidateSettings().then(() => {
-        if (userSettings && !userSettings.apiProvider && !userSettings.byokNudgeDismissed && userSettings.usage.used === 0) {
-          setByokTrigger('first-generation');
-        }
-      });
+      pendingByokCheck.current = true;
+      invalidateSettings();
     }
   }, [stage]);
+
+  // first-generation trigger (effect 2): check fresh settings once invalidation resolves
+  React.useEffect(() => {
+    if (!pendingByokCheck.current) return;
+    if (!userSettings) return;
+    pendingByokCheck.current = false;
+    if (!userSettings.apiProvider && !userSettings.byokNudgeDismissed && userSettings.usage.used === 0) {
+      setByokTrigger('first-generation');
+    }
+  }, [userSettings]);
 
   // Listen for reset event from navbar
   React.useEffect(() => {
