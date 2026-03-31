@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --testPathPatterns=tests/ --passWithNoTests",
+    "test:watch": "jest --testPathPatterns=tests/ --watch",
     "start": "node index.js"
   },
   "keywords": [],
@@ -21,6 +22,13 @@
     "multer": "^2.0.1",
     "pdf-parse": "^1.1.1",
     "resend": "^6.0.3",
-    "textract": "^2.5.0"
+    "word-extractor": "^1.0.4"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"]
   }
 }
