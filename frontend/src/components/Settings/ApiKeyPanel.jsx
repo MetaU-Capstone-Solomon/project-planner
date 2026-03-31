@@ -27,6 +27,7 @@ export default function ApiKeyPanel() {
     setErrorMsg('');
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setStatus('error'); setErrorMsg('Session expired. Please refresh the page.'); return; }
       const response = await fetch(API_ENDPOINTS.USER_API_KEY, {
         method: 'POST',
         headers: {
@@ -52,8 +53,10 @@ export default function ApiKeyPanel() {
   }
 
   async function handleRemove() {
+    if (!window.confirm('Remove your API key? You will be switched back to the free tier.')) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error('Session expired. Please refresh the page.'); return; }
       const response = await fetch(API_ENDPOINTS.USER_API_KEY, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -117,7 +120,7 @@ export default function ApiKeyPanel() {
         <div className="space-y-3">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label htmlFor="api-key-input" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Your API key
               </label>
               <div className="group relative">
@@ -130,6 +133,7 @@ export default function ApiKeyPanel() {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <input
+                  id="api-key-input"
                   type="text"
                   value={keyInput}
                   onChange={(e) => { setKeyInput(e.target.value); setStatus('idle'); }}

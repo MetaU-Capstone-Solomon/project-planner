@@ -29,6 +29,7 @@ export default function SettingsPage() {
     setSavingRole(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error('Session expired. Please refresh the page.'); setSavingRole(false); return; }
       const response = await fetch(API_ENDPOINTS.USER_ROLE, {
         method: 'POST',
         headers: {
@@ -52,10 +53,12 @@ export default function SettingsPage() {
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 mb-6">Settings</h1>
 
       {/* Tab nav */}
-      <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-700 mb-8">
+      <div role="tablist" className="flex gap-1 border-b border-zinc-200 dark:border-zinc-700 mb-8">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
+            role="tab"
+            aria-selected={activeTab === id}
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
               activeTab === id
@@ -71,12 +74,17 @@ export default function SettingsPage() {
 
       {/* Profile tab */}
       {activeTab === 'profile' && (
+        <div role="tabpanel">
         <div className="space-y-6">
           <div>
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-1">Email</label>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800">
-              {user?.email}
-            </p>
+            <label htmlFor="user-email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-1">Email</label>
+            <input
+              id="user-email"
+              type="email"
+              readOnly
+              value={user?.email ?? ''}
+              className="text-sm text-zinc-500 dark:text-zinc-400 px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 w-full focus:outline-none"
+            />
           </div>
 
           <div>
@@ -105,12 +113,20 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+            {savingRole && (
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">Saving…</p>
+            )}
           </div>
+        </div>
         </div>
       )}
 
       {/* API Key tab */}
-      {activeTab === 'api-key' && <ApiKeyPanel />}
+      {activeTab === 'api-key' && (
+        <div role="tabpanel">
+          <ApiKeyPanel />
+        </div>
+      )}
     </div>
   );
 }
