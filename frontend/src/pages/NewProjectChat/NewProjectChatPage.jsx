@@ -96,7 +96,7 @@ const NewProjectChatPage = () => {
     if (used === limit - 1 && byokTrigger === null) {
       setByokTrigger('one-remaining');
     }
-  }, [userSettings]);
+  }, [userSettings, byokTrigger]);
 
   // first-generation trigger (effect 1): set pending flag and invalidate settings when stage is reached
   React.useEffect(() => {
@@ -104,7 +104,7 @@ const NewProjectChatPage = () => {
       pendingByokCheck.current = true;
       invalidateSettings();
     }
-  }, [stage]);
+  }, [stage, invalidateSettings]);
 
   // first-generation trigger (effect 2): check fresh settings once invalidation resolves
   React.useEffect(() => {
@@ -114,7 +114,7 @@ const NewProjectChatPage = () => {
     if (!userSettings.apiProvider && !userSettings.byokNudgeDismissed && userSettings.usage.used === 0) {
       setByokTrigger('first-generation');
     }
-  }, [userSettings]);
+  }, [userSettings, setByokTrigger]);
 
   // Listen for reset event from navbar
   React.useEffect(() => {
