@@ -40,6 +40,8 @@ import { CheckCircle, Plus } from 'lucide-react';
 import useIsMobile from '@/hooks/useIsMobile';
 import resetNewProjectState from '@/utils/resetNewProjectState';
 import confirmAction from '@/utils/confirmAction';
+import OnboardingModal from '@/components/Onboarding/OnboardingModal';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
@@ -70,6 +72,17 @@ const NewProjectChatPage = () => {
   );
 
   const { saving, savedProjectId, handleSaveProject } = useProjectSave(messages, values);
+
+  const { data: userSettings } = useUserSettings();
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+  const [onboardingDone, setOnboardingDone] = React.useState(false);
+
+  // Show onboarding once if role has not been set
+  React.useEffect(() => {
+    if (userSettings !== undefined && userSettings?.role === null && !onboardingDone) {
+      setShowOnboarding(true);
+    }
+  }, [userSettings, onboardingDone]);
 
   // Listen for reset event from navbar
   React.useEffect(() => {
@@ -257,6 +270,14 @@ const NewProjectChatPage = () => {
   // --- Responsive Layout ---
   return (
     <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900">
+      {showOnboarding && (
+        <OnboardingModal
+          onComplete={() => {
+            setShowOnboarding(false);
+            setOnboardingDone(true);
+          }}
+        />
+      )}
       <div className="mx-auto max-w-7xl">
         {isMobile ? (
           <div className="flex flex-col gap-6">{mobileStep === 1 ? formSection : chatSection}</div>
