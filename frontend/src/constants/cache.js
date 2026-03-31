@@ -12,27 +12,27 @@ export const CACHE_TIMES = {
 export const CACHE_CONFIG = {
   AI_RESPONSES: {
     staleTime: CACHE_TIMES.FIVE_MINUTES,
-    cacheTime: CACHE_TIMES.TWENTY_MINUTES,
+    gcTime: CACHE_TIMES.TWENTY_MINUTES,
     retry: 1,
   },
   USER_PROJECTS: {
     staleTime: CACHE_TIMES.TWO_MINUTES,
-    cacheTime: CACHE_TIMES.TWENTY_MINUTES,
+    gcTime: CACHE_TIMES.TWENTY_MINUTES,
     retry: 1,
   },
   PROJECT_DETAILS: {
     staleTime: CACHE_TIMES.TWO_MINUTES,
-    cacheTime: CACHE_TIMES.TWENTY_MINUTES,
+    gcTime: CACHE_TIMES.TWENTY_MINUTES,
     retry: 1,
   },
   USER_PROFILE: {
     staleTime: CACHE_TIMES.TEN_MINUTES,
-    cacheTime: CACHE_TIMES.ONE_HOUR,
+    gcTime: CACHE_TIMES.ONE_HOUR,
     retry: 1,
   },
   STATIC_CONTENT: {
     staleTime: CACHE_TIMES.ONE_HOUR,
-    cacheTime: CACHE_TIMES.ONE_DAY,
+    gcTime: CACHE_TIMES.ONE_DAY,
     retry: 1,
   },
 };

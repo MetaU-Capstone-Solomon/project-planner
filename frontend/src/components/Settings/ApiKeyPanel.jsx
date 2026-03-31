@@ -45,6 +45,7 @@ export default function ApiKeyPanel() {
       setStatus('success');
       setKeyInput('');
       await invalidate();
+      setShowInput(false);
       toast.success('API key saved and verified.');
     } catch {
       setStatus('error');

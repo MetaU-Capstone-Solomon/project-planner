@@ -38,7 +38,7 @@ export const useAICache = (prompt) => {
     queryFn: () => callAI(prompt),
     enabled: !!prompt,
     staleTime: CACHE_CONFIG.AI_RESPONSES.staleTime,
-    cacheTime: CACHE_CONFIG.AI_RESPONSES.cacheTime,
+    gcTime: CACHE_CONFIG.AI_RESPONSES.gcTime,
     retry: CACHE_CONFIG.AI_RESPONSES.retry,
   });
 };
