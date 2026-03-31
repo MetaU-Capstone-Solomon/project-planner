@@ -32,7 +32,7 @@ const Dashboard = () => {
   const { projects, loading, error, stats } = useDashboardData();
   const navigate = useNavigate();
   const { data: settings } = useUserSettings();
-  const showUsageBanner = settings && !settings.apiProvider && settings.usage.used > 0;
+  const showUsageBanner = settings && !settings.apiProvider && settings.usage?.used > 0;
 
   return (
     <div className={`${COLOR_PATTERNS.components.page}`}>

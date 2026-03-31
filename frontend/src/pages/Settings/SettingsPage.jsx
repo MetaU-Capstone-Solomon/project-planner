@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Key } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +23,11 @@ export default function SettingsPage() {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const { user } = useAuth();
+
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) setActiveTab(tabFromUrl);
+  }, [searchParams]);
   const { data: settings } = useUserSettings();
   const invalidate = useInvalidateUserSettings();
   const [savingRole, setSavingRole] = useState(false);
