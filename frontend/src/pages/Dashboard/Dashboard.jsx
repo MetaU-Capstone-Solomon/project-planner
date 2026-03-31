@@ -16,17 +16,23 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import StatsCard from '@/components/StatsCard';
 import ProjectCard from '@/components/ProjectCard';
 import LoadingSpinner from '@/components/Loading/LoadingSpinner';
 import useDashboardData from '@/hooks/useDashboardData';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
 import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
+import { ROUTES } from '@/constants/routes';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { projects, loading, error, stats } = useDashboardData();
+  const navigate = useNavigate();
+  const { data: settings } = useUserSettings();
+  const showUsageBanner = settings && !settings.apiProvider && settings.usage.used > 0;
 
   return (
     <div className={`${COLOR_PATTERNS.components.page}`}>
@@ -51,6 +57,22 @@ const Dashboard = () => {
               />
             ))}
           </div>
+
+          {/* Usage indicator banner */}
+          {showUsageBanner && (
+            <div className="flex items-center justify-between px-4 py-2.5 mb-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm">
+              <span className="text-zinc-500 dark:text-zinc-400">
+                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{settings.usage.used}</span> of{' '}
+                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{settings.usage.limit}</span> free generations used this month.
+              </span>
+              <button
+                onClick={() => navigate(ROUTES.SETTINGS + '?tab=api-key')}
+                className="text-xs font-medium text-zinc-700 dark:text-zinc-300 underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              >
+                Add your key →
+              </button>
+            </div>
+          )}
 
           {/* Project list section */}
           <div>
