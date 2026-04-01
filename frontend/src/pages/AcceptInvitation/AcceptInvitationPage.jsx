@@ -48,36 +48,56 @@ export default function AcceptInvitationPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!token || !project) { setStatus('error'); setErrorMessage('Invalid invitation link. Please ask for a new invitation.'); return; }
-    if (!user) { localStorage.setItem('pendingInvitation', window.location.href); navigate(ROUTES.AUTH); return; }
-    acceptInvitation();
-  }, [user, authLoading]);
-
-  const acceptInvitation = async () => {
-    try {
-      setStatus('loading');
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { localStorage.setItem('pendingInvitation', window.location.href); navigate(ROUTES.AUTH); return; }
-
-      const response = await fetch(API_ENDPOINTS.ACCEPT_INVITATION, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ token, projectId: project }),
-      });
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setStatus('success');
-        setTimeout(() => navigate(getProjectDetailPath(result.projectId)), 2000);
-      } else {
-        setStatus('error');
-        setErrorMessage(result.error || MESSAGES.ERROR.INVITATION_ACCEPT_FAILED);
-      }
-    } catch {
+    if (!token || !project) {
       setStatus('error');
-      setErrorMessage(MESSAGES.ERROR.INVITATION_ACCEPT_FAILED);
+      setErrorMessage('Invalid invitation link. Please ask for a new invitation.');
+      return;
     }
-  };
+    if (!user) {
+      localStorage.setItem('pendingInvitation', window.location.href);
+      navigate(ROUTES.AUTH);
+      return;
+    }
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        setStatus('loading');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          localStorage.setItem('pendingInvitation', window.location.href);
+          navigate(ROUTES.AUTH);
+          return;
+        }
+
+        const response = await fetch(API_ENDPOINTS.ACCEPT_INVITATION, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ token, projectId: project }),
+        });
+        const result = await response.json();
+
+        if (cancelled) return;
+
+        if (response.ok && result.success) {
+          setStatus('success');
+          setTimeout(() => navigate(getProjectDetailPath(result.projectId)), 2000);
+        } else {
+          setStatus('error');
+          setErrorMessage(result.error || MESSAGES.ERROR.INVITATION_ACCEPT_FAILED);
+        }
+      } catch {
+        if (!cancelled) {
+          setStatus('error');
+          setErrorMessage(MESSAGES.ERROR.INVITATION_ACCEPT_FAILED);
+        }
+      }
+    };
+
+    run();
+    return () => { cancelled = true; };
+  }, [authLoading, token, project, user, navigate]);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-base)] p-4">
