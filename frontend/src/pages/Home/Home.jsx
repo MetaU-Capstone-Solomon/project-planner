@@ -1,176 +1,222 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Star, CheckCircle } from 'lucide-react';
-import Button from '@/components/Button/Button';
-import LandingNavbar from '@/components/Layout/LandingNavbar';
-import Footer from '@/components/Layout/Footer';
+import { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, Zap, Target, Users } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
-import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
-import prosperImg from '@/assets/images/testimonials/prosper.jpg';
-import sudeepImg from '@/assets/images/testimonials/sudeep.jpg';
-import vincentImg from '@/assets/images/testimonials/vincent.jpg';
+import Button from '@/components/ui/Button';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import { stagger, pageTransition } from '@/constants/motion';
 
-const Home = () => {
-  const steps = [
-    {
-      number: '1',
-      title: 'Create Your Project',
-      description: 'Start by setting up your project with a clear name and description',
-    },
-    {
-      number: '2',
-      title: 'Add Tasks',
-      description: 'Break down your project into manageable tasks and set deadlines',
-    },
-    {
-      number: '3',
-      title: 'Track Progress',
-      description: 'Monitor your progress and update task status as you complete them',
-    },
-  ];
+const FAKE_CARDS = [
+  {
+    title: 'E-Commerce Platform',
+    phase: 'Phase 2 of 4 · Backend API',
+    progress: 48,
+    tags: ['React', 'Node.js', 'PostgreSQL'],
+  },
+  {
+    title: 'Mobile Fitness App',
+    phase: 'Phase 1 of 3 · MVP Setup',
+    progress: 72,
+    tags: ['React Native', 'Firebase'],
+  },
+  {
+    title: 'AI Document Tool',
+    phase: 'Phase 3 of 5 · Integration',
+    progress: 31,
+    tags: ['Python', 'OpenAI', 'FastAPI'],
+  },
+];
 
-  const testimonials = [
-    {
-      name: 'Prosper Banda',
-      role: 'Software Engineer at Meta',
-      content:
-        'This app is still in development, but I can see the potential. Looking forward to the full release!',
-      image: prosperImg,
-    },
-    {
-      name: 'Sudeep Joshi',
-      role: 'SWE Intern at Amazon',
-      content:
-        "The interface looks promising. Can't wait to try out all the features when it's ready.",
-      image: sudeepImg,
-    },
-    {
-      name: 'Vincent Anim-Addo',
-      role: 'Meta U Intern at Meta',
-      content:
-        'Clean design and intuitive layout. This will be great for managing our design projects.',
-      image: vincentImg,
-    },
-  ];
+const FEATURES = [
+  { icon: Zap,    title: 'Generate in seconds',  desc: 'AI builds your full roadmap from a description or document upload.' },
+  { icon: Target, title: 'Track everything',      desc: 'Phases, milestones, tasks, and progress rings — all in one place.' },
+  { icon: Users,  title: 'Collaborate',           desc: 'Invite your team, assign work, connect Claude Code via MCP.' },
+];
+
+function HeroCardStack() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width  - 0.5;
+      const y = (e.clientY - rect.top)  / rect.height - 0.5;
+      el.style.setProperty('--rx', `${y * 10}deg`);
+      el.style.setProperty('--ry', `${x * -10}deg`);
+    };
+    const handleMouseLeave = () => {
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    };
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
 
   return (
-    <div className={`min-h-screen ${COLOR_CLASSES.landing.backgrounds.secondary}`}>
-      {/* Header */}
-      <LandingNavbar />
-
-      {/* Hero Section */}
-      <section className={COLOR_PATTERNS.landing.hero}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="mb-6 text-4xl font-bold text-white">
-              Plan Your Projects
-              <span className={COLOR_CLASSES.landing.text.accent}> Smarter</span>
-            </h1>
-            <p className="mx-auto mb-8 max-w-2xl text-xl text-white">
-              Streamline your workflow with our intuitive project management platform. Keep your
-              team organized and projects on track.
-            </p>
-            <div className="flex flex-row justify-center gap-4 sm:gap-6">
-              <Link to={ROUTES.AUTH}>
-                <Button
-                  variant="outline"
-                  size="md"
-                  className={`flex items-center ${COLOR_PATTERNS.landing.heroButton}`}
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to={ROUTES.AUTH}>
-                <Button variant="outline" size="md" className={COLOR_PATTERNS.landing.heroButton}>
-                  Sign In
-                </Button>
-              </Link>
+    <div
+      ref={containerRef}
+      className="relative hidden lg:flex items-center justify-center"
+      style={{ perspective: '1000px', width: 380, height: 420 }}
+    >
+      {FAKE_CARDS.map((card, i) => {
+        const depths  = ['-20px', '-10px', '0px'];
+        const rotateY = ['-8deg', '-4deg', '0deg'];
+        const rotateX = ['4deg', '2deg', '0deg'];
+        const translateX = ['-24px', '-10px', '0px'];
+        const depth = [0.3, 0.6, 1][i];
+        return (
+          <div
+            key={card.title}
+            className="absolute w-72 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-lg"
+            style={{
+              transform: `rotateX(calc(var(--rx, 0deg) * ${depth})) rotateY(calc(var(--ry, 0deg) * ${depth})) rotateY(${rotateY[i]}) rotateX(${rotateX[i]}) translateX(${translateX[i]}) translateZ(${depths[i]})`,
+              transition: 'transform 0.15s ease-out',
+              transformStyle: 'preserve-3d',
+              zIndex: i,
+            }}
+          >
+            <p className="mb-1 text-xs text-[var(--text-muted)]">{card.phase}</p>
+            <p className="mb-3 font-semibold text-[var(--text-primary)]">{card.title}</p>
+            <div className="mb-3 h-1.5 w-full rounded-full bg-[var(--bg-elevated)]">
+              <div
+                className="h-full rounded-full bg-[var(--accent)]"
+                style={{ width: `${card.progress}%` }}
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {card.tags.map(t => (
+                <span key={t} className="rounded-full bg-[var(--accent-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function Home() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[var(--bg-base)]">
+      {/* Background orb */}
+      <div className="orb" style={{ top: '-200px', right: '-100px' }} />
+
+      {/* Nav */}
+      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent)]">
+            <span className="text-xs font-bold text-white">PP</span>
+          </div>
+          <span className="font-semibold text-[var(--text-primary)]">ProjectPlanner</span>
         </div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.AUTH)}>
+            Sign in
+          </Button>
+          <Button size="sm" onClick={() => navigate(ROUTES.AUTH)}>
+            Get Started <ArrowRight size={14} />
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="relative z-10 mx-auto flex max-w-7xl flex-col items-center gap-16 px-6 py-20 lg:flex-row lg:py-32 sm:px-10">
+        {/* Left */}
+        <motion.div
+          variants={stagger.container}
+          initial="initial"
+          animate="animate"
+          className="flex-1"
+        >
+          <motion.div variants={stagger.item} transition={{ duration: 0.3 }}>
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
+              AI-powered roadmap generation
+            </span>
+          </motion.div>
+          <motion.h1
+            variants={stagger.item}
+            transition={{ duration: 0.4 }}
+            className="mb-5 text-5xl font-extrabold leading-tight tracking-tight text-[var(--text-primary)] sm:text-6xl"
+          >
+            Turn your idea into a roadmap.{' '}
+            <span style={{ color: 'var(--accent)' }}>Ship it.</span>
+          </motion.h1>
+          <motion.p
+            variants={stagger.item}
+            transition={{ duration: 0.3 }}
+            className="mb-8 max-w-lg text-lg text-[var(--text-secondary)]"
+          >
+            Describe your project, upload a doc, or start from scratch. We generate a custom step-by-step roadmap with timelines, tasks, and learning resources — tailored to your level.
+          </motion.p>
+          <motion.div variants={stagger.item} transition={{ duration: 0.3 }} className="flex gap-3">
+            <Button size="lg" onClick={() => navigate(ROUTES.AUTH)}>
+              Get Started free <ArrowRight size={16} />
+            </Button>
+            <Button variant="secondary" size="lg" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+              See how it works
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Right — 3D card stack */}
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 25 }}
+          className="flex-1 flex justify-center"
+        >
+          <HeroCardStack />
+        </motion.div>
       </section>
 
-      {/* How It Works Section */}
-      <section className={COLOR_PATTERNS.landing.contentSection}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
-              How it works
-            </h2>
-            <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
-              Get started in just a few simple steps
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={index} className={COLOR_PATTERNS.landing.card}>
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-2xl font-bold text-white shadow-lg">
-                  {step.number}
-                </div>
-                <h3
-                  className={`mb-3 text-center text-xl font-semibold ${COLOR_CLASSES.landing.text.primary}`}
-                >
-                  {step.title}
-                </h3>
-                <p className={`text-center leading-relaxed ${COLOR_CLASSES.landing.text.muted}`}>
-                  {step.description}
-                </p>
+      {/* Features */}
+      <section id="features" className="relative z-10 mx-auto max-w-7xl px-6 pb-32 sm:px-10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="grid gap-6 sm:grid-cols-3"
+        >
+          {FEATURES.map(({ icon: Icon, title, desc }, i) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, type: 'spring', stiffness: 200, damping: 25 }}
+              className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-subtle)]">
+                <Icon size={20} style={{ color: 'var(--accent)' }} />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className={COLOR_PATTERNS.landing.testimonialsSection}>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className={`mb-4 text-3xl font-bold ${COLOR_CLASSES.landing.text.primary}`}>
-              What people are saying
-            </h2>
-            <p className={`mx-auto max-w-2xl ${COLOR_CLASSES.landing.text.muted}`}>
-              Hear from developers about their experience
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className={COLOR_PATTERNS.landing.card}>
-                <div className="mb-6 flex items-center">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="mr-4 h-14 w-14 rounded-full ring-2 ring-blue-200"
-                  />
-                  <div>
-                    <h3 className={`font-semibold ${COLOR_CLASSES.landing.text.primary}`}>
-                      {testimonial.name}
-                    </h3>
-                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
-                <p className={`mb-6 leading-relaxed ${COLOR_CLASSES.landing.text.secondary}`}>
-                  {testimonial.content}
-                </p>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="mr-1 h-5 w-5 fill-current text-orange-500" />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+              <h3 className="mb-2 font-semibold text-[var(--text-primary)]">{title}</h3>
+              <p className="text-sm text-[var(--text-secondary)]">{desc}</p>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       {/* Footer */}
-      <Footer />
+      <footer className="relative z-10 border-t border-[var(--border)] px-6 py-6 sm:px-10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <p className="text-xs text-[var(--text-muted)]">© 2026 ProjectPlanner</p>
+          <ThemeToggle />
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default Home;
+}
