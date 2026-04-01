@@ -73,6 +73,7 @@ function calculateWeightedScore(scores, weights) {
   }, 0);
 }
 
+
 /**
  * Scores a phase based on logical order using configuration patterns.
  * @param {Object} phase - Phase object with title and description.

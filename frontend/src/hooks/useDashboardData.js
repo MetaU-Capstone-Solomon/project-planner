@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { calculateProjectStats } from '@/utils/dashboardUtils';
-import { getUserProjects } from '@/services/projectService';
+import { getUserProjects, getSharedProjects } from '@/services/projectService';
 import { showErrorToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { CACHE_CONFIG, QUERY_KEYS } from '@/constants/cache';
@@ -34,17 +34,22 @@ const useDashboardData = () => {
   } = useQuery({
     queryKey: [QUERY_KEYS.USER_PROJECTS],
     queryFn: async () => {
-      const result = await getUserProjects();
-      if (result.success) {
-        return result.projects;
-      } else {
-        throw new Error(result.error);
-      }
+      const [ownResult, sharedResult] = await Promise.all([
+        getUserProjects(),
+        getSharedProjects(),
+      ]);
+
+      if (!ownResult.success) throw new Error(ownResult.error);
+
+      const ownProjects = ownResult.projects;
+      const sharedProjects = sharedResult.success ? sharedResult.projects : [];
+
+      return [...ownProjects, ...sharedProjects];
     },
     staleTime: CACHE_CONFIG.USER_PROJECTS.staleTime,
     cacheTime: CACHE_CONFIG.USER_PROJECTS.cacheTime,
     retry: CACHE_CONFIG.USER_PROJECTS.retry,
-    onError: (error) => {
+    onError: () => {
       showErrorToast(MESSAGES.ERROR.PROJECTS_LOAD_FAILED);
     },
   });

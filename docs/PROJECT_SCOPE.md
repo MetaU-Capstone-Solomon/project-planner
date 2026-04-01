@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single source of truth for every feature, technical decision, and implementation detail discussed. Feed it to Claude at the start of each session to resume without losing context.
 
-**Last updated:** 2026-03-31  
+**Last updated:** 2026-04-01  
 **Intern:** Solomon Agyire | **Manager:** Jessica Sun | **Director:** Zahra Surani
 
 ---
@@ -11,33 +11,47 @@
 
 > **READ THIS FIRST before doing anything in a new session.**
 
-### What was just decided (2026-03-31)
+---
 
-The project has been decomposed into three upcoming implementation phases, in this order:
+### Phase 1 — Full UI Redesign ✅ COMPLETE (merged to main 2026-04-01)
+
+**All 24 tasks shipped and merged.** The frontend has been fully rebuilt.
+
+**What was delivered:**
+- CSS design token system: `frontend/src/index.css` — CSS custom properties for all colors, shadows, radius; full light + dark mode via `.dark` class + `data-theme` attr
+- Tailwind config simplified to semantic CSS var tokens (`frontend/tailwind.config.js`)
+- Framer Motion installed + motion constants (`frontend/src/constants/motion.js`): `spring`, `stagger`, `pageTransition`, `scaleIn`, `fade`
+- ThemeContext updated — persists to localStorage, syncs `.dark` class and `data-theme`, exposes `theme`/`toggleTheme` (`frontend/src/contexts/ThemeContext.jsx`)
+- **12 new base UI components** in `frontend/src/components/ui/`:
+  - `Button` — 4 variants (primary/secondary/ghost/destructive), 3 sizes, loading state
+  - `Card` — hover-lift with spring animation
+  - `Badge` — 8 variants including admin/editor/viewer role badges
+  - `Input` + `Textarea` — focus glow, label association via `useId`, error state
+  - `Modal` — AnimatePresence, Escape key, backdrop blur, bottom-sheet on mobile
+  - `Spinner` + `Skeleton` — shimmer loading states
+  - `Avatar` + `AvatarGroup` — initials fallback, deterministic color, stacked group
+  - `Tooltip` — 4 positions, hover-controlled
+  - `ProgressRing` — animated SVG with `useMotionValue`/`useTransform`, glow filter
+  - `ThemeToggle` — spring rotate animation on icon swap
+- **App.jsx** — `AnimatePresence mode="wait"` page transitions, `/profile → /settings` redirect (`frontend/src/App.jsx`)
+- **RootLayout + Navbar** — sticky blur nav, `layoutId` sliding active indicator, ThemeToggle, Avatar linked to settings (`frontend/src/layouts/RootLayout.jsx`)
+- **Landing page** — 3D parallax card stack (mouse-move CSS vars), hero stagger, features `whileInView`, orb background (`frontend/src/pages/Home/Home.jsx`)
+- **Auth page** — split layout (dark left panel with orb + dot pattern, light right panel), Google OAuth only (`frontend/src/pages/Auth/Auth.jsx`)
+- **Auth Callback** — swapped old LoadingSpinner for `ui/Spinner` (`frontend/src/pages/Auth/Callback.jsx`)
+- **Dashboard** — 4 stat cards with `ProgressRing`, stagger grid, project cards with inline progress, skeleton loading, empty state (`frontend/src/pages/Dashboard/Dashboard.jsx`)
+- **New Project Chat** — 2-panel layout (input left, roadmap output right), drag-drop file upload zone, generation skeletons, preserved all existing hooks (`frontend/src/pages/NewProjectChat/NewProjectChatPage.jsx`)
+- **Project Detail** — 3-panel layout: left sidebar phase nav (with `layoutId` indicator + ProgressRing), main content with `PhaseSection` accordion, fixed bottom progress bar, mobile scrollable phase tabs, MCP placeholder in sidebar (`frontend/src/pages/ProjectDetail/ProjectDetailPage.jsx`)
+- **Settings** — consolidated single-scroll page: Profile section, 3 role cards (Developer/Founder/Student) with animated selection, API key section with usage bar (`frontend/src/pages/Settings/SettingsPage.jsx`)
+- **Accept Invitation** — animated 3-state card (loading/success/error) with SVG path-draw checkmark, orb background (`frontend/src/pages/AcceptInvitation/AcceptInvitationPage.jsx`)
+- **Profile** — simplified to `<Navigate to="/settings" replace />` (`frontend/src/pages/Profile/Profile.jsx`)
+
+**Known remaining UI polish items (next session should address these before Phase 2):**
+- Some pages may need visual tweaks after seeing them running in browser — identify and fix in a follow-up UI polish pass
+- The chunk size warning (`788 kB`) — consider lazy-loading heavy pages (ProjectDetail, NewProjectChat) with `React.lazy` + `Suspense`
 
 ---
 
-### Phase 1 — Full UI Redesign ← CURRENTLY IN PROGRESS (brainstorming/design stage)
-
-**Status:** Brainstorming complete. Design doc being written. Implementation plan not yet started.
-
-**What this covers:**
-- Complete visual redesign of every page: Landing, Auth, Dashboard, New Project Chat, Project Detail, Settings (consolidated), Profile, Accept Invitation
-- Design system: new color tokens, typography scale, spacing, shadow, motion tokens
-- Dark mode + Light mode (toggle, persisted)
-- Visual direction: Option A+B blend — dark-first like Linear/Vercel, light mode like Notion/Linear Light
-- Motion: spring physics (Framer Motion), slide-up page transitions, skeleton loaders
-- 3D elements: mesh gradient/sphere hero on landing page, 3D progress rings on dashboard, card depth throughout
-- Fully responsive (mobile, tablet, desktop)
-- Production-ready, not AI-looking — clean and polished
-- Project Detail restructured: remove summary block, add sticky left sidebar phase nav, expanded single-phase view, task rows with assignee + resources, always-visible bottom progress bar
-- Settings consolidated into one page (no duplicate settings views)
-
-**What this does NOT cover** (left for Phase 2 and 3):
-- Role-specific functional differences
-- Task assignment
-- MCP server
-- Student explanation expansion
+### Phase 2 — Role Functionalities ← NEXT (NOT STARTED)
 
 ---
 
@@ -88,6 +102,33 @@ Each role then adds on top:
 - `get_project_roadmap` — full roadmap dump for context
 
 **Auth:** MCP server authenticates via user's Supabase JWT or a generated personal access token.
+
+---
+
+### Unstaged Work on `main` (commit before starting anything new)
+
+The following files are modified/untracked on `main` but not yet committed. They represent in-progress collaboration work from before Phase 1:
+
+**Backend (all modified, need a commit):**
+- `backend/routes/user.js`
+- `backend/services/aiProviderService.js`
+- `backend/services/fileProcessingService.js`
+- `backend/services/invitationService.js`
+- `backend/utils/scoringUtils.js`
+- `backend/package.json` + `backend/package-lock.json`
+
+**Frontend (modified):**
+- `frontend/src/components/ProjectCard/ProjectCard.jsx` — updated to support `isShared` prop
+- `frontend/src/hooks/useDashboardData.js` — returns `isShared` flag on projects
+- `frontend/src/pages/Auth/Callback.jsx` — additional redirect logic
+- `frontend/src/services/projectService.js` — new service (NEW FILE, untracked)
+- `frontend/src/components/Collaboration/TeamPanel.jsx` — collaboration panel (NEW FILE, untracked)
+
+**SQL files (untracked, apply to DB if not already done):**
+- `fix-rls-circular-dependency.sql`
+- `fix-roadmap-collaboration-rls.sql`
+
+**Action for next session:** Commit all of the above before writing any new code.
 
 ---
 
@@ -473,81 +514,95 @@ Supabase (PostgreSQL + RLS + Auth)
 
 ## 6. What Is Done vs. What Is Pending
 
-### DONE (committed to git)
+### DONE (committed to main)
 
-| Feature | Commits |
+| Feature | Notes |
 |---|---|
-| AI roadmap generation (Gemini free tier) | Early commits |
-| File upload + text extraction (PDF/DOCX/TXT) | Early commits |
-| Text summarization algorithm | Early commits |
-| Roadmap prioritization algorithm | Early commits |
-| Task CRUD (create, edit, delete) | Stretch goal commits |
-| Milestone edit, delete, reorder | Stretch goal commits |
-| Phase create, edit, delete, reorder | Stretch goal commits |
-| Progress tracking system | Stretch goal commits |
-| React Query caching | Stretch goal commits |
-| user_settings DB migration | Foundation commits |
-| AIProviderService (BYOK routing) | Foundation commits |
-| EncryptionService (AES-256-GCM) | Foundation commits |
-| Backend user settings API routes | Foundation commits |
-| OnboardingModal (role picker) | Foundation commits |
-| BYOKModal (two-trigger) | Foundation commits |
-| ApiKeyPanel (Settings) | Foundation commits |
-| SettingsPage (`/settings`) | Foundation commits |
-| useUserSettings + useUserRole hooks | Foundation commits |
-| Usage indicator on Dashboard | Foundation commits |
-| Usage tracking (monthly_usage) | Foundation commits |
-| Nav link for Settings | Foundation commits |
-| Collaboration DB migration (project_collaborators, project_invitations) | Collaboration commits |
-| InvitationService + email sending | Collaboration commits |
-| `POST /api/invite-collaborator` | Collaboration commits |
-| `POST /api/accept-invitation` | Collaboration commits |
-| InviteCollaboratorsModal | Collaboration commits |
-| checkUserPermission() in projectService | Collaboration commits |
-| Role-based Invite button visibility | Collaboration commits |
-| AcceptInvitationPage route in App.jsx | Collaboration commits |
-| Auth Callback pending-invitation redirect | Collaboration commits |
+| AI roadmap generation (Gemini free tier) | |
+| File upload + text extraction (PDF/DOCX/TXT) | |
+| Text summarization + prioritization algorithms | |
+| Task / Milestone / Phase CRUD (create, edit, delete, reorder) | |
+| Progress tracking system | |
+| React Query caching (`staleTime`/`gcTime`) | |
+| user_settings DB migration | |
+| AIProviderService (BYOK routing — Gemini + Claude) | |
+| EncryptionService (AES-256-GCM) | |
+| Backend user settings API routes | |
+| OnboardingModal (role picker) | |
+| BYOKModal + ApiKeyPanel | |
+| useUserSettings + useUserRole hooks | |
+| Usage tracking + indicator on Dashboard | |
+| Collaboration DB migration (`project_collaborators`, `project_invitations`) | |
+| InvitationService + email sending | |
+| `POST /api/invite-collaborator` + `POST /api/accept-invitation` | |
+| InviteCollaboratorsModal | |
+| `checkUserPermission()` in projectService | |
+| Role-based UI gate (Invite button) | |
+| Auth Callback pending-invitation redirect | |
+| **Phase 1 UI Redesign — all pages rebuilt** | Merged 2026-04-01 |
+| CSS design token system (light + dark mode) | `frontend/src/index.css` |
+| Tailwind semantic token config | `frontend/tailwind.config.js` |
+| 12 base UI components in `frontend/src/components/ui/` | |
+| Framer Motion animations across all pages | |
+| AnimatePresence page transitions | `frontend/src/App.jsx` |
+| RootLayout + sticky navbar redesign | `frontend/src/layouts/RootLayout.jsx` |
+| Landing page with 3D card stack | `frontend/src/pages/Home/Home.jsx` |
+| Auth split layout + Google-only sign in | `frontend/src/pages/Auth/Auth.jsx` |
+| Dashboard — ProgressRing cards + stagger | `frontend/src/pages/Dashboard/Dashboard.jsx` |
+| New Project Chat — 2-panel + drag-drop upload | `frontend/src/pages/NewProjectChat/NewProjectChatPage.jsx` |
+| Project Detail — 3-panel + sidebar + bottom bar | `frontend/src/pages/ProjectDetail/ProjectDetailPage.jsx` |
+| Settings — consolidated single-scroll page | `frontend/src/pages/Settings/SettingsPage.jsx` |
+| Accept Invitation — animated SVG states | `frontend/src/pages/AcceptInvitation/AcceptInvitationPage.jsx` |
+| Profile — redirect to /settings | `frontend/src/pages/Profile/Profile.jsx` |
 
-### PENDING (unstaged or not yet built)
+### PENDING — Next session priorities
 
-| Feature | Status | File(s) |
-|---|---|---|
-| Commit `AcceptInvitationPage.jsx` | Unstaged — ready | `frontend/src/pages/AcceptInvitation/AcceptInvitationPage.jsx` |
-| Commit `TeamPanel.jsx` | Unstaged — ready | `frontend/src/components/Collaboration/TeamPanel.jsx` |
-| Commit projectService.js additions | Unstaged — ready | `frontend/src/services/projectService.js` |
-| Commit useDashboardData.js changes | Unstaged — ready | `frontend/src/hooks/useDashboardData.js` |
-| Commit ProjectCard.jsx "Shared" badge | Unstaged — ready | `frontend/src/components/ProjectCard/ProjectCard.jsx` |
-| Commit invitationService.js email redesign | Unstaged — ready | `backend/services/invitationService.js` |
-| Commit user.js error message fix | Unstaged — ready | `backend/routes/user.js` |
-| Wire TeamPanel into ProjectDetailPage | NOT BUILT | `frontend/src/pages/ProjectDetail/ProjectDetailPage.jsx` |
-| "Team" button in ProjectDetailPage header | NOT BUILT | ProjectDetailPage.jsx |
-| Pass isShared flag from Dashboard to ProjectCard | NOT BUILT | `frontend/src/pages/Dashboard/Dashboard.jsx` |
-| Role-aware edit UI (hide controls for viewers) | NOT BUILT | PhaseCardNew, PhaseModal, task components |
-| Verify `get_project_collaborators` DB function exists | NEEDS VERIFICATION | Supabase SQL |
+**Step 0 — Commit unstaged work first (see "Unstaged Work" section above)**
+
+**Step 1 — UI polish pass (do this before Phase 2)**
+Run the app in browser and walk every page. Identify any visual issues introduced by the redesign. Common things to check:
+- Mobile responsiveness on each page
+- Dark ↔ light mode toggle on all pages
+- ProgressRing rendering in Dashboard cards
+- Project Detail sidebar phase nav scrolling
+- New Project Chat output panel rendering `ChatContainer` correctly
+- Settings role card selection persisting
+- Consider lazy-loading heavy pages (`ProjectDetail`, `NewProjectChat`) with `React.lazy` + `Suspense` to reduce 788kB bundle
+
+**Step 2 — Wire TeamPanel into Project Detail**
+`TeamPanel.jsx` exists (`frontend/src/components/Collaboration/TeamPanel.jsx`) but was skipped in Phase 1 because its import path wasn't confirmed. The Project Detail page already has a "Team" button that sets `teamPanelOpen` state — just import and render `<TeamPanel>` at the bottom of the return.
+
+**Step 3 — Pass `isShared` from Dashboard data to project cards**
+`useDashboardData.js` already returns `isShared` on each project. The Dashboard `ProjectCardItem` already renders a "Shared" badge when `project.isShared` is truthy. Just verify this is flowing through correctly.
+
+**Step 4 — Verify `get_project_collaborators` DB function**
+Run in Supabase SQL editor: `SELECT * FROM get_project_collaborators('<any-project-id>');` — if it errors, apply the SQL from `fix-rls-circular-dependency.sql` and `fix-roadmap-collaboration-rls.sql`.
+
+**Step 5 — Phase 2 (Role Functionalities)**
+Do not start until Steps 0–4 are done.
 
 ---
 
-## 7. Unstaged Changes (In-Progress Work)
+## 7. Unstaged Work (In-Progress Before Phase 1)
 
-These files have changes that exist locally but are NOT committed:
+> These files are modified/untracked on `main` but not yet committed. Commit them at the start of the next session before doing anything else.
 
 ### Modified files
-- `backend/package.json` — dependency updates
-- `backend/package-lock.json` — lock file
+- `backend/package.json` + `backend/package-lock.json` — dependency updates
 - `backend/routes/user.js` — better API key error message forwarding
 - `backend/services/aiProviderService.js` — minor tweaks
 - `backend/services/fileProcessingService.js` — minor tweaks
 - `backend/services/invitationService.js` — email template redesign
-- `frontend/package.json` — dependency updates
-- `frontend/package-lock.json` — lock file (large diff)
-- `frontend/src/components/ProjectCard/ProjectCard.jsx` — isShared badge
-- `frontend/src/hooks/useDashboardData.js` — fetches shared + owned projects
-- `frontend/src/pages/Auth/Callback.jsx` — pending invitation redirect
-- `frontend/src/services/projectService.js` — getSharedProjects, getProjectCollaborators, removeCollaborator
+- `backend/utils/scoringUtils.js` — minor fix
+- `frontend/src/components/ProjectCard/ProjectCard.jsx` — isShared "Shared" badge
+- `frontend/src/hooks/useDashboardData.js` — fetches shared + owned projects, returns `isShared` flag
+- `frontend/src/pages/Auth/Callback.jsx` — pending invitation redirect on login
+- `frontend/src/services/projectService.js` — `getSharedProjects`, `getProjectCollaborators`, `removeCollaborator`
 
 ### New untracked files
-- `frontend/src/components/Collaboration/TeamPanel.jsx` — team member management modal
-- `frontend/src/pages/AcceptInvitation/AcceptInvitationPage.jsx` — invitation acceptance page
+- `frontend/src/components/Collaboration/TeamPanel.jsx` — team member management panel (needs to be wired into ProjectDetailPage)
+- `fix-rls-circular-dependency.sql` — SQL fix for RLS policy
+- `fix-roadmap-collaboration-rls.sql` — SQL fix for collaboration RLS
 
 ---
 

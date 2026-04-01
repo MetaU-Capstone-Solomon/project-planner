@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Users } from 'lucide-react';
 import { getProjectDetailPath } from '@/constants/routes';
 import { getProgressColor } from '@/constants/projectCard';
 import { calculateOverallProgress } from '@/utils/roadmapUtils';
@@ -29,7 +29,7 @@ import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
  * @param {string} props.project.created_at - Project creation date
  * @param {string} props.project.updated_at - Project last updated date
  */
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, isShared }) => {
   const navigate = useNavigate();
 
   // Parse roadmap content to get metadata and progress
@@ -62,6 +62,12 @@ const ProjectCard = ({ project }) => {
             <h3 className={`text-lg font-semibold ${COLOR_CLASSES.text.heading} truncate`}>
               {project.title}
             </h3>
+            {(isShared || project.isShared) && (
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+                <Users className="h-3 w-3" />
+                Shared
+              </span>
+            )}
           </div>
           <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0 text-gray-400 dark:text-gray-500" />
         </div>

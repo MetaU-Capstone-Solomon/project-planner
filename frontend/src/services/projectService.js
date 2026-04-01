@@ -178,6 +178,98 @@ export const deleteProject = async (projectId) => {
 };
 
 // =====================================================
+// SHARED PROJECTS
+// =====================================================
+
+/**
+ * Retrieve projects the current user is a collaborator on (but does not own)
+ *
+ * @returns {Promise<Object>} Result with projects array or error
+ */
+export const getSharedProjects = async () => {
+  try {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError) throw authError;
+    if (!user) throw new Error('You must be logged in to view projects.');
+
+    // Get project IDs where user is an accepted collaborator
+    const { data: collaborations, error: collabError } = await supabase
+      .from('project_collaborators')
+      .select('project_id')
+      .eq('user_id', user.id)
+      .eq('status', 'accepted');
+
+    if (collabError) throw collabError;
+    if (!collaborations || collaborations.length === 0) return { success: true, projects: [] };
+
+    const projectIds = collaborations.map((c) => c.project_id);
+
+    // Fetch those projects, excluding ones the user owns
+    const { data, error } = await supabase
+      .from('roadmap')
+      .select('id, title, content, created_at, updated_at')
+      .in('id', projectIds)
+      .neq('user_id', user.id)
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, projects: (data || []).map((p) => ({ ...p, isShared: true })) };
+  } catch (error) {
+    console.error('Failed to fetch shared projects:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Get collaborators for a project (uses DB function to include user info)
+ *
+ * @param {string} projectId - Project ID
+ * @returns {Promise<Object>} Result with collaborators array or error
+ */
+export const getProjectCollaborators = async (projectId) => {
+  try {
+    const { data, error } = await supabase.rpc('get_project_collaborators', {
+      p_project_id: projectId,
+    });
+
+    if (error) throw error;
+
+    return { success: true, collaborators: data || [] };
+  } catch (error) {
+    console.error('Failed to fetch collaborators:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Remove a collaborator from a project (admin/owner only)
+ *
+ * @param {string} projectId - Project ID
+ * @param {string} userId - User ID to remove
+ * @returns {Promise<Object>} Result with success status or error
+ */
+export const removeCollaborator = async (projectId, userId) => {
+  try {
+    const { error } = await supabase
+      .from('project_collaborators')
+      .delete()
+      .eq('project_id', projectId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to remove collaborator:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// =====================================================
 // COLLABORATION PERMISSION FUNCTIONS
 // =====================================================
 

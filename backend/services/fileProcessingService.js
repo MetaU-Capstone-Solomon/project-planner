@@ -1,7 +1,7 @@
 const TextSummarizer = require('../utils/textSummarizer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const textract = require('textract');
+const WordExtractor = require('word-extractor');
 
 // Handles text extraction and processing from various file formats
 class FileProcessingService {
@@ -81,18 +81,12 @@ class FileProcessingService {
     }
   }
 
-  // Extracts text from legacy DOC files using textract
+  // Extracts text from legacy DOC files using word-extractor
   async #extractTextFromDoc(file) {
     try {
-      return new Promise((resolve, reject) => {
-        textract.fromBufferWithName(file.originalname, file.buffer, (error, text) => {
-          if (error) {
-            reject(new Error(`Failed to extract text from DOC: ${error.message}`));
-          } else {
-            resolve(text);
-          }
-        });
-      });
+      const extractor = new WordExtractor();
+      const doc = await extractor.extract(file.buffer);
+      return doc.getBody();
     } catch (error) {
       throw new Error(`Failed to extract text from DOC: ${error.message}`);
     }

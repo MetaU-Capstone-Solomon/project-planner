@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:render": "npm install --force && vite build",
+    "build:render": "npm install --force --platform=linux --arch=x64 && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",

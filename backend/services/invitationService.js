@@ -226,61 +226,75 @@ class InvitationService {
    */
   generateInvitationEmailHtml(data) {
     const { projectName, inviterName, role, message, invitationLink } = data;
-    
     const roleText = role === 'editor' ? 'Editor' : 'Viewer';
-    const roleDescription = role === 'editor' 
-      ? 'You can view, edit, and manage project tasks' 
-      : 'You can view project details and tasks';
 
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Project Collaboration Invitation</title>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #4f46e5; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-          .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-          .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-          .role-badge { background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
-          .message-box { background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #4f46e5; }
-          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>🎯 Project Collaboration Invitation</h1>
-        </div>
-        <div class="content">
-          <h2>You're invited to collaborate!</h2>
-          <p><strong>${inviterName}</strong> has invited you to collaborate on the project:</p>
-          <h3 style="color: #4f46e5; margin: 20px 0;">"${projectName}"</h3>
-          
-          <p>Your role: <span class="role-badge">${roleText}</span></p>
-          <p><em>${roleDescription}</em></p>
-          
-          ${message ? `
-            <div class="message-box">
-              <strong>Message from ${inviterName}:</strong><br>
-              "${message}"
-            </div>
-          ` : ''}
-          
-          <p>Click the button below to accept this invitation:</p>
-          <a href="${invitationLink}" class="button">Accept Invitation</a>
-          
-          <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
-            This invitation will expire in 7 days. If you don't want to collaborate on this project, you can safely ignore this email.
-          </p>
-        </div>
-        <div class="footer">
-          <p>This invitation was sent from Project Planner</p>
-        </div>
-      </body>
-      </html>
-    `;
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're invited to collaborate</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e4e4e7;">
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:48px 48px 32px;">
+              <p style="margin:0 0 24px;font-size:14px;color:#71717a;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;">Project Invitation</p>
+              <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#09090b;line-height:1.3;">
+                ${inviterName} invited you to collaborate
+              </h1>
+              <p style="margin:0 0 32px;font-size:16px;color:#3f3f46;line-height:1.6;">
+                You've been added as an <strong>${roleText}</strong> on the project:
+              </p>
+
+              <!-- Project name block -->
+              <div style="background:#fafafa;border:1px solid #e4e4e7;border-radius:6px;padding:16px 20px;margin-bottom:32px;">
+                <p style="margin:0;font-size:18px;font-weight:600;color:#09090b;">${projectName}</p>
+              </div>
+
+              ${message ? `
+              <!-- Personal message -->
+              <div style="border-left:3px solid #e4e4e7;padding:4px 16px;margin-bottom:32px;">
+                <p style="margin:0;font-size:14px;color:#71717a;font-style:italic;">"${message}"</p>
+              </div>
+              ` : ''}
+
+              <!-- CTA Button -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="background:#18181b;border-radius:6px;">
+                    <a href="${invitationLink}"
+                       style="display:inline-block;padding:12px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">
+                      Accept Invitation
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0;font-size:13px;color:#a1a1aa;line-height:1.6;">
+                This invitation expires in 7 days. If you weren't expecting this, you can safely ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 48px;border-top:1px solid #f4f4f5;">
+              <p style="margin:0;font-size:13px;color:#a1a1aa;">Sent via Project Planner</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   }
 }
 

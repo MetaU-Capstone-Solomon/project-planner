@@ -83,7 +83,8 @@ router.post('/api-key', extractUserId, async (req, res) => {
   try {
     await aiProvider.validateKey(key, provider);
   } catch (err) {
-    return res.status(400).json({ error: 'Invalid or expired key. Please check it and try again.' });
+    console.error(`Key validation failed for provider=${provider}:`, err.message);
+    return res.status(400).json({ error: err.message || 'Invalid or expired key. Please check it and try again.' });
   }
 
   try {

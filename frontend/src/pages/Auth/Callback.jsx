@@ -14,7 +14,13 @@ export default function Callback() {
         if (error) throw error;
 
         if (data?.session) {
-          navigate(ROUTES.DASHBOARD);
+          const pendingInvitation = localStorage.getItem('pendingInvitation');
+          if (pendingInvitation) {
+            localStorage.removeItem('pendingInvitation');
+            window.location.href = pendingInvitation;
+          } else {
+            navigate(ROUTES.DASHBOARD);
+          }
         } else {
           navigate(ROUTES.AUTH);
         }
