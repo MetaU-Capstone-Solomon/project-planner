@@ -1,373 +1,105 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, Plus, X, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useExperiences } from '@/hooks/useExperiences';
+import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
+import { stagger } from '@/constants/motion';
 
-function Auth() {
-  const [activeTab, setActiveTab] = useState('signup');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showSignInPassword, setShowSignInPassword] = useState(false);
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, user } = useAuth();
+export default function Auth() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const {
-    experiences,
-    experienceInput,
-    showDropdown,
-    filteredSuggestions,
-    addExperience,
-    removeExperience,
-    handleExperienceInputChange,
-  } = useExperiences();
 
   useEffect(() => {
-    if (user) {
-      navigate(ROUTES.DASHBOARD);
-    }
-  }, [user, navigate]);
+    if (user) navigate(ROUTES.DASHBOARD, { replace: true });
+  }, [user]);
 
-  const handleGoogleSignIn = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-      await signInWithGoogle();
-    } catch (err) {
-      setError(err.message || 'Failed to sign in with Google');
-      console.error('Google sign in error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [signInWithGoogle]);
-
-  const handleSignIn = useCallback(
-    async (e) => {
-      e.preventDefault();
-      try {
-        setIsLoading(true);
-        setError('');
-        await signInWithEmail(email, password);
-      } catch (err) {
-        setError(err.message || 'Failed to sign in');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [signInWithEmail, email, password]
-  );
-
-  const handleCreateAccount = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        return;
-      }
-      try {
-        setIsLoading(true);
-        setError('');
-        await signUpWithEmail(email, password, fullName);
-        alert('Account created! Please check your email to confirm.');
-        setActiveTab('signin');
-      } catch (err) {
-        setError(err.message || 'Failed to create account');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [signUpWithEmail, email, password, confirmPassword, fullName]
-  );
+  const handleGoogleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md">
-        <div className="rounded-lg bg-white p-8 shadow-md">
-          <div className="mb-6 text-center">
-            <div className="mb-2 inline-flex items-center space-x-2">
-              <div className="rounded-lg border border-gray-300 p-2">
-                <Sparkles className="h-6 w-6 text-blue-600" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">ProPlan</span>
+    <div className="flex min-h-screen bg-[var(--bg-base)]">
+      {/* Left panel — dark, always */}
+      <div className="relative hidden w-1/2 overflow-hidden bg-[#0a0a0a] lg:flex lg:flex-col lg:items-center lg:justify-center">
+        <div className="orb" style={{ top: '10%', left: '20%' }} />
+        <div className="relative z-10 max-w-sm px-12 text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)]">
+              <span className="text-xl font-bold text-white">PP</span>
             </div>
           </div>
-
-          <div className="mb-6">
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <img
-                  src="https://developers.google.com/identity/images/g-logo.png"
-                  alt="Google logo"
-                  className="h-5 w-5"
-                />
-              )}
-              <span>{isLoading ? 'Signing in...' : 'Continue with Google'}</span>
-            </button>
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Or continue with email</span>
-            </div>
-          </div>
-
-          {error && (
-            <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
-          )}
-
-          <div className="mb-8 flex space-x-2">
-            <button
-              onClick={() => setActiveTab('signin')}
-              className={`flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors ${
-                activeTab === 'signin'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={() => setActiveTab('signup')}
-              className={`flex-1 rounded-lg px-4 py-3 text-sm font-semibold transition-colors ${
-                activeTab === 'signup'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          {activeTab === 'signup' && (
-            <form className="space-y-5" onSubmit={handleCreateAccount}>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type="text"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your full name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type="email"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Create a password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Experience</label>
-                <p className="mb-3 text-xs text-gray-500">
-                  Add your technical experience (optional)
-                </p>
-
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={experienceInput}
-                    onChange={(e) => handleExperienceInputChange(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addExperience(experienceInput);
-                      }
-                    }}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 placeholder-gray-500"
-                    placeholder="Type your experience or select from suggestions"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => addExperience(experienceInput)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-blue-600"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {showDropdown && filteredSuggestions.length > 0 && (
-                  <div className="absolute z-10 mt-1 max-h-48 w-64 overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg">
-                    {filteredSuggestions.map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        type="button"
-                        onClick={() => addExperience(suggestion)}
-                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {experiences.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {experiences.map((experience, index) => (
-                      <span
-                        key={index}
-                        className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                      >
-                        {experience}
-                        <button
-                          type="button"
-                          onClick={() => removeExperience(index)}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
-              >
-                {isLoading ? (
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin" />
-                ) : (
-                  'Create Account'
-                )}
-              </button>
-            </form>
-          )}
-
-          {activeTab === 'signin' && (
-            <form className="space-y-5" onSubmit={handleSignIn}>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type="email"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                  <input
-                    type={showSignInPassword ? 'text' : 'password'}
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-12 text-gray-900 placeholder-gray-500"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowSignInPassword(!showSignInPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 hover:text-gray-600"
-                  >
-                    {showSignInPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 ${isLoading ? 'cursor-not-allowed opacity-60' : ''}`}
-              >
-                {isLoading ? <Loader2 className="mx-auto h-5 w-5 animate-spin" /> : 'Sign In'}
-              </button>
-            </form>
-          )}
+          <p className="text-2xl font-bold leading-snug text-white">
+            Your projects. Your pace. Powered by AI.
+          </p>
+          <p className="mt-3 text-sm text-[#a3a3a3]">
+            Generate roadmaps, track progress, and collaborate with your team — all in one place.
+          </p>
         </div>
+        {/* Floating dot pattern */}
+        <div className="absolute inset-0 z-0 opacity-20"
+          style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '32px 32px' }}
+        />
+      </div>
+
+      {/* Right panel — sign in */}
+      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        <motion.div
+          variants={stagger.container}
+          initial="initial"
+          animate="animate"
+          className="w-full max-w-sm"
+        >
+          {/* Mobile logo */}
+          <motion.div variants={stagger.item} transition={{ duration: 0.3 }} className="mb-8 flex justify-center lg:hidden">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]">
+              <span className="font-bold text-white">PP</span>
+            </div>
+          </motion.div>
+
+          <motion.h1
+            variants={stagger.item}
+            transition={{ duration: 0.3 }}
+            className="mb-2 text-2xl font-bold text-[var(--text-primary)]"
+          >
+            Welcome back
+          </motion.h1>
+          <motion.p
+            variants={stagger.item}
+            transition={{ duration: 0.3 }}
+            className="mb-8 text-sm text-[var(--text-secondary)]"
+          >
+            Sign in to continue to ProjectPlanner
+          </motion.p>
+
+          <motion.button
+            variants={stagger.item}
+            transition={{ duration: 0.3 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleGoogleSignIn}
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] shadow-sm transition-colors hover:bg-[var(--bg-elevated)]"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18">
+              <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+              <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+              <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
+              <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/>
+            </svg>
+            Continue with Google
+          </motion.button>
+
+          <motion.p
+            variants={stagger.item}
+            transition={{ duration: 0.3 }}
+            className="mt-6 text-center text-xs text-[var(--text-muted)]"
+          >
+            By signing in, you agree to our Terms of Service
+          </motion.p>
+        </motion.div>
       </div>
     </div>
   );
 }
-
-export default Auth;
