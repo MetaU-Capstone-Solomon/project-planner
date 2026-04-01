@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single source of truth for every feature, technical decision, and implementation detail discussed. Feed it to Claude at the start of each session to resume without losing context.
 
-**Last updated:** 2026-04-01  
+**Last updated:** 2026-04-01 (UI polish session)  
 **Intern:** Solomon Agyire | **Manager:** Jessica Sun | **Director:** Zahra Surani
 
 ---
@@ -45,9 +45,18 @@
 - **Accept Invitation** — animated 3-state card (loading/success/error) with SVG path-draw checkmark, orb background (`frontend/src/pages/AcceptInvitation/AcceptInvitationPage.jsx`)
 - **Profile** — simplified to `<Navigate to="/settings" replace />` (`frontend/src/pages/Profile/Profile.jsx`)
 
-**Known remaining UI polish items (next session should address these before Phase 2):**
-- Some pages may need visual tweaks after seeing them running in browser — identify and fix in a follow-up UI polish pass
-- The chunk size warning (`788 kB`) — consider lazy-loading heavy pages (ProjectDetail, NewProjectChat) with `React.lazy` + `Suspense`
+**UI polish completed (2026-04-01 session):**
+- Committed all pre-Phase-1 unstaged collaboration work (backend services, TeamPanel, projectService, SQL fix files)
+- Fixed double `pageTransition` animation: removed redundant `motion.div` wrapper from `RootLayout` — each page handles its own transition
+- Fixed `group-hover` arrow animation on Dashboard project cards (added `group` class to `Card`)
+- Fixed file-upload spinner size (lg → sm for inline text context)
+- Wired `TeamPanel` into `ProjectDetailPage`: added `teamPanelOpen` state, Team button (admin-only, alongside Invite/Phase), and rendered `<TeamPanel>` in modal section
+
+**Still pending before Phase 2:**
+- Run app in browser and do a visual walk-through of every page (mobile + dark mode) — no code-level issues found, but real-browser check is needed
+- The chunk size warning (`778 kB`) — consider lazy-loading heavy pages (ProjectDetail, NewProjectChat) with `React.lazy` + `Suspense`
+- Verify `isShared` flows through Dashboard → ProjectCardItem end-to-end (badge shows for shared projects)
+- Verify `get_project_collaborators` DB function works — apply SQL fix files in Supabase if not done
 
 ---
 
@@ -105,30 +114,13 @@ Each role then adds on top:
 
 ---
 
-### Unstaged Work on `main` (commit before starting anything new)
+### Unstaged Work on `main`
 
-The following files are modified/untracked on `main` but not yet committed. They represent in-progress collaboration work from before Phase 1:
+All collaboration work committed. No unstaged changes as of 2026-04-01.
 
-**Backend (all modified, need a commit):**
-- `backend/routes/user.js`
-- `backend/services/aiProviderService.js`
-- `backend/services/fileProcessingService.js`
-- `backend/services/invitationService.js`
-- `backend/utils/scoringUtils.js`
-- `backend/package.json` + `backend/package-lock.json`
-
-**Frontend (modified):**
-- `frontend/src/components/ProjectCard/ProjectCard.jsx` — updated to support `isShared` prop
-- `frontend/src/hooks/useDashboardData.js` — returns `isShared` flag on projects
-- `frontend/src/pages/Auth/Callback.jsx` — additional redirect logic
-- `frontend/src/services/projectService.js` — new service (NEW FILE, untracked)
-- `frontend/src/components/Collaboration/TeamPanel.jsx` — collaboration panel (NEW FILE, untracked)
-
-**SQL files (untracked, apply to DB if not already done):**
-- `fix-rls-circular-dependency.sql`
-- `fix-roadmap-collaboration-rls.sql`
-
-**Action for next session:** Commit all of the above before writing any new code.
+**SQL files are committed but may not yet be applied to Supabase DB:**
+- `fix-rls-circular-dependency.sql` — apply if `get_project_collaborators` returns an RLS error
+- `fix-roadmap-collaboration-rls.sql` — apply if roadmap collaboration queries fail
 
 ---
 
