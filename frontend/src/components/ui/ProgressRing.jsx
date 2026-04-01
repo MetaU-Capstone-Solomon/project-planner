@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 
 export default function ProgressRing({
@@ -12,6 +12,9 @@ export default function ProgressRing({
   const circumference = 2 * Math.PI * radius;
   const cx = size / 2;
   const cy = size / 2;
+
+  const uid = useId();
+  const filterId = `ring-glow-${uid.replace(/:/g, '')}`;
 
   const motionProgress = useMotionValue(0);
   const dashOffset = useTransform(motionProgress, v => circumference * (1 - v / 100));
@@ -28,7 +31,7 @@ export default function ProgressRing({
     <div className={`relative inline-flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         <defs>
-          <filter id="ring-glow">
+          <filter id={filterId}>
             <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="#6366f1" floodOpacity="0.4" />
           </filter>
         </defs>
@@ -46,7 +49,7 @@ export default function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           style={{ strokeDashoffset: dashOffset }}
-          filter="url(#ring-glow)"
+          filter={`url(#${filterId})`}
         />
       </svg>
       {label && (

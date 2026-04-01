@@ -35,6 +35,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
               )}
               <button
                 onClick={onClose}
+                aria-label="Close modal"
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <X size={16} />

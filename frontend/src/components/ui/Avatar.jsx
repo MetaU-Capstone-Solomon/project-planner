@@ -37,7 +37,7 @@ export function AvatarGroup({ users = [], max = 3, size = 'sm' }) {
   return (
     <div className="flex -space-x-2">
       {visible.map((u, i) => (
-        <div key={i} className="ring-2 ring-[var(--bg-base)] rounded-full">
+        <div key={u.id || u.email || i} className="ring-2 ring-[var(--bg-base)] rounded-full">
           <Avatar src={u.avatar} name={u.name} size={size} />
         </div>
       ))}
