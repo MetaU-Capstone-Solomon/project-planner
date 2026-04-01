@@ -12,7 +12,7 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) navigate(ROUTES.DASHBOARD, { replace: true });
-  }, [user]);
+  }, [user, navigate]);
 
   const handleGoogleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
