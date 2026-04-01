@@ -160,7 +160,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map(i => <ProjectSkeleton key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => <ProjectSkeleton key={i} />)}
           </div>
         ) : !projects?.length ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] py-20 text-center">
