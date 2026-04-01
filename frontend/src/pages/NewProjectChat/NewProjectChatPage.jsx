@@ -37,7 +37,7 @@ import {
   PROJECT_SCOPE_OPTIONS,
   FORM_FIELDS,
 } from '@/constants/projectOptions';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import Spinner from '@/components/ui/Spinner';
 import { CheckCircle, Plus } from 'lucide-react';
 import useIsMobile from '@/hooks/useIsMobile';
 import resetNewProjectState from '@/utils/resetNewProjectState';
@@ -280,7 +280,7 @@ const NewProjectChatPage = () => {
           </motion.label>
           {fileLoading && (
             <div className="mt-2 flex items-center gap-2 text-[var(--text-muted)]">
-              <LoadingSpinner size="sm" />
+              <Spinner size="lg" className="text-[var(--accent)]" />
               <p className="text-sm">{MESSAGES.LOADING.PROCESSING_DOCUMENT}</p>
             </div>
           )}
