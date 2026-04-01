@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, Users } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
@@ -10,6 +10,7 @@ import confirmAction from '@/utils/confirmAction';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
 import EditPhaseModal from '@/components/Roadmap/EditPhaseModal';
 import InviteCollaboratorsModal from '@/components/Collaboration/InviteCollaboratorsModal';
+import TeamPanel from '@/components/Collaboration/TeamPanel';
 import { getProject, updateProject, checkUserPermission } from '@/services/projectService';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
@@ -140,6 +141,7 @@ const ProjectDetailPage = () => {
   const [editingPhase, setEditingPhase] = useState(null);
   const [isCreatePhaseModalOpen, setIsCreatePhaseModalOpen] = useState(false);
   const [activePhaseId, setActivePhaseId] = useState(null);
+  const [teamPanelOpen, setTeamPanelOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -687,6 +689,9 @@ const ProjectDetailPage = () => {
               <div className="flex items-center gap-2">
                 {userRole === 'admin' && (
                   <>
+                    <Button variant="secondary" size="sm" onClick={() => setTeamPanelOpen(true)}>
+                      <Users size={14} /> Team
+                    </Button>
                     <Button variant="secondary" size="sm" onClick={() => setInviteModalOpen(true)}>
                       <UserPlus size={14} /> Invite
                     </Button>
@@ -764,6 +769,15 @@ const ProjectDetailPage = () => {
         phase={selectedPhase}
         onTaskUpdate={handleTaskUpdate}
         onMilestoneReorder={handleMilestoneReorder}
+      />
+
+      {/* Team Panel */}
+      <TeamPanel
+        isOpen={teamPanelOpen}
+        onClose={() => setTeamPanelOpen(false)}
+        projectId={projectId}
+        currentUserId={user?.id}
+        isAdmin={userRole === 'admin'}
       />
 
       {/* Invite Collaborators Modal */}
