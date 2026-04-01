@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { UserPlus, Plus, Users } from 'lucide-react';
-import Button from '@/components/Button/Button';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Plus, UserPlus, Users } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Spinner from '@/components/ui/Spinner';
+import ProgressRing from '@/components/ui/ProgressRing';
 import confirmAction from '@/utils/confirmAction';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner';
-import PhaseCardNew from '@/components/Roadmap/PhaseCardNew';
-import ProgressBar from '@/components/Roadmap/ProgressBar';
-import Summary from '@/components/Roadmap/Summary';
 import PhaseModal from '@/components/Roadmap/PhaseModal';
 import EditPhaseModal from '@/components/Roadmap/EditPhaseModal';
 import InviteCollaboratorsModal from '@/components/Collaboration/InviteCollaboratorsModal';
@@ -14,8 +14,8 @@ import { getProject, updateProject, checkUserPermission } from '@/services/proje
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
 import { MARKDOWN } from '@/constants/roadmap';
-import { getButtonClasses } from '@/utils/formUtils';
-import { BUTTON_CONFIGS } from '@/constants/forms';
+import { ROUTES } from '@/constants/routes';
+import { pageTransition } from '@/constants/motion';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,7 +24,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/config/api';
 
 /**
- * ProjectDetailPage - Card-based project details layout with modal task editing
+ * ProjectDetailPage - 3-panel layout with sidebar nav, main content, and fixed bottom bar
  *
  * HOW IT WORKS:
  * - Loads and displays a single project's details.
@@ -34,10 +34,10 @@ import { API_ENDPOINTS } from '@/config/api';
  * - Cache timing and keys are managed in the config file.
  *
  * Features:
- * - Card-based phase layout similar to dashboard
- * - Responsive grid layout for phase cards
- * - Clean, modern UI with consistent styling
- * - Maintains existing functionality for data display
+ * - Left sidebar with phase navigation and overall progress ring
+ * - Expandable PhaseSection cards with inline task checkboxes
+ * - Fixed bottom bar showing global progress
+ * - Sticky top header with breadcrumb, role badge, and action buttons
  * - Modal task editing: Edit task titles and descriptions in a dedicated edit modal
  *
  * MODAL TASK EDITING WORKFLOW:
@@ -49,6 +49,84 @@ import { API_ENDPOINTS } from '@/config/api';
  * 6. Changes are validated (empty titles prevented) and persisted to database
  *
  */
+
+// ---------------------------------------------------------------------------
+// PhaseSection — inline expandable phase card with task checkboxes
+// ---------------------------------------------------------------------------
+function PhaseSection({ phase, userRole, onTaskUpdate, onEditPhase, onDeletePhase, onViewMilestone }) {
+  const [expanded, setExpanded] = useState(true);
+  const tasks = phase.milestones?.flatMap(m => m.tasks || []) || [];
+  const completed = tasks.filter(t => t.status === 'completed').length;
+  const pct = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
+
+  return (
+    <div id={`phase-${phase.id}`} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+      <button
+        onClick={() => setExpanded(e => !e)}
+        className="flex w-full items-center justify-between p-5 text-left hover:bg-[var(--bg-elevated)] transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-semibold text-[var(--text-primary)]">{phase.title}</span>
+          <span className="text-sm text-[var(--text-muted)]">{completed}/{tasks.length} tasks</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+            <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="text-xs text-[var(--text-muted)]">{pct}%</span>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-[var(--border)] p-5 space-y-4">
+          {phase.milestones?.map(milestone => (
+            <div key={milestone.id || milestone.title}>
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-sm font-medium text-[var(--text-secondary)]">{milestone.title}</h4>
+                <button onClick={() => onViewMilestone(phase)} className="text-xs text-[var(--accent)] hover:underline">
+                  View details
+                </button>
+              </div>
+              <div className="space-y-2">
+                {milestone.tasks?.map(task => (
+                  <div key={task.id || task.title} className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-4 py-2.5">
+                    <input
+                      type="checkbox"
+                      checked={task.status === 'completed'}
+                      onChange={() =>
+                        onTaskUpdate(
+                          phase.id,
+                          milestone.id,
+                          task.id,
+                          { status: task.status === 'completed' ? 'pending' : 'completed' }
+                        )
+                      }
+                      disabled={userRole === 'viewer'}
+                      className="h-4 w-4 rounded accent-[var(--accent)]"
+                    />
+                    <span className={`flex-1 text-sm ${task.status === 'completed' ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                      {task.title}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          {userRole === 'admin' && (
+            <div className="flex gap-2 pt-2">
+              <button onClick={onEditPhase} className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">Edit phase</button>
+              <button onClick={onDeletePhase} className="text-xs text-[var(--destructive)] hover:opacity-80 transition-opacity">Delete</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ProjectDetailPage
+// ---------------------------------------------------------------------------
 const ProjectDetailPage = () => {
   const navigate = useNavigate();
   const { projectId } = useParams();
@@ -62,6 +140,7 @@ const ProjectDetailPage = () => {
   const [isEditPhaseModalOpen, setIsEditPhaseModalOpen] = useState(false);
   const [editingPhase, setEditingPhase] = useState(null);
   const [isCreatePhaseModalOpen, setIsCreatePhaseModalOpen] = useState(false);
+  const [activePhaseId, setActivePhaseId] = useState(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const role = useUserRole();
@@ -339,17 +418,6 @@ const ProjectDetailPage = () => {
   };
 
   /**
-   * Handler to update task status and content from modal
-   * Supports both legacy format (status string) and new format (object with title, description, status)
-   * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
-   * deleting milestones when action is 'deleteMilestone', and deleting tasks when action is 'deleteTask'
-   * @param {string} phaseId - The phase ID containing the task
-   * @param {string} milestoneId - The milestone ID containing the task (or to delete)
-   * @param {string} taskId - The task ID to update (null for new tasks)
-   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
-   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, 'deleteMilestone' for deleting milestones, or 'deleteTask' for deleting tasks
-   */
-  /**
    * Handle milestone reordering - move milestone up or down in the list
    * @param {string} phaseId - ID of the phase containing the milestone
    * @param {string} milestoneId - ID of the milestone to reorder
@@ -409,6 +477,17 @@ const ProjectDetailPage = () => {
     });
   };
 
+  /**
+   * Handler to update task status and content from modal or inline checkboxes
+   * Supports both legacy format (status string) and new format (object with title, description, status)
+   * Also supports adding new tasks when action is 'add', new milestones when action is 'addMilestone',
+   * deleting milestones when action is 'deleteMilestone', and deleting tasks when action is 'deleteTask'
+   * @param {string} phaseId - The phase ID containing the task
+   * @param {string} milestoneId - The milestone ID containing the task (or to delete)
+   * @param {string} taskId - The task ID to update (null for new tasks)
+   * @param {string|Object} updates - Either status string (legacy) or object with title, description, status, or new task/milestone object
+   * @param {string} action - 'update' (default), 'add' for new tasks, 'addMilestone' for new milestones, 'deleteMilestone' for deleting milestones, or 'deleteTask' for deleting tasks
+   */
   const handleTaskUpdate = (phaseId, milestoneId, taskId, updates, action = 'update') => {
     setRoadmapData((prevRoadmap) => {
       const newPhases = prevRoadmap.phases.map((phase) => {
@@ -511,156 +590,209 @@ const ProjectDetailPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-800">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  // ---------------------------------------------------------------------------
+  // Early returns
+  // ---------------------------------------------------------------------------
+  if (loading) return (
+    <div className="flex min-h-[calc(100vh-56px)] items-center justify-center">
+      <Spinner size="lg" className="text-[var(--accent)]" />
+    </div>
+  );
 
-  if (!project) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
-        <div className="p-6">
-          <main className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
-              {MESSAGES.ERROR.PROJECT_NOT_FOUND}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-100">The project could not be found.</p>
-          </main>
-        </div>
-      </div>
-    );
-  }
+  if (!project) return (
+    <div className="flex min-h-[calc(100vh-56px)] flex-col items-center justify-center gap-4">
+      <p className="text-[var(--text-secondary)]">Project not found.</p>
+      <Button variant="secondary" onClick={() => navigate(ROUTES.DASHBOARD)}>Back to dashboard</Button>
+    </div>
+  );
 
+  // ---------------------------------------------------------------------------
+  // Derived values
+  // ---------------------------------------------------------------------------
+  const phases = roadmapData?.phases || [];
+  const totalTasks = phases.flatMap(p => p.milestones?.flatMap(m => m.tasks || []) || []);
+  const completedTasks = totalTasks.filter(t => t.status === 'completed');
+  const overallProgress = totalTasks.length
+    ? Math.round((completedTasks.length / totalTasks.length) * 100)
+    : 0;
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
-      <div className="p-6">
-        <main>
-          {roadmapData ? (
-            <>
-              <div className="space-y-6">
-                {/* Progress Bar with Collaboration Button */}
-                <div className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <ProgressBar phases={roadmapData.phases} />
-                  </div>
-                  <div className="mt-5 flex items-center gap-2">
-                    {role === 'founder_pm' ? (
-                      <button
-                        onClick={() => setInviteModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 dark:hover:border-zinc-500 transition-colors bg-white dark:bg-zinc-800"
-                      >
-                        <Users size={15} />
-                        Manage Team
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setInviteModalOpen(true)}
-                        className="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                        title="View team members"
-                      >
-                        <Users className="h-4 w-4" />
-                        <span>Team</span>
-                      </button>
-                    )}
-                    {/* MCP Setup Card — rendered here for 'developer' role in sub-project 4 */}
-                    {role === 'developer' && null /* placeholder — implemented in Foundation sub-project 4 */}
-                    {userRole === MESSAGES.COLLABORATION.ROLES.ADMIN && (
-                      <button
-                        onClick={() => setInviteModalOpen(true)}
-                        className={BUTTON_CONFIGS.INVITE_BUTTON.CLASSES}
-                        title={BUTTON_CONFIGS.INVITE_BUTTON.TITLE}
-                        aria-label={BUTTON_CONFIGS.INVITE_BUTTON.ARIA_LABEL}
-                      >
-                        <UserPlus className={BUTTON_CONFIGS.INVITE_BUTTON.ICON_SIZE} />
-                        <span className={BUTTON_CONFIGS.INVITE_BUTTON.TEXT_SIZE}>Invite</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+    <motion.div {...pageTransition} className="flex min-h-[calc(100vh-56px)] flex-col bg-[var(--bg-base)]">
+      <div className="flex flex-1 overflow-hidden">
 
-                <Summary metadata={roadmapData.metadata} summary={roadmapData.summary} />
-
-                {/* Phase Cards Grid */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Project Phases
-                    </h2>
-                    <button
-                      onClick={handleCreatePhase}
-                      className="flex items-center space-x-2 rounded-lg border border-blue-600 bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-green-600 hover:bg-green-600 hover:shadow-md"
-                      aria-label="Add new phase"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span>Add Phase</span>
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {roadmapData.phases.map((phase, index) => (
-                      <PhaseCardNew
-                        key={phase.id}
-                        phase={phase}
-                        onClick={() => handlePhaseClick(phase)}
-                        onEdit={handlePhaseEdit}
-                        onDelete={handlePhaseDelete}
-                        onReorder={handlePhaseReorder}
-                        isFirst={index === 0}
-                        isLast={index === roadmapData.phases.length - 1}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              {/* Phase Modal */}
-              <PhaseModal
-                open={modalOpen}
-                onClose={handleCloseModal}
-                phase={selectedPhase}
-                onTaskUpdate={handleTaskUpdate}
-                onMilestoneReorder={handleMilestoneReorder}
-              />
-
-              {/* Invite Collaborators Modal */}
-              <InviteCollaboratorsModal
-                isOpen={inviteModalOpen}
-                onClose={() => setInviteModalOpen(false)}
-                onInvite={handleInviteCollaborators}
-                projectName={project?.title || 'this project'}
-              />
-
-              {/* Edit Phase Modal */}
-              <EditPhaseModal
-                isOpen={isEditPhaseModalOpen}
-                onClose={handleCloseEditPhaseModal}
-                phase={editingPhase}
-                onSave={handleSavePhaseEdit}
-              />
-
-              {/* Create Phase Modal */}
-              <EditPhaseModal
-                isOpen={isCreatePhaseModalOpen}
-                onClose={handleCloseCreatePhaseModal}
-                phase={null}
-                onSave={handleSaveNewPhase}
-                nextOrder={roadmapData.phases.length + 1}
-              />
-            </>
-          ) : (
-            <div className="rounded-lg bg-white p-8 text-center shadow-sm dark:bg-gray-800">
-              <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
-                No Roadmap Data
-              </h2>
-              <p className="text-gray-600 dark:text-gray-100">
-                This project doesn't have any roadmap data available.
-              </p>
+        {/* LEFT SIDEBAR */}
+        <aside className="hidden w-56 flex-shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)] lg:flex lg:flex-col">
+          <div className="flex flex-col items-center gap-3 border-b border-[var(--border)] p-5">
+            <ProgressRing progress={overallProgress} size={72} strokeWidth={6} />
+            <p className="max-w-full truncate text-center text-sm font-semibold text-[var(--text-primary)]">{project.title}</p>
+          </div>
+          <nav className="flex-1 overflow-y-auto py-3">
+            {phases.map((phase, i) => {
+              const phaseTasks = phase.milestones?.flatMap(m => m.tasks || []) || [];
+              const phaseComplete = phaseTasks.length
+                ? Math.round((phaseTasks.filter(t => t.status === 'completed').length / phaseTasks.length) * 100)
+                : 0;
+              const isActive = activePhaseId === phase.id;
+              return (
+                <button
+                  key={phase.id}
+                  onClick={() => {
+                    setActivePhaseId(phase.id);
+                    document.getElementById(`phase-${phase.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={`relative flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'}`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="phase-indicator"
+                      className="absolute inset-y-0 left-0 w-0.5 rounded-r bg-[var(--accent)]"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[var(--bg-elevated)] text-xs font-medium">{i + 1}</span>
+                  <span className="min-w-0 flex-1 truncate">{phase.title}</span>
+                  <span className="text-xs text-[var(--text-muted)]">{phaseComplete}%</span>
+                </button>
+              );
+            })}
+          </nav>
+          <div className="border-t border-[var(--border)] p-4">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[var(--text-muted)]" />
+              <span className="text-xs text-[var(--text-muted)]">MCP disconnected</span>
             </div>
-          )}
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <main className="flex-1 overflow-y-auto pb-16">
+          {/* Sticky header */}
+          <div className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--bg-base)]/90 backdrop-blur-md">
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <h1 className="truncate text-lg font-semibold text-[var(--text-primary)]">{project.title}</h1>
+                {userRole && (
+                  <Badge variant={userRole === 'admin' ? 'admin' : userRole === 'editor' ? 'editor' : 'viewer'}>
+                    {userRole}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {userRole === 'admin' && (
+                  <>
+                    <Button variant="secondary" size="sm" onClick={() => setInviteModalOpen(true)}>
+                      <UserPlus size={14} /> Invite
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => setIsCreatePhaseModalOpen(true)}>
+                      <Plus size={14} /> Phase
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+            {/* Mobile phase tabs */}
+            <div className="flex gap-1 overflow-x-auto px-4 pb-3 lg:hidden">
+              {phases.map((phase, i) => (
+                <button
+                  key={phase.id}
+                  onClick={() => document.getElementById(`phase-${phase.id}`)?.scrollIntoView({ behavior: 'smooth' })}
+                  className="flex-shrink-0 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                >
+                  {i + 1}. {phase.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Phase sections */}
+          <div className="space-y-4 p-6">
+            {phases.length > 0 ? (
+              phases.map((phase) => (
+                <PhaseSection
+                  key={phase.id}
+                  phase={phase}
+                  userRole={userRole}
+                  onTaskUpdate={handleTaskUpdate}
+                  onEditPhase={() => { setEditingPhase(phase); setIsEditPhaseModalOpen(true); }}
+                  onDeletePhase={() => handlePhaseDelete(phase)}
+                  onViewMilestone={(p) => { setSelectedPhase(p); setModalOpen(true); saveModalState(p); }}
+                />
+              ))
+            ) : (
+              <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-8 text-center">
+                <p className="text-[var(--text-secondary)]">No roadmap data available for this project.</p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
-    </div>
+
+      {/* FIXED BOTTOM BAR */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-[var(--border)] bg-[var(--bg-base)]/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+          <p className="text-sm text-[var(--text-secondary)]">
+            <span className="font-medium text-[var(--text-primary)]">{completedTasks.length}</span> of{' '}
+            <span className="font-medium text-[var(--text-primary)]">{totalTasks.length}</span> tasks complete
+          </p>
+          <div className="flex w-48 items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+              <motion.div
+                className="h-full rounded-full bg-[var(--accent)]"
+                animate={{ width: `${overallProgress}%` }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              />
+            </div>
+            <span className="text-xs font-medium text-[var(--text-muted)]">{overallProgress}%</span>
+          </div>
+          <p className="text-xs text-[var(--text-muted)]">Auto-saved</p>
+        </div>
+      </div>
+
+      {/* MODALS */}
+
+      {/* Phase detail modal */}
+      <PhaseModal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        phase={selectedPhase}
+        onTaskUpdate={handleTaskUpdate}
+        onMilestoneReorder={handleMilestoneReorder}
+      />
+
+      {/* Invite Collaborators Modal */}
+      <InviteCollaboratorsModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        onInvite={handleInviteCollaborators}
+        projectName={project?.title || 'this project'}
+      />
+
+      {/* Edit Phase Modal */}
+      <EditPhaseModal
+        isOpen={isEditPhaseModalOpen}
+        onClose={handleCloseEditPhaseModal}
+        phase={editingPhase}
+        onSave={handleSavePhaseEdit}
+      />
+
+      {/* Create Phase Modal */}
+      <EditPhaseModal
+        isOpen={isCreatePhaseModalOpen}
+        onClose={handleCloseCreatePhaseModal}
+        phase={null}
+        onSave={handleSaveNewPhase}
+        nextOrder={roadmapData?.phases?.length + 1 || 1}
+      />
+    </motion.div>
   );
 };
 
