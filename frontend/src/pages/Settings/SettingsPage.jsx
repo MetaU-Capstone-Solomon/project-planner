@@ -79,11 +79,11 @@ export default function SettingsPage() {
 
   async function handleSaveKey() {
     if (!apiKey.trim()) return;
+    const provider = apiKey.startsWith('sk-ant-') ? 'claude' : apiKey.startsWith('AIza') ? 'gemini' : null;
+    if (!provider) { toast.error('Unrecognised key format. Use an Anthropic (sk-ant-…) or Gemini (AIza…) key.'); return; }
     setSavingKey(true);
     try {
       const session = await getSession();
-      const provider = apiKey.startsWith('sk-ant-') ? 'claude' : apiKey.startsWith('AIza') ? 'gemini' : null;
-      if (!provider) { toast.error('Unrecognised key format. Use an Anthropic (sk-ant-…) or Gemini (AIza…) key.'); return; }
       const res = await fetch(API_ENDPOINTS.USER_API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
