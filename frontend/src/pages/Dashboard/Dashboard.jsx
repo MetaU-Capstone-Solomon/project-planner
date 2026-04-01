@@ -1,115 +1,193 @@
-/**
- * Dashboard Page
- *
- * Displays user's project overview with welcome message, statistics, and project list.
- *
- * Components:
- * - Welcome section with personalized greeting and create button
- * - Stats cards showing project metrics (Total, Completed, Progress, Milestones)
- * - Project list section with ProjectCard components
- *
- * Features:
- * - Real-time project data from backend
- * - Progress tracking and statistics
- * - Navigation to project details
- * - Error handling and loading states
- */
-
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FolderOpen, CheckCircle, ListTodo, Users, Plus, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import StatsCard from '@/components/StatsCard';
-import ProjectCard from '@/components/ProjectCard';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner';
-import useDashboardData from '@/hooks/useDashboardData';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { STATS_CONFIG, DASHBOARD_MESSAGES } from '@/constants/dashboard';
-import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
-import { ROUTES } from '@/constants/routes';
+import useDashboardData from '@/hooks/useDashboardData';
+import { ROUTES, getProjectDetailPath } from '@/constants/routes';
+import { stagger, pageTransition } from '@/constants/motion';
+import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Skeleton from '@/components/ui/Skeleton';
+import ProgressRing from '@/components/ui/ProgressRing';
 
-const Dashboard = () => {
-  const { user } = useAuth();
-  const { projects, loading, error, stats } = useDashboardData();
+const STAT_CONFIG = [
+  { key: 'total',      label: 'Total Projects', icon: FolderOpen  },
+  { key: 'completed',  label: 'Completed',       icon: CheckCircle },
+  { key: 'tasks',      label: 'Tasks Done',       icon: ListTodo   },
+  { key: 'members',    label: 'Team Members',     icon: Users      },
+];
+
+function StatCard({ label, value, icon: Icon, index }) {
+  return (
+    <motion.div
+      variants={stagger.item}
+      transition={{ duration: 0.3, delay: index * 0.06 }}
+    >
+      <Card className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm text-[var(--text-secondary)]">{label}</p>
+            <p className="mt-1 text-3xl font-bold text-[var(--text-primary)]">{value ?? 0}</p>
+          </div>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-subtle)]">
+            <Icon size={18} style={{ color: 'var(--accent)' }} />
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+function ProjectCardItem({ project }) {
   const navigate = useNavigate();
-  const { data: settings } = useUserSettings();
-  const showUsageBanner = settings && !settings.apiProvider && settings.usage?.used > 0;
+  let progress = 0;
+  try {
+    const data = typeof project.content === 'string' ? JSON.parse(project.content) : project.content;
+    if (data?.phases) {
+      const tasks = data.phases.flatMap(p => p.milestones?.flatMap(m => m.tasks || []) || []);
+      if (tasks.length) progress = Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100);
+    }
+  } catch {}
 
   return (
-    <div className={`${COLOR_PATTERNS.components.page}`}>
-      <div className="p-6">
-        <main>
-          {/* Welcome section */}
-          <div className="mb-8 text-center">
-            <h1 className={`mb-4 text-4xl font-bold ${COLOR_CLASSES.text.heading}`}>
-              Welcome back, {user?.user_metadata?.full_name?.split(' ')[0] || 'Roadmapper'}!
-            </h1>
-            <p className={`mb-6 ${COLOR_CLASSES.text.body}`}>{DASHBOARD_MESSAGES.WELCOME}</p>
-          </div>
-
-          {/* Statistics */}
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {Object.entries(STATS_CONFIG).map(([key, config]) => (
-              <StatsCard
-                key={key}
-                title={config.title}
-                value={stats[config.key]}
-                icon={config.icon}
-              />
-            ))}
-          </div>
-
-          {/* Usage indicator banner */}
-          {showUsageBanner && (
-            <div className="flex items-center justify-between px-4 py-2.5 mb-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm">
-              <span className="text-zinc-500 dark:text-zinc-400">
-                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{settings.usage.used}</span> of{' '}
-                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{settings.usage.limit}</span> free generations used this month.
-              </span>
-              <button
-                onClick={() => navigate(ROUTES.SETTINGS + '?tab=api-key')}
-                className="text-xs font-medium text-zinc-700 dark:text-zinc-300 underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-              >
-                Add your key →
-              </button>
+    <Card onClick={() => navigate(getProjectDetailPath(project.id))} className="p-5">
+      <div className="flex items-start gap-4">
+        <ProgressRing progress={progress} size={52} strokeWidth={4} />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="truncate font-semibold text-[var(--text-primary)]">{project.title}</h3>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {project.isShared && (
+                  <Badge variant="accent">
+                    <Users size={10} /> Shared
+                  </Badge>
+                )}
+              </div>
             </div>
-          )}
-
-          {/* Project list section */}
-          <div>
-            <h3 className={`text-xl font-semibold ${COLOR_CLASSES.text.heading} mb-4`}>
-              Your Roadmaps
-            </h3>
-
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <LoadingSpinner size="lg" />
-              </div>
-            ) : error ? (
-              <div className={`py-8 text-center text-red-600 dark:text-red-400`}>
-                <p>Failed to load projects. Please try again.</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className={`mt-4 rounded-lg bg-gray-200 px-4 py-2 dark:bg-gray-700 ${COLOR_CLASSES.text.heading} transition-colors hover:bg-gray-300 dark:hover:bg-gray-600`}
-                >
-                  Retry
-                </button>
-              </div>
-            ) : projects.length === 0 ? (
-              <div className={`py-8 text-center text-gray-500 dark:text-gray-400`}>
-                {DASHBOARD_MESSAGES.NO_PROJECTS}
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {projects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
-            )}
+            <ArrowRight size={16} className="mt-0.5 flex-shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-1" />
           </div>
-        </main>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
+            Updated {new Date(project.updated_at).toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ProjectSkeleton() {
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-13 w-13 flex-shrink-0" rounded />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
       </div>
     </div>
   );
-};
+}
 
-export default Dashboard;
+export default function Dashboard() {
+  const { user } = useAuth();
+  const { projects, loading, stats } = useDashboardData();
+  const { data: settings } = useUserSettings();
+  const navigate = useNavigate();
+
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
+  const showUsageBanner = settings && !settings.apiProvider && settings.usage?.used > 0;
+
+  const statValues = {
+    total:     projects?.length ?? 0,
+    completed: stats?.completed ?? 0,
+    tasks:     stats?.completedTasks ?? 0,
+    members:   stats?.teamMembers ?? 0,
+  };
+
+  return (
+    <motion.div {...pageTransition} className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Good to see you, {firstName}!</h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">Here's an overview of your roadmaps</p>
+        </div>
+        <Button onClick={() => navigate(ROUTES.NEW_PROJECT_CHAT)}>
+          <Plus size={15} /> New Project
+        </Button>
+      </div>
+
+      {/* Usage banner */}
+      {showUsageBanner && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
+          <p className="text-sm text-[var(--text-secondary)]">
+            <span className="font-medium text-[var(--text-primary)]">{settings.usage.used}</span> of{' '}
+            <span className="font-medium text-[var(--text-primary)]">{settings.usage.limit}</span> free generations used this month
+          </p>
+          <button
+            onClick={() => navigate(ROUTES.SETTINGS + '?section=api-key')}
+            className="text-xs font-medium text-[var(--accent)] hover:underline"
+          >
+            Add your key →
+          </button>
+        </div>
+      )}
+
+      {/* Stats */}
+      <motion.div
+        variants={stagger.container}
+        initial="initial"
+        animate="animate"
+        className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4"
+      >
+        {STAT_CONFIG.map(({ key, label, icon }, i) => (
+          <StatCard key={key} label={label} value={statValues[key]} icon={icon} index={i} />
+        ))}
+      </motion.div>
+
+      {/* Projects */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">Your Roadmaps</h2>
+          {projects?.length > 0 && (
+            <span className="text-sm text-[var(--text-muted)]">{projects.length} project{projects.length !== 1 ? 's' : ''}</span>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[1, 2, 3, 4].map(i => <ProjectSkeleton key={i} />)}
+          </div>
+        ) : !projects?.length ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] py-20 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-elevated)]">
+              <FolderOpen size={24} className="text-[var(--text-muted)]" />
+            </div>
+            <h3 className="mb-2 font-semibold text-[var(--text-primary)]">No projects yet</h3>
+            <p className="mb-6 max-w-xs text-sm text-[var(--text-secondary)]">Create your first roadmap and start turning your ideas into actionable plans.</p>
+            <Button onClick={() => navigate(ROUTES.NEW_PROJECT_CHAT)}>
+              <Plus size={15} /> Create your first roadmap
+            </Button>
+          </div>
+        ) : (
+          <motion.div
+            variants={stagger.container}
+            initial="initial"
+            animate="animate"
+            className="grid gap-4 sm:grid-cols-2"
+          >
+            {projects.map((project, i) => (
+              <motion.div key={project.id} variants={stagger.item} transition={{ duration: 0.3, delay: i * 0.06 }}>
+                <ProjectCardItem project={project} />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
