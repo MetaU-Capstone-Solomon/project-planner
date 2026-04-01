@@ -27,17 +27,19 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
             {...scaleIn}
             className={`relative w-full ${maxWidth} rounded-2xl border border-[var(--border)] bg-[var(--bg-base)] shadow-lg`}
           >
-            {title && (
-              <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
+              {title ? (
                 <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
-                <button
-                  onClick={onClose}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
+              ) : (
+                <div />
+              )}
+              <button
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
             <div className="p-6">{children}</div>
           </motion.div>
         </div>
