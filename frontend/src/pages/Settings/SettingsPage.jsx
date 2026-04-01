@@ -1,52 +1,74 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { User, Key } from 'lucide-react';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Terminal, Briefcase, GraduationCap, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
-import ApiKeyPanel from '@/components/Settings/ApiKeyPanel';
+import { Avatar } from '@/components/ui/Avatar';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Skeleton from '@/components/ui/Skeleton';
+import Badge from '@/components/ui/Badge';
 import { API_ENDPOINTS } from '@/config/api';
 import { supabase } from '@/lib/supabase';
+import { pageTransition, spring } from '@/constants/motion';
 import toast from 'react-hot-toast';
 
-const ROLE_OPTIONS = [
-  { value: 'developer', label: 'Developer', desc: 'Code, agents, and integrations' },
-  { value: 'founder_pm', label: 'Founder / PM', desc: 'Products, teams, and milestones' },
-  { value: 'student', label: 'Student', desc: 'Learning and building projects' },
+const ROLES = [
+  { value: 'developer',  label: 'Developer',   icon: Terminal,       desc: 'I build things with code' },
+  { value: 'founder_pm', label: 'Founder / PM', icon: Briefcase,      desc: 'I lead teams and ship products' },
+  { value: 'student',    label: 'Student',      icon: GraduationCap,  desc: "I'm learning and building projects" },
 ];
 
-const TABS = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'api-key', label: 'API Key', icon: Key },
-];
+function SectionHeading({ title, description }) {
+  return (
+    <div className="mb-6">
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">{title}</h2>
+      {description && <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{description}</p>}
+    </div>
+  );
+}
+
+function Divider() {
+  return <div className="my-8 border-t border-[var(--border)]" />;
+}
 
 export default function SettingsPage() {
-  const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
   const { user } = useAuth();
-
-  useEffect(() => {
-    const tabFromUrl = searchParams.get('tab');
-    if (tabFromUrl) setActiveTab(tabFromUrl);
-  }, [searchParams]);
-  const { data: settings } = useUserSettings();
+  const { data: settings, isLoading } = useUserSettings();
   const invalidate = useInvalidateUserSettings();
-  const [savingRole, setSavingRole] = useState(false);
 
-  async function handleRoleChange(role) {
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [savingRole, setSavingRole] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [savingKey, setSavingKey] = useState(false);
+  const [removingKey, setRemovingKey] = useState(false);
+
+  const currentRole = settings?.role;
+  const pendingRole = selectedRole ?? currentRole;
+  const hasRoleChange = selectedRole && selectedRole !== currentRole;
+
+  const currentProvider = settings?.apiProvider;
+  const maskedKey = settings?.maskedKey;
+  const usage = settings?.usage;
+
+  async function getSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session;
+  }
+
+  async function handleSaveRole() {
+    if (!hasRoleChange) return;
     setSavingRole(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { toast.error('Session expired. Please refresh the page.'); setSavingRole(false); return; }
-      const response = await fetch(API_ENDPOINTS.USER_ROLE, {
+      const session = await getSession();
+      const res = await fetch(API_ENDPOINTS.USER_ROLE, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ role }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ role: selectedRole }),
       });
-      if (!response.ok) throw new Error();
+      if (!res.ok) throw new Error();
       await invalidate();
+      setSelectedRole(null);
       toast.success('Preferences saved.');
     } catch {
       toast.error('Failed to save. Please try again.');
@@ -55,85 +77,185 @@ export default function SettingsPage() {
     }
   }
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 mb-6">Settings</h1>
+  async function handleSaveKey() {
+    if (!apiKey.trim()) return;
+    setSavingKey(true);
+    try {
+      const session = await getSession();
+      const provider = apiKey.startsWith('sk-ant-') ? 'claude' : apiKey.startsWith('AIza') ? 'gemini' : null;
+      if (!provider) { toast.error('Unrecognised key format. Use an Anthropic (sk-ant-…) or Gemini (AIza…) key.'); return; }
+      const res = await fetch(API_ENDPOINTS.USER_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ key: apiKey, provider }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await invalidate();
+      setApiKey('');
+      toast.success('API key saved and verified.');
+    } catch (err) {
+      toast.error(err.message || 'Failed to save API key.');
+    } finally {
+      setSavingKey(false);
+    }
+  }
 
-      {/* Tab nav */}
-      <div role="tablist" className="flex gap-1 border-b border-zinc-200 dark:border-zinc-700 mb-8">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            role="tab"
-            aria-selected={activeTab === id}
-            onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === id
-                ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50'
-                : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
-            }`}
-          >
-            <Icon size={15} />
-            {label}
-          </button>
-        ))}
+  async function handleRemoveKey() {
+    setRemovingKey(true);
+    try {
+      const session = await getSession();
+      await fetch(API_ENDPOINTS.USER_API_KEY, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      await invalidate();
+      toast.success("API key removed. You're back on the free tier.");
+    } catch {
+      toast.error('Failed to remove API key.');
+    } finally {
+      setRemovingKey(false);
+    }
+  }
+
+  return (
+    <motion.div {...pageTransition} className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+      <h1 className="mb-8 text-2xl font-bold text-[var(--text-primary)]">Settings</h1>
+
+      {/* SECTION 1 — Profile */}
+      <SectionHeading title="Profile" />
+      <div className="flex items-center gap-5">
+        <Avatar
+          src={user?.user_metadata?.avatar_url}
+          name={user?.user_metadata?.full_name || user?.email}
+          size="lg"
+        />
+        <div>
+          <p className="font-semibold text-[var(--text-primary)]">
+            {user?.user_metadata?.full_name || '—'}
+          </p>
+          <p className="text-sm text-[var(--text-secondary)]">{user?.email}</p>
+          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+            Member since {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}
+          </p>
+        </div>
       </div>
 
-      {/* Profile tab */}
-      {activeTab === 'profile' && (
-        <div role="tabpanel">
-        <div className="space-y-6">
-          <div>
-            <label htmlFor="user-email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-1">Email</label>
-            <input
-              id="user-email"
-              type="email"
-              readOnly
-              value={user?.email ?? ''}
-              className="text-sm text-zinc-500 dark:text-zinc-400 px-3 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 w-full focus:outline-none"
-            />
-          </div>
+      <Divider />
 
-          <div>
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-3">
-              How are you using this?
-            </label>
-            <div className="flex flex-col gap-2">
-              {ROLE_OPTIONS.map(({ value, label, desc }) => (
-                <button
+      {/* SECTION 2 — Role */}
+      <SectionHeading
+        title="How are you using this?"
+        description="This personalises your experience. You can change it anytime."
+      />
+      {isLoading ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {ROLES.map(({ value, label, icon: Icon, desc }) => {
+              const active = pendingRole === value;
+              return (
+                <motion.button
                   key={value}
-                  onClick={() => handleRoleChange(value)}
-                  disabled={savingRole}
-                  className={`flex items-center justify-between p-3.5 rounded-lg border text-left transition-all disabled:opacity-60 ${
-                    settings?.role === value
-                      ? 'border-zinc-900 dark:border-zinc-100 bg-zinc-50 dark:bg-zinc-800'
-                      : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500'
+                  onClick={() => setSelectedRole(value)}
+                  whileTap={{ scale: 0.98 }}
+                  transition={spring.snappy}
+                  className={`relative flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all ${
+                    active
+                      ? 'border-[var(--accent)] bg-[var(--accent-subtle)]'
+                      : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--accent)]'
                   }`}
                 >
-                  <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{label}</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{desc}</p>
-                  </div>
-                  {settings?.role === value && (
-                    <div className="w-2 h-2 rounded-full bg-zinc-900 dark:bg-zinc-100 flex-shrink-0" />
+                  {active && (
+                    <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent)]">
+                      <Check size={11} className="text-white" />
+                    </span>
                   )}
-                </button>
-              ))}
-            </div>
-            {savingRole && (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-2">Saving…</p>
-            )}
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${active ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'}`}>
+                    <Icon size={17} className={active ? 'text-white' : 'text-[var(--text-secondary)]'} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">{label}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{desc}</p>
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
-        </div>
-        </div>
+          {hasRoleChange && (
+            <div className="mt-4 flex justify-end">
+              <Button onClick={handleSaveRole} loading={savingRole} size="sm">
+                Save preference
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
-      {/* API Key tab */}
-      {activeTab === 'api-key' && (
-        <div role="tabpanel">
-          <ApiKeyPanel />
+      <Divider />
+
+      {/* SECTION 3 — API Key */}
+      <SectionHeading
+        title="API Key"
+        description="Add your own Gemini or Claude key to unlock unlimited generations."
+      />
+      {isLoading ? (
+        <Skeleton className="h-24 rounded-xl" />
+      ) : currentProvider ? (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Badge variant="accent">{currentProvider === 'claude' ? 'Anthropic Claude' : 'Google Gemini'}</Badge>
+              <span className="font-mono text-sm text-[var(--text-secondary)]">{maskedKey}</span>
+            </div>
+            <Button variant="destructive" size="sm" onClick={handleRemoveKey} loading={removingKey}>
+              Remove
+            </Button>
+          </div>
+          {usage && (
+            <div>
+              <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--text-muted)]">
+                <span>Unlimited generations active</span>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          {usage && (
+            <div className="mb-5">
+              <div className="mb-1.5 flex items-center justify-between text-xs">
+                <span className="text-[var(--text-secondary)]">Free tier usage</span>
+                <span className="text-[var(--text-muted)]">Resets {new Date(usage.resetAt).toLocaleDateString()}</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)] transition-all"
+                  style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-[var(--text-muted)]">{usage.used} of {usage.limit} generations used</p>
+            </div>
+          )}
+          <div className="flex gap-3">
+            <Input
+              placeholder="Paste your Gemini (AIza…) or Claude (sk-ant-…) key"
+              value={apiKey}
+              onChange={e => setApiKey(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleSaveKey} loading={savingKey} disabled={!apiKey.trim()}>
+              Save & Verify
+            </Button>
+          </div>
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Keys are encrypted at rest with AES-256-GCM and never exposed in responses.
+          </p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
