@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import LoadingSpinner from '@/components/Loading/LoadingSpinner';
+import Spinner from '@/components/ui/Spinner';
 import { ROUTES } from '@/constants/routes';
 
 export default function Callback() {
@@ -28,8 +28,8 @@ export default function Callback() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen">
-      <LoadingSpinner size="lg" className="min-h-screen" />
+    <div className="flex min-h-screen items-center justify-center bg-[var(--bg-base)]">
+      <Spinner size="lg" className="text-[var(--accent)]" />
     </div>
   );
 }
