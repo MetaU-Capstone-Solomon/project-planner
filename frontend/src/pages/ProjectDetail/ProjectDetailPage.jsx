@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
@@ -17,7 +17,6 @@ import { MARKDOWN } from '@/constants/roadmap';
 import { ROUTES } from '@/constants/routes';
 import { pageTransition } from '@/constants/motion';
 import useDebouncedCallback from '@/hooks/useDebouncedCallback';
-import { useUserRole } from '@/hooks/useUserRole';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/cache';
 import { useAuth } from '@/contexts/AuthContext';
@@ -143,7 +142,6 @@ const ProjectDetailPage = () => {
   const [activePhaseId, setActivePhaseId] = useState(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const role = useUserRole();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
