@@ -156,8 +156,8 @@ const ProjectDetailPage = () => {
         showErrorToast(MESSAGES.ERROR.PROJECT_SAVE_FAILED);
       } else {
         // Invalidate project detail and user projects caches
-        queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
-        queryClient.invalidateQueries([QUERY_KEYS.USER_PROJECTS]);
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_DETAILS, projectId] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER_PROJECTS] });
       }
     },
     800,
