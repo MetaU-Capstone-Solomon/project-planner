@@ -16,13 +16,15 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Upload, X, FileText } from 'lucide-react';
 import FormField from '@/components/Form/FormField';
-import Input from '@/components/Form/Input';
-import Textarea from '@/components/Form/Textarea';
 import Select from '@/components/Form/Select';
-import FileUpload from '@/components/Form/FileUpload';
 import ChatContainer from '@/components/Chat/ChatContainer';
-import Button from '@/components/Button/Button';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
+import Skeleton from '@/components/ui/Skeleton';
 import useFileUpload from '@/hooks/useFileUpload';
 import useChat from '@/hooks/useChat';
 import { useProjectForm } from '@/hooks/useProjectForm';
@@ -43,11 +45,13 @@ import confirmAction from '@/utils/confirmAction';
 import OnboardingModal from '@/components/Onboarding/OnboardingModal';
 import BYOKModal from '@/components/BYOK/BYOKModal';
 import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
+import { pageTransition } from '@/constants/motion';
 
 const NewProjectChatPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [mobileStep, setMobileStep] = React.useState(1); // 1 = form, 2 = chat
+  const [dragOver, setDragOver] = React.useState(false);
   const {
     file,
     processedFile,
@@ -155,32 +159,39 @@ const NewProjectChatPage = () => {
     setMobileStep(1);
   };
 
-  // --- Form Section ---
-  const formSection = (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-lg dark:bg-gray-800">
-      <div className="border-b border-gray-200 p-6 dark:border-gray-700">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Project Details</h2>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-100">
-          Fill in the details below or upload a document to get started
-        </p>
-      </div>
-      <div className="flex-1 space-y-4 overflow-y-auto p-6">
-        <FormField label="Project Title" isRequired={true}>
-          <Input
-            name={FORM_FIELDS.TITLE}
-            placeholder="Enter your project title"
-            value={values[FORM_FIELDS.TITLE]}
-            onChange={handleChange}
-          />
-        </FormField>
-        <FormField label="Project Description" isRequired={true}>
-          <Textarea
-            name={FORM_FIELDS.DESCRIPTION}
-            placeholder="Describe your project idea"
-            value={values[FORM_FIELDS.DESCRIPTION]}
-            onChange={handleChange}
-          />
-        </FormField>
+  return (
+    <motion.div {...pageTransition} className="flex min-h-[calc(100vh-56px)] flex-col lg:flex-row bg-[var(--bg-base)]">
+
+      {/* Left panel — Input */}
+      <div className="flex flex-col gap-5 border-b border-[var(--border)] p-6 lg:w-2/5 lg:border-b-0 lg:border-r lg:p-8">
+        <div>
+          <button
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+            className="mb-4 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            <ArrowLeft size={14} /> Back to dashboard
+          </button>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Describe your project</h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">Give us the details — we'll build the roadmap.</p>
+        </div>
+
+        <Input
+          label="Project title"
+          placeholder="e.g. E-commerce platform, Mobile fitness app"
+          name={FORM_FIELDS.TITLE}
+          value={values[FORM_FIELDS.TITLE]}
+          onChange={handleChange}
+        />
+
+        <Textarea
+          label="Description"
+          placeholder="What are you building? Who is it for? What's your experience level? Any specific technologies or timeline?"
+          name={FORM_FIELDS.DESCRIPTION}
+          value={values[FORM_FIELDS.DESCRIPTION]}
+          onChange={handleChange}
+          className="min-h-[140px]"
+        />
+
         <FormField label="Timeline" isRequired={true}>
           <Select
             name={FORM_FIELDS.TIMELINE}
@@ -189,16 +200,17 @@ const NewProjectChatPage = () => {
             options={TIMELINE_OPTIONS}
           />
         </FormField>
+
         {values[FORM_FIELDS.TIMELINE] === 'custom' && (
-          <FormField label="Custom Timeline" isRequired={true}>
-            <Input
-              name={FORM_FIELDS.CUSTOM_TIMELINE}
-              placeholder="e.g., 2 weeks, 4 months, 1.5 years"
-              value={values[FORM_FIELDS.CUSTOM_TIMELINE] || ''}
-              onChange={handleChange}
-            />
-          </FormField>
+          <Input
+            label="Custom Timeline"
+            placeholder="e.g., 2 weeks, 4 months, 1.5 years"
+            name={FORM_FIELDS.CUSTOM_TIMELINE}
+            value={values[FORM_FIELDS.CUSTOM_TIMELINE] || ''}
+            onChange={handleChange}
+          />
         )}
+
         <FormField label="Experience Level" isRequired={true}>
           <Select
             name={FORM_FIELDS.EXPERIENCE_LEVEL}
@@ -207,14 +219,15 @@ const NewProjectChatPage = () => {
             options={EXPERIENCE_LEVEL_OPTIONS}
           />
         </FormField>
-        <FormField label="Technologies/Frameworks">
-          <Input
-            name={FORM_FIELDS.TECHNOLOGIES}
-            placeholder="e.g., React, Python, PyTorch, HTML/CSS"
-            value={values[FORM_FIELDS.TECHNOLOGIES]}
-            onChange={handleChange}
-          />
-        </FormField>
+
+        <Input
+          label="Technologies / Frameworks"
+          placeholder="e.g., React, Python, PyTorch, HTML/CSS"
+          name={FORM_FIELDS.TECHNOLOGIES}
+          value={values[FORM_FIELDS.TECHNOLOGIES]}
+          onChange={handleChange}
+        />
+
         <FormField label="Project Scope" isRequired={true}>
           <Select
             name={FORM_FIELDS.PROJECT_SCOPE}
@@ -223,85 +236,131 @@ const NewProjectChatPage = () => {
             options={PROJECT_SCOPE_OPTIONS}
           />
         </FormField>
-        <FormField label="Upload Document">
-          <FileUpload onFileSelect={handleFileSelect} selectedFile={file} />
+
+        {/* File upload zone */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+            Or upload a document <span className="text-[var(--text-muted)] font-normal">(optional)</span>
+          </label>
+          <motion.label
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            htmlFor="file-upload"
+            className={`flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 transition-colors ${
+              dragOver
+                ? 'border-[var(--accent)] bg-[var(--accent-subtle)]'
+                : 'border-[var(--border)] hover:border-[var(--accent)]'
+            }`}
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => { e.preventDefault(); setDragOver(false); handleFileSelect(e.dataTransfer.files[0]); }}
+          >
+            <Upload size={20} className="text-[var(--text-muted)]" />
+            {file ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-[var(--text-primary)]">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={e => { e.preventDefault(); clearFile(); }}
+                  className="text-[var(--text-muted)] hover:text-[var(--destructive)]"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <span className="text-sm text-[var(--text-muted)]">Drop a PDF, DOCX, or TXT</span>
+            )}
+            <input
+              id="file-upload"
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={e => handleFileSelect(e.target.files[0])}
+            />
+          </motion.label>
           {fileLoading && (
-            <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400">
+            <div className="mt-2 flex items-center gap-2 text-[var(--text-muted)]">
               <LoadingSpinner size="sm" />
-              <p className="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                {MESSAGES.LOADING.PROCESSING_DOCUMENT}
-              </p>
+              <p className="text-sm">{MESSAGES.LOADING.PROCESSING_DOCUMENT}</p>
             </div>
           )}
-          {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="mt-2 text-sm text-[var(--destructive)]">{error}</p>}
           {processedFile && (
-            <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
+            <div className="mt-2 flex items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle className="h-4 w-4" />
-              <p>{MESSAGES.SUCCESS.FILE_PROCESSED}</p>
+              <p className="text-sm">{MESSAGES.SUCCESS.FILE_PROCESSED}</p>
             </div>
           )}
-        </FormField>
-        <div className="flex justify-center pt-4">
-          <div className="text-center">
-            <Button
-              onClick={onGenerateClick}
-              disabled={!canGenerate(processedFile)}
-              size="md"
-              className="px-6 py-2"
-            >
-              {chatLoading
-                ? MESSAGES.LOADING.GENERATING_ROADMAP
-                : MESSAGES.ACTIONS.GENERATE_ROADMAP}
-            </Button>
-          </div>
         </div>
-      </div>
-    </div>
-  );
 
-  // --- Chat Section ---
-  const chatSection = (
-    <div
-      className={`flex flex-col overflow-hidden rounded-xl bg-white shadow-lg dark:bg-gray-800 ${isMobile ? 'h-[calc(100vh-3rem)]' : 'h-full'}`}
-    >
-      <div className="border-b border-gray-200 p-6 dark:border-gray-700">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">AI Assistant</h2>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-100">
-          Take advantage of our AI assistant
-        </p>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <ChatContainer
-          messages={messages}
+        <Button
+          onClick={onGenerateClick}
           loading={chatLoading}
-          stage={stage}
-          sendMessage={sendMessage}
-        />
+          disabled={!canGenerate(processedFile)}
+          size="lg"
+          className="w-full"
+        >
+          {chatLoading ? MESSAGES.LOADING.GENERATING_ROADMAP : MESSAGES.ACTIONS.GENERATE_ROADMAP}
+        </Button>
       </div>
-      {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
-        <div className="border-t border-gray-200 p-4 dark:border-gray-700">
-          <div className="flex justify-center space-x-4">
-            <Button onClick={handleSaveProject} disabled={saving} size="md" className="px-6 py-2">
-              {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
-            </Button>
-            <Button 
-              onClick={handleNewProject} 
-              size="md" 
-              variant="secondary"
-              className="px-6 py-2 flex items-center space-x-2"
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Project</span>
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 
-  // --- Responsive Layout ---
-  return (
-    <div className="min-h-screen bg-gray-100 p-6 dark:bg-gray-900">
+      {/* Right panel — Output */}
+      <div className="flex-1 overflow-auto p-6 lg:p-8">
+        {!messages.length && !chatLoading && (
+          <div className="flex h-full min-h-[300px] flex-col items-center justify-center text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--bg-elevated)]">
+              <FileText size={28} className="text-[var(--text-muted)]" />
+            </div>
+            <p className="font-medium text-[var(--text-secondary)]">Your roadmap will appear here</p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">Fill in the details on the left and click Generate</p>
+          </div>
+        )}
+
+        {chatLoading && !messages.length && (
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 space-y-3">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {(messages.length > 0 || chatLoading) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col h-full"
+          >
+            <div className="flex-1 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+              <ChatContainer
+                messages={messages}
+                loading={chatLoading}
+                stage={stage}
+                sendMessage={sendMessage}
+              />
+            </div>
+
+            {(stage === CHAT_STAGES.AWAITING_CONFIRMATION || stage === CHAT_STAGES.DONE) && (
+              <div className="mt-6 flex justify-end gap-3">
+                <Button onClick={handleNewProject} size="lg" variant="secondary" className="flex items-center gap-2">
+                  <Plus size={16} />
+                  New Project
+                </Button>
+                <Button onClick={handleSaveProject} loading={saving} size="lg">
+                  {saving ? MESSAGES.LOADING.SAVING_PROJECT : MESSAGES.ACTIONS.SAVE_PROJECT}
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
+
+      {/* Existing modals */}
       {showOnboarding && (
         <OnboardingModal
           onComplete={() => {
@@ -316,17 +375,7 @@ const NewProjectChatPage = () => {
           onDismiss={() => setByokTrigger(null)}
         />
       )}
-      <div className="mx-auto max-w-7xl">
-        {isMobile ? (
-          <div className="flex flex-col gap-6">{mobileStep === 1 ? formSection : chatSection}</div>
-        ) : (
-          <div className="grid h-[calc(100vh-3rem)] grid-cols-1 gap-6 lg:grid-cols-2">
-            {formSection}
-            {chatSection}
-          </div>
-        )}
-      </div>
-    </div>
+    </motion.div>
   );
 };
 
