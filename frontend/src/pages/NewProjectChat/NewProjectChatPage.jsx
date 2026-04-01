@@ -280,7 +280,7 @@ const NewProjectChatPage = () => {
           </motion.label>
           {fileLoading && (
             <div className="mt-2 flex items-center gap-2 text-[var(--text-muted)]">
-              <Spinner size="lg" className="text-[var(--accent)]" />
+              <Spinner size="sm" className="text-[var(--accent)]" />
               <p className="text-sm">{MESSAGES.LOADING.PROCESSING_DOCUMENT}</p>
             </div>
           )}

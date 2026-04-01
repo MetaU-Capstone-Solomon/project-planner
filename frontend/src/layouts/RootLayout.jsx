@@ -8,7 +8,6 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import Button from '@/components/ui/Button';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
 import resetNewProjectState from '@/utils/resetNewProjectState';
-import { pageTransition } from '@/constants/motion';
 
 const navLinks = [
   { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
@@ -90,9 +89,7 @@ export default function RootLayout() {
     <div className="flex min-h-screen flex-col bg-[var(--bg-base)]">
       <Navbar />
       <main className="flex-1">
-        <motion.div {...pageTransition}>
-          <Outlet />
-        </motion.div>
+        <Outlet />
       </main>
     </div>
   );

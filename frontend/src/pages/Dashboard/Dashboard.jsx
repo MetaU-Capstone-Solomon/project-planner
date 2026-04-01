@@ -52,7 +52,7 @@ function ProjectCardItem({ project }) {
   } catch {}
 
   return (
-    <Card onClick={() => navigate(getProjectDetailPath(project.id))} className="p-5">
+    <Card onClick={() => navigate(getProjectDetailPath(project.id))} className="group p-5">
       <div className="flex items-start gap-4">
         <ProgressRing progress={progress} size={52} strokeWidth={4} />
         <div className="min-w-0 flex-1">
