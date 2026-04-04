@@ -6,6 +6,7 @@
  * @param {{ project_id: string, limit?: number }} args
  */
 export async function getNextTasks(supabase, userId, args) {
+  if (!args.project_id) throw new Error('project_id is required');
   const limit = Math.min(args.limit ?? 5, 20);
 
   const { data, error } = await supabase

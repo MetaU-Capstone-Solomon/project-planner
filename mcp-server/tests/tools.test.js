@@ -131,7 +131,7 @@ describe('updateTaskStatus', () => {
 
   test('throws when task not found', async () => {
     const content = makeContent({ phases: [] });
-    const mock = singleRowMock({ id: 'p1', content });
+    const mock = writeableMock({ id: 'p1', content });
     await expect(
       updateTaskStatus(mock, 'user-1', { project_id: 'p1', task_id: 'missing', status: 'completed' })
     ).rejects.toThrow('Task missing not found');
