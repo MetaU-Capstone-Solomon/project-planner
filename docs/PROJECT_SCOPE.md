@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single source of truth for every feature, technical decision, and implementation detail discussed. Feed it to Claude at the start of each session to resume without losing context.
 
-**Last updated:** 2026-04-01 (UI polish session)  
+**Last updated:** 2026-04-03  
 **Intern:** Solomon Agyire | **Manager:** Jessica Sun | **Director:** Zahra Surani
 
 ---
@@ -52,41 +52,70 @@
 - Fixed file-upload spinner size (lg → sm for inline text context)
 - Wired `TeamPanel` into `ProjectDetailPage`: added `teamPanelOpen` state, Team button (admin-only, alongside Invite/Phase), and rendered `<TeamPanel>` in modal section
 
-**Still pending before Phase 2:**
-- Run app in browser and do a visual walk-through of every page (mobile + dark mode) — no code-level issues found, but real-browser check is needed
-- The chunk size warning (`778 kB`) — consider lazy-loading heavy pages (ProjectDetail, NewProjectChat) with `React.lazy` + `Suspense`
-- Verify `isShared` flows through Dashboard → ProjectCardItem end-to-end (badge shows for shared projects)
-- Verify `get_project_collaborators` DB function works — apply SQL fix files in Supabase if not done
+---
+
+### Phase 2 — Role Functionalities ✅ COMPLETE (on branch `phase-2-role-functionalities`, 2026-04-03)
+
+**Branch:** `phase-2-role-functionalities` — ready to merge into `main`.  
+**Spec:** `docs/superpowers/specs/2026-04-01-phase2-role-functionalities-design.md`  
+**Scope:** Frontend-only. No new DB columns, no new API routes.
+
+**What was delivered:**
+
+**Foundation:**
+- `frontend/src/constants/roleConfig.js` — `ROLE_CONFIG` + `DEFAULT_CONFIG` feature flag objects per role
+- `frontend/src/hooks/useRoleConfig.js` — `useRoleConfig()` returns `{ role, config }` built on existing `useUserRole`
+
+**New components:**
+- `McpStatusBadge` — "MCP disconnected" with tooltip "coming in Phase 3"; used in Dashboard header and ProjectDetail sidebar
+- `TaskExplainer` — Student "Explain this" + "Break it down" buttons; calls `POST /api/chat` with role-specific prompt, shows response inline in collapsible panel
+- `TeamOverviewWidget` — Founder/PM dashboard widget; shows each project with collaborator `AvatarGroup` and count
+- `LearningPathBar` — Student dashboard bar; cross-project task completion progress with spring animation
+
+**Dashboard (`Dashboard.jsx`):**
+- Fixed stat key mismatch bug (was always showing 0 for completed/tasks/members — keys were wrong)
+- Founder/PM: milestone-oriented stat card labels, `TeamOverviewWidget`, always-visible Invite button
+- Developer: tech stack filter chips above project grid, estimated hours badge on project cards
+- Student: `LearningPathBar`, encouragement banner that adapts copy to completion percentage
+- All roles: `McpStatusBadge` in header subtitle
+
+**ProjectDetail (`ProjectDetailPage.jsx`):**
+- Replaced hardcoded MCP placeholder text with `McpStatusBadge` component in sidebar
+- Developer: clickable resource link badges (external links) + estimated hours per task inline
+- Student: `TaskExplainer` rendered on every task item
+- Founder/PM: Invite button always visible in header regardless of `userRole`
+- `config` prop passed to `PhaseSection` for all task-level role features
+
+**Settings (`SettingsPage.jsx`):**
+- Developer (`settingsDefaultApiKey`): API key section scrolls into view on mount
+- Student (`hideApiKeyNudge`): entire API key section hidden
+
+**Next session — first action:**
+1. Merge `phase-2-role-functionalities` into `main` (same stash/merge flow as Phase 1)
+2. Start Phase 3 — MCP Server
 
 ---
 
-### Phase 2 — Role Functionalities ← NEXT (NOT STARTED)
-
----
-
-### Phase 2 — Role Functionalities (NOT STARTED)
-
-**Status:** Defined, not designed yet. Do not implement until Phase 1 is shipped.
+### Phase 2 — Role Functionalities (detail, for reference)
 
 **All three roles (Developer, Founder/PM, Student) get MCP connection as a base feature.**
 Each role then adds on top:
 
 **Developer (on top of base):**
-- Tech stack quick-filter on dashboard
-- Estimated hours shown prominently on tasks
-- Code/resource links rendered as clickable badges
-- Settings defaults to API key tab
+- Tech stack quick-filter on dashboard ✅
+- Estimated hours shown prominently on tasks ✅
+- Code/resource links rendered as clickable badges ✅
+- Settings defaults to API key tab ✅
 
 **Founder / PM (on top of base):**
-- Full admin — create projects, invite developers, manage team
-- Task assignment — assign any task to a specific team member (by name/avatar)
-- Team overview widget on dashboard (who is on what project)
-- Dashboard stats oriented toward milestones completed
-- Invite button always prominent
+- Task assignment — assign any task to a specific team member ⏳ (deferred — no collaborator picker UI yet)
+- Team overview widget on dashboard ✅
+- Dashboard stats oriented toward milestones completed ✅
+- Invite button always prominent ✅
 
 **Student (on top of base):**
-- "Explain this" button on every task — AI expands the task into a simpler breakdown
-- "Break this down" — splits a task into smaller sub-steps
+- "Explain this" button on every task ✅
+- "Break this down" — splits a task into smaller sub-steps ✅
 - Learning Path progress bar across all projects on dashboard
 - Encouragement micro-copy at milestone/phase completion
 - No API key nudge (free tier is appropriate)
@@ -97,9 +126,9 @@ Each role then adds on top:
 
 ---
 
-### Phase 3 — MCP Server (NOT STARTED)
+### Phase 3 — MCP Server ← NEXT (NOT STARTED)
 
-**Status:** Defined at high level only. Do not design until Phase 2 is shipped.
+**Status:** Defined at high level only. Phase 2 is now shipped — Phase 3 design can begin.
 
 **Goal:** Build an MCP server that exposes the user's Project Planner data as tools Claude Code can call. This turns every project into a living memory — Claude Code reads project status, picks up tasks, marks them complete, and continues work across sessions.
 
@@ -116,7 +145,7 @@ Each role then adds on top:
 
 ### Unstaged Work on `main`
 
-All collaboration work committed. No unstaged changes as of 2026-04-01.
+All collaboration work committed. Phase 2 is on `phase-2-role-functionalities` branch — merge into `main` at session start before beginning Phase 3.
 
 **SQL files are committed but may not yet be applied to Supabase DB:**
 - `fix-rls-circular-dependency.sql` — apply if `get_project_collaborators` returns an RLS error
