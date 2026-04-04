@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   USER_SETTINGS: `${API_BASE_URL}/api/user/settings`,
   USER_ROLE: `${API_BASE_URL}/api/user/role`,
   USER_API_KEY: `${API_BASE_URL}/api/user/api-key`,
+  USER_ACCOUNT: `${API_BASE_URL}/api/user/account`,
   DISMISS_BYOK: `${API_BASE_URL}/api/user/dismiss-byok-nudge`,
 };
 

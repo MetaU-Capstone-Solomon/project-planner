@@ -83,6 +83,14 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error;
   };
 
+  const refreshUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) {
+      setUser(data.user);
+    }
+    return { data, error };
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -112,6 +120,7 @@ export const AuthProvider = ({ children }) => {
     signOut,
     resetPassword,
     updatePassword,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

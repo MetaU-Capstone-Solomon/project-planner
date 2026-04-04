@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, Users, ExternalLink } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Spinner from '@/components/ui/Spinner';
@@ -11,6 +11,9 @@ import PhaseModal from '@/components/Roadmap/PhaseModal';
 import EditPhaseModal from '@/components/Roadmap/EditPhaseModal';
 import InviteCollaboratorsModal from '@/components/Collaboration/InviteCollaboratorsModal';
 import TeamPanel from '@/components/Collaboration/TeamPanel';
+import McpStatusBadge from '@/components/McpStatusBadge/McpStatusBadge';
+import TaskExplainer from '@/components/TaskExplainer/TaskExplainer';
+import { useRoleConfig } from '@/hooks/useRoleConfig';
 import { getProject, updateProject, checkUserPermission } from '@/services/projectService';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import { MESSAGES } from '@/constants/messages';
@@ -53,7 +56,7 @@ import { API_ENDPOINTS } from '@/config/api';
 // ---------------------------------------------------------------------------
 // PhaseSection — inline expandable phase card with task checkboxes
 // ---------------------------------------------------------------------------
-function PhaseSection({ phase, userRole, onTaskUpdate, onEditPhase, onDeletePhase, onViewMilestone }) {
+function PhaseSection({ phase, userRole, config, onTaskUpdate, onEditPhase, onDeletePhase, onViewMilestone }) {
   const [expanded, setExpanded] = useState(true);
   const tasks = phase.milestones?.flatMap(m => m.tasks || []) || [];
   const completed = tasks.filter(t => t.status === 'completed').length;
@@ -89,24 +92,53 @@ function PhaseSection({ phase, userRole, onTaskUpdate, onEditPhase, onDeletePhas
               </div>
               <div className="space-y-2">
                 {milestone.tasks?.map(task => (
-                  <div key={task.id || task.title} className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-4 py-2.5">
-                    <input
-                      type="checkbox"
-                      checked={task.status === 'completed'}
-                      onChange={() =>
-                        onTaskUpdate(
-                          phase.id,
-                          milestone.id,
-                          task.id,
-                          { status: task.status === 'completed' ? 'pending' : 'completed' }
-                        )
-                      }
-                      disabled={userRole === 'viewer'}
-                      className="h-4 w-4 rounded accent-[var(--accent)]"
-                    />
-                    <span className={`flex-1 text-sm ${task.status === 'completed' ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
-                      {task.title}
-                    </span>
+                  <div key={task.id || task.title} className="rounded-lg border border-[var(--border)] bg-[var(--bg-base)] px-4 py-2.5">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={task.status === 'completed'}
+                        onChange={() =>
+                          onTaskUpdate(
+                            phase.id,
+                            milestone.id,
+                            task.id,
+                            { status: task.status === 'completed' ? 'pending' : 'completed' }
+                          )
+                        }
+                        disabled={userRole === 'viewer'}
+                        className="h-4 w-4 flex-shrink-0 rounded accent-[var(--accent)]"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <span className={`text-sm ${task.status === 'completed' ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
+                          {task.title}
+                        </span>
+                        {/* Developer: estimated hours */}
+                        {config?.showEstimatedHours && task.estimatedHours && (
+                          <span className="ml-2 text-xs text-[var(--text-muted)]">~{task.estimatedHours}h</span>
+                        )}
+                      </div>
+                      {/* Developer: resource badges */}
+                      {config?.showResourceBadges && task.resources?.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {task.resources.slice(0, 2).map((r, i) => (
+                            <a
+                              key={i}
+                              href={r.url || '#'}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="flex items-center gap-0.5 rounded-full bg-[var(--bg-elevated)] px-2 py-0.5 text-xs text-[var(--accent)] hover:underline"
+                            >
+                              {r.title || 'Resource'} <ExternalLink size={9} />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {/* Student: explain this / break it down */}
+                    {(config?.showExplainThis || config?.showBreakdown) && (
+                      <TaskExplainer task={task} />
+                    )}
                   </div>
                 ))}
               </div>
@@ -144,6 +176,7 @@ const ProjectDetailPage = () => {
   const [teamPanelOpen, setTeamPanelOpen] = useState(false);
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { config } = useRoleConfig();
 
   // Debounced persist function to minimize network overhead during rapid interactions
   const persistRoadmap = useDebouncedCallback(
@@ -660,10 +693,7 @@ const ProjectDetailPage = () => {
             })}
           </nav>
           <div className="border-t border-[var(--border)] p-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[var(--text-muted)]" />
-              <span className="text-xs text-[var(--text-muted)]">MCP disconnected</span>
-            </div>
+            <McpStatusBadge />
           </div>
         </aside>
 
@@ -692,13 +722,16 @@ const ProjectDetailPage = () => {
                     <Button variant="secondary" size="sm" onClick={() => setTeamPanelOpen(true)}>
                       <Users size={14} /> Team
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => setInviteModalOpen(true)}>
-                      <UserPlus size={14} /> Invite
-                    </Button>
                     <Button variant="secondary" size="sm" onClick={() => setIsCreatePhaseModalOpen(true)}>
                       <Plus size={14} /> Phase
                     </Button>
                   </>
+                )}
+                {/* Invite always visible for Founder/PM, or admin-only otherwise */}
+                {(userRole === 'admin' || config.alwaysShowInvite) && (
+                  <Button variant="secondary" size="sm" onClick={() => setInviteModalOpen(true)}>
+                    <UserPlus size={14} /> Invite
+                  </Button>
                 )}
               </div>
             </div>
@@ -724,6 +757,7 @@ const ProjectDetailPage = () => {
                   key={phase.id}
                   phase={phase}
                   userRole={userRole}
+                  config={config}
                   onTaskUpdate={handleTaskUpdate}
                   onEditPhase={() => { setEditingPhase(phase); setIsEditPhaseModalOpen(true); }}
                   onDeletePhase={() => handlePhaseDelete(phase)}

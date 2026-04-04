@@ -1,9 +1,10 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Settings, Plus } from 'lucide-react';
+import { LayoutDashboard, Settings, Plus, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
-import { Avatar } from '@/components/ui/Avatar';
+import ProfileDropdown from '@/components/Layout/ProfileDropdown';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import Button from '@/components/ui/Button';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
@@ -18,6 +19,13 @@ function Navbar() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const profileButtonRef = useRef(null);
+
+  const userProfile = {
+    name: getDisplayName(user),
+    image: getAvatarUrl(user),
+  };
 
   const handleNewProject = () => {
     resetNewProjectState();
@@ -70,14 +78,30 @@ function Navbar() {
             <span className="hidden sm:block">New Project</span>
           </Button>
           <ThemeToggle />
-          <Link to={ROUTES.SETTINGS}>
-            <Avatar
-              src={getAvatarUrl(user)}
-              name={getDisplayName(user)}
-              size="sm"
-              className="cursor-pointer ring-2 ring-transparent hover:ring-[var(--accent)] transition-all"
+          <div className="relative">
+            <button
+              ref={profileButtonRef}
+              onClick={() => setIsDropdownOpen((open) => !open)}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--bg-surface)] ring-2 ring-transparent transition hover:ring-[var(--accent)]"
+              aria-label="Open profile menu"
+              aria-expanded={isDropdownOpen}
+            >
+              {userProfile.image ? (
+                <img
+                  src={userProfile.image}
+                  alt={userProfile.name}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <User className="h-5 w-5 text-[var(--text-primary)]" />
+              )}
+            </button>
+            <ProfileDropdown
+              isOpen={isDropdownOpen}
+              onClose={() => setIsDropdownOpen(false)}
+              triggerRef={profileButtonRef}
             />
-          </Link>
+          </div>
         </div>
       </div>
     </header>

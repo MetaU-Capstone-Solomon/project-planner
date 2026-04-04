@@ -3,15 +3,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { getDisplayName, isEmailUser, getAvatarUrl } from '@/utils/userUtils';
+import { API_ENDPOINTS } from '@/config/api';
 import {
   updateUserPassword,
+  updateUserProfile,
+  deleteUserAccount,
   signOutUser,
   validatePassword,
   uploadAvatar,
 } from '@/services/profileService';
 
 export const useProfile = () => {
-  const { user, signOut, updatePassword } = useAuth();
+  const { user, signOut, updatePassword, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -19,7 +22,13 @@ export const useProfile = () => {
     newPassword: '',
     confirmPassword: '',
   });
+  const [profileData, setProfileData] = useState({
+    fullName: '',
+    email: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -28,6 +37,16 @@ export const useProfile = () => {
   const displayName = getDisplayName(user);
   const emailUser = isEmailUser(user);
   const avatarUrl = getAvatarUrl(user);
+
+  // Keep form values in sync with current user data
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        fullName: user.user_metadata?.full_name || user.user_metadata?.name || '',
+        email: user.email || '',
+      });
+    }
+  }, [user]);
 
   // Add cache busting to avatar URL
   const avatarUrlWithCache = avatarUrl ? `${avatarUrl}?t=${avatarTimestamp}` : avatarUrl;
@@ -68,14 +87,54 @@ export const useProfile = () => {
     setIsLoading(false);
   };
 
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setError('');
+
+    const result = await updateUserProfile(supabase, profileData, user?.email);
+    if (result.success) {
+      await refreshUser();
+      setSuccess('Profile updated successfully.');
+    } else {
+      setError(result.error);
+    }
+
+    setProfileSaving(false);
+  };
+
   const handleAvatarUpload = async (file) => {
     setAvatarLoading(true);
     const { success, error, url } = await uploadAvatar(supabase, user.id, file);
     if (success) {
-      // Update timestamp immediately for instant display
       setAvatarTimestamp(Date.now());
     }
+    if (error) {
+      setError(error);
+    }
     setAvatarLoading(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    setError('');
+
+    const session = await supabase.auth.getSession();
+    const accessToken = session?.data?.session?.access_token;
+    if (!accessToken) {
+      setError('Unable to delete account. Please sign in again.');
+      setDeleteLoading(false);
+      return;
+    }
+
+    const result = await deleteUserAccount(API_ENDPOINTS.USER_ACCOUNT, accessToken);
+    if (result.success) {
+      await signOutUser(signOut, navigate);
+    } else {
+      setError(result.error);
+    }
+
+    setDeleteLoading(false);
   };
 
   const handleSignOut = async () => {
@@ -107,17 +166,22 @@ export const useProfile = () => {
     user,
     displayName,
     emailUser,
-    avatarUrl: avatarUrlWithCache, // Use the cached avatar URL
+    profileData,
+    setProfileData,
     showPasswordForm,
     setShowPasswordForm,
     passwordData,
     setPasswordData,
     isLoading,
+    profileSaving,
+    deleteLoading,
     error,
     success,
     handlePasswordChange,
+    handleProfileSave,
     handleSignOut,
     handleAvatarUpload,
+    handleDeleteAccount,
     avatarLoading,
     resetPasswordForm,
     clearErrorOnInput,

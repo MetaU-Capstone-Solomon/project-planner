@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Briefcase, GraduationCap, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
+import { useProfile } from '@/hooks/useProfile';
+import { useRoleConfig } from '@/hooks/useRoleConfig';
 import { Avatar } from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -36,6 +38,8 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { data: settings, isLoading } = useUserSettings();
   const invalidate = useInvalidateUserSettings();
+  const { config } = useRoleConfig();
+  const apiKeyRef = useRef(null);
 
   const [selectedRole, setSelectedRole] = useState(null);
   const [savingRole, setSavingRole] = useState(false);
@@ -50,6 +54,18 @@ export default function SettingsPage() {
   const currentProvider = settings?.apiProvider;
   const maskedKey = settings?.maskedKey;
   const usage = settings?.usage;
+  const {
+    deleteLoading,
+    handleDeleteAccount,
+    handleSignOut,
+  } = useProfile();
+
+  // Developer: scroll API key section into view on mount
+  useEffect(() => {
+    if (config.settingsDefaultApiKey && apiKeyRef.current && !isLoading) {
+      apiKeyRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [config.settingsDefaultApiKey, isLoading]);
 
   async function getSession() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -195,9 +211,11 @@ export default function SettingsPage() {
         </>
       )}
 
-      <Divider />
+      {!config.hideApiKeyNudge && <Divider />}
 
-      {/* SECTION 3 — API Key */}
+      {/* SECTION 3 — API Key (hidden for Student role) */}
+      {!config.hideApiKeyNudge && (
+      <div ref={apiKeyRef}>
       <SectionHeading
         title="API Key"
         description="Add your own Gemini or Claude key to unlock unlimited generations."
@@ -256,6 +274,32 @@ export default function SettingsPage() {
           </p>
         </div>
       )}
+      </div>
+      )}
+
+      <Divider />
+
+      <SectionHeading
+        title="Account actions"
+        description="Keep your session secure or remove your account permanently."
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Button variant="secondary" onClick={handleSignOut}>
+          Sign out
+        </Button>
+        <Button
+          variant="destructive"
+          loading={deleteLoading}
+          onClick={() => {
+            if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+              handleDeleteAccount();
+            }
+          }}
+        >
+          Delete account
+        </Button>
+      </div>
     </motion.div>
   );
 }

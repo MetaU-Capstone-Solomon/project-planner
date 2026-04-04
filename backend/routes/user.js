@@ -118,6 +118,19 @@ router.delete('/api-key', extractUserId, async (req, res) => {
   }
 });
 
+// DELETE /api/user/account
+router.delete('/account', extractUserId, async (req, res) => {
+  try {
+    await supabase.from('user_settings').delete().eq('user_id', req.userId);
+    const { error } = await supabase.auth.admin.deleteUser(req.userId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /api/user/account error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/user/dismiss-byok-nudge
 router.post('/dismiss-byok-nudge', extractUserId, async (req, res) => {
   try {

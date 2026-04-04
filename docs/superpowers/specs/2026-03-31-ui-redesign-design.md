@@ -37,7 +37,7 @@ Defined as CSS custom properties on `:root` (light) and `[data-theme="dark"]`. T
 ```css
 :root {
   --bg-base: #ffffff;
-  --bg-surface: #f5f5f5;
+  --bg-surfa1ce: #f5f5f5;
   --bg-elevated: #ebebeb;
   --border: #e0e0e0;
   --text-primary: #0a0a0a;

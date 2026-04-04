@@ -34,6 +34,64 @@ export const updateUserPassword = async (updatePassword, newPassword) => {
     return { success: false, error: error.message || ERROR_MESSAGES.PASSWORD_UPDATE_FAILED };
   }
 };
+
+export const updateUserProfile = async (supabase, profileData, currentEmail) => {
+  try {
+    const { email, fullName } = profileData;
+    const updatePayload = {};
+    const dataPayload = {};
+
+    if (email?.trim() && email.trim() !== currentEmail?.trim()) {
+      updatePayload.email = email.trim();
+    }
+    if (fullName?.trim()) {
+      dataPayload.full_name = fullName.trim();
+    }
+    if (Object.keys(dataPayload).length) {
+      updatePayload.data = dataPayload;
+    }
+
+    if (!Object.keys(updatePayload).length) {
+      return { success: true };
+    }
+
+    const { error } = await supabase.auth.updateUser(updatePayload);
+
+    if (error) {
+      showErrorToast(error.message);
+      return { success: false, error: error.message };
+    }
+
+    showSuccessToast('Profile updated successfully.');
+    return { success: true };
+  } catch (error) {
+    showErrorToast(error.message || 'Failed to update profile.');
+    return { success: false, error: error.message || 'Failed to update profile.' };
+  }
+};
+
+export const deleteUserAccount = async (apiUrl, accessToken) => {
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const payload = await response.json();
+      throw new Error(payload.error || 'Failed to delete account');
+    }
+
+    showSuccessToast('Your account has been deleted.');
+    return { success: true };
+  } catch (error) {
+    showErrorToast(error.message || 'Failed to delete account.');
+    return { success: false, error: error.message || 'Failed to delete account.' };
+  }
+};
+
 // User can upload avatar
 export const uploadAvatar = async (supabase, userId, file) => {
   // Validate image type & size (<=2MB)

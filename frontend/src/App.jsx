@@ -14,6 +14,7 @@ import NewProjectChatPage from '@/pages/NewProjectChat/NewProjectChatPage';
 import ProjectDetailPage from '@/pages/ProjectDetail/ProjectDetailPage';
 import AcceptInvitationPage from '@/pages/AcceptInvitation/AcceptInvitationPage';
 import SettingsPage from '@/pages/Settings/SettingsPage';
+import Profile from '@/pages/Profile/Profile';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -37,14 +38,12 @@ function AppRoutes() {
         <Route path={ROUTES.AUTH_CALLBACK} element={<Callback />} />
         <Route path={ROUTES.ACCEPT_INVITATION} element={<AcceptInvitationPage />} />
 
-        {/* Profile → Settings redirect */}
-        <Route path={ROUTES.PROFILE} element={<Navigate to={ROUTES.SETTINGS} replace />} />
-
         {/* Protected */}
         <Route element={<ProtectedRoute><RootLayout /></ProtectedRoute>}>
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.NEW_PROJECT_CHAT} element={<NewProjectChatPage />} />
           <Route path={ROUTES.PROJECT_DETAIL} element={<ProjectDetailPage />} />
+          <Route path={ROUTES.PROFILE} element={<Profile />} />
           <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
         </Route>
       </Routes>

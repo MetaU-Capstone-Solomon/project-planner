@@ -117,6 +117,13 @@ const ProfileDropdown = ({ isOpen, onClose, triggerRef }) => {
           onClick={() => handleNavigation(ROUTES.PROFILE)}
           className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
         >
+          <User className="mr-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          Profile
+        </button>
+        <button
+          onClick={() => handleNavigation(ROUTES.SETTINGS)}
+          className="flex w-full items-center px-4 py-2 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+        >
           <Settings className="mr-3 h-4 w-4 text-gray-400 dark:text-gray-500" />
           Settings
         </button>
