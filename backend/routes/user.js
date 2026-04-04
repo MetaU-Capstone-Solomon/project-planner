@@ -148,4 +148,51 @@ router.post('/dismiss-byok-nudge', extractUserId, async (req, res) => {
   }
 });
 
+// POST /api/user/mcp-token  — generate (or replace) a PAT
+router.post('/mcp-token', extractUserId, async (req, res) => {
+  const crypto = require('crypto');
+  const token = 'mcp_' + crypto.randomBytes(32).toString('hex');
+  try {
+    const { error } = await supabase
+      .from('mcp_tokens')
+      .upsert({ user_id: req.userId, token, created_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (error) throw error;
+    res.json({ token });
+  } catch (err) {
+    console.error('POST /api/user/mcp-token error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/user/mcp-token  — revoke PAT
+router.delete('/mcp-token', extractUserId, async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('mcp_tokens')
+      .delete()
+      .eq('user_id', req.userId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /api/user/mcp-token error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/user/mcp-token/status  — returns { exists: boolean }, never the token value
+router.get('/mcp-token/status', extractUserId, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('mcp_tokens')
+      .select('id')
+      .eq('user_id', req.userId)
+      .single();
+    if (error && error.code !== 'PGRST116') throw error;
+    res.json({ exists: !!data });
+  } catch (err) {
+    console.error('GET /api/user/mcp-token/status error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
