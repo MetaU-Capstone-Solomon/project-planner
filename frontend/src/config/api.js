@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   USER_API_KEY: `${API_BASE_URL}/api/user/api-key`,
   USER_ACCOUNT: `${API_BASE_URL}/api/user/account`,
   DISMISS_BYOK: `${API_BASE_URL}/api/user/dismiss-byok-nudge`,
+  MCP_TOKEN: `${API_BASE_URL}/api/user/mcp-token`,
+  MCP_TOKEN_STATUS: `${API_BASE_URL}/api/user/mcp-token/status`,
 };
 
 export default API_ENDPOINTS;
