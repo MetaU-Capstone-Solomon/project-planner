@@ -25,6 +25,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@/constants/cache';
 import { useAuth } from '@/contexts/AuthContext';
 import { API_ENDPOINTS } from '@/config/api';
+import { supabase } from '@/lib/supabase';
 
 /**
  * ProjectDetailPage - 3-panel layout with sidebar nav, main content, and fixed bottom bar
@@ -296,6 +297,31 @@ const ProjectDetailPage = () => {
       }
     }
   }, [modalOpen, roadmapData]);
+
+  // Realtime: invalidate project cache when MCP server writes to the roadmap table
+  useEffect(() => {
+    if (!projectId) return;
+
+    const channel = supabase
+      .channel(`roadmap-mcp-${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'roadmap',
+          filter: `id=eq.${projectId}`,
+        },
+        () => {
+          queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, queryClient]);
 
   // Handler to open modal with selected phase
   const handlePhaseClick = (phase) => {
