@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const { extractUserId } = require('../middleware/auth');
 const { AIProviderService, ProviderError } = require('../services/aiProviderService');
@@ -150,7 +151,6 @@ router.post('/dismiss-byok-nudge', extractUserId, async (req, res) => {
 
 // POST /api/user/mcp-token  — generate (or replace) a PAT
 router.post('/mcp-token', extractUserId, async (req, res) => {
-  const crypto = require('crypto');
   const token = 'mcp_' + crypto.randomBytes(32).toString('hex');
   try {
     const { error } = await supabase
