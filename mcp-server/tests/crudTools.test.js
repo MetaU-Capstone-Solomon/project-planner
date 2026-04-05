@@ -1,6 +1,9 @@
 import { addTask } from '../tools/addTask.js';
 import { addMilestone } from '../tools/addMilestone.js';
 import { addPhase } from '../tools/addPhase.js';
+import { editTask } from '../tools/editTask.js';
+import { editMilestone } from '../tools/editMilestone.js';
+import { editPhase } from '../tools/editPhase.js';
 
 // ---------------------------------------------------------------------------
 // Shared helpers (reused across all tasks in this file)
@@ -202,5 +205,127 @@ describe('addPhase', () => {
       project_id: 'p1', title: 'Phase One', dry_run: false
     });
     expect(result.order).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// editTask
+// ---------------------------------------------------------------------------
+
+describe('editTask', () => {
+  const task = makeTask('task-1', 'Old title');
+  const phase = makePhase('phase-1', 'Phase A', [makeMilestone('m-1', 'MS A', [task])]);
+  const content = makeContent([phase]);
+
+  test('dry_run returns before/after without writing', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await editTask(mock, 'user-1', {
+      project_id: 'p1', task_id: 'task-1', title: 'New title', dry_run: true
+    });
+    expect(result.action).toBe('edit_task');
+    expect(result.before.title).toBe('Old title');
+    expect(result.after.title).toBe('New title');
+  });
+
+  test('dry_run=false applies edit and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await editTask(mock, 'user-1', {
+      project_id: 'p1', task_id: 'task-1',
+      title: 'Updated title', description: 'New desc', technology: 'React',
+      dry_run: false
+    });
+    expect(result.title).toBe('Updated title');
+    expect(result.description).toBe('New desc');
+    expect(result.technology).toBe('React');
+  });
+
+  test('partial update — only provided fields change', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await editTask(mock, 'user-1', {
+      project_id: 'p1', task_id: 'task-1', description: 'Only desc changed', dry_run: false
+    });
+    expect(result.title).toBe('Old title');
+    expect(result.description).toBe('Only desc changed');
+  });
+
+  test('throws when no fields provided', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      editTask(mock, 'user-1', { project_id: 'p1', task_id: 'task-1', dry_run: true })
+    ).rejects.toThrow('Provide at least one field to update: title, description, technology');
+  });
+
+  test('throws when task not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      editTask(mock, 'user-1', { project_id: 'p1', task_id: 'nope', title: 'T', dry_run: true })
+    ).rejects.toThrow('Task nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// editMilestone
+// ---------------------------------------------------------------------------
+
+describe('editMilestone', () => {
+  const phase = makePhase('phase-1', 'Phase A', [makeMilestone('m-1', 'Old MS')]);
+  const content = makeContent([phase]);
+
+  test('dry_run returns before/after without writing', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await editMilestone(mock, 'user-1', {
+      project_id: 'p1', milestone_id: 'm-1', title: 'New MS', dry_run: true
+    });
+    expect(result.action).toBe('edit_milestone');
+    expect(result.before.title).toBe('Old MS');
+    expect(result.after.title).toBe('New MS');
+  });
+
+  test('dry_run=false applies edit and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await editMilestone(mock, 'user-1', {
+      project_id: 'p1', milestone_id: 'm-1', title: 'New MS', dry_run: false
+    });
+    expect(result.title).toBe('New MS');
+  });
+
+  test('throws when milestone not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      editMilestone(mock, 'user-1', { project_id: 'p1', milestone_id: 'nope', title: 'T', dry_run: true })
+    ).rejects.toThrow('Milestone nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// editPhase
+// ---------------------------------------------------------------------------
+
+describe('editPhase', () => {
+  const content = makeContent([makePhase('phase-1', 'Old Phase')]);
+
+  test('dry_run returns before/after without writing', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await editPhase(mock, 'user-1', {
+      project_id: 'p1', phase_id: 'phase-1', title: 'New Phase', dry_run: true
+    });
+    expect(result.action).toBe('edit_phase');
+    expect(result.before.title).toBe('Old Phase');
+    expect(result.after.title).toBe('New Phase');
+  });
+
+  test('dry_run=false applies edit and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await editPhase(mock, 'user-1', {
+      project_id: 'p1', phase_id: 'phase-1', title: 'New Phase', dry_run: false
+    });
+    expect(result.title).toBe('New Phase');
+  });
+
+  test('throws when phase not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      editPhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', title: 'T', dry_run: true })
+    ).rejects.toThrow('Phase nope not found in project p1');
   });
 });
