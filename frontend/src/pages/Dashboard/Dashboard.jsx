@@ -1,8 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FolderOpen, CheckCircle, ListTodo, Users, Plus, ArrowRight, UserPlus, Flag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '@/constants/cache';
+import { supabase } from '@/lib/supabase';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useRoleConfig } from '@/hooks/useRoleConfig';
 import useDashboardData from '@/hooks/useDashboardData';
@@ -136,6 +139,23 @@ export default function Dashboard() {
   const { config } = useRoleConfig();
   const navigate = useNavigate();
   const [activeTech, setActiveTech] = useState(null);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel('dashboard-new-projects')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'roadmap',
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.USER_PROJECTS] });
+      })
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [user?.id, queryClient]);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
   const showUsageBanner = settings && !settings.apiProvider && settings.usage?.used > 0;
