@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Terminal, Briefcase, GraduationCap, Check } from 'lucide-react';
+import { Terminal, Briefcase, GraduationCap, Check, Copy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
 import { useProfile } from '@/hooks/useProfile';
@@ -14,6 +14,8 @@ import { API_ENDPOINTS } from '@/config/api';
 import { supabase } from '@/lib/supabase';
 import { pageTransition, spring } from '@/constants/motion';
 import toast from 'react-hot-toast';
+
+const VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '<your Supabase URL>';
 
 const ROLES = [
   { value: 'developer',  label: 'Developer',   icon: Terminal,       desc: 'I build things with code' },
@@ -46,6 +48,12 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
   const [savingKey, setSavingKey] = useState(false);
   const [removingKey, setRemovingKey] = useState(false);
+  const [mcpTokenExists, setMcpTokenExists] = useState(false);
+  const [mcpTokenCreatedAt, setMcpTokenCreatedAt] = useState(null);
+  const [mcpToken, setMcpToken] = useState(null);
+  const [mcpTokenCopied, setMcpTokenCopied] = useState(false);
+  const [mcpLoading, setMcpLoading] = useState(false);
+  const [mcpStatusLoading, setMcpStatusLoading] = useState(true);
 
   const currentRole = settings?.role;
   const pendingRole = selectedRole ?? currentRole;
@@ -66,6 +74,27 @@ export default function SettingsPage() {
       apiKeyRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [config.settingsDefaultApiKey, isLoading]);
+
+  useEffect(() => {
+    async function checkMcpStatus() {
+      try {
+        const session = await getSession();
+        if (!session) return;
+        const res = await fetch(API_ENDPOINTS.MCP_TOKEN_STATUS, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (!res.ok) return;
+        const { exists, createdAt } = await res.json();
+        setMcpTokenExists(exists);
+        setMcpTokenCreatedAt(createdAt);
+      } catch {
+        // silently fail
+      } finally {
+        setMcpStatusLoading(false);
+      }
+    }
+    checkMcpStatus();
+  }, []);
 
   async function getSession() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -131,6 +160,56 @@ export default function SettingsPage() {
       toast.error('Failed to remove API key.');
     } finally {
       setRemovingKey(false);
+    }
+  }
+
+  async function handleGenerateMcpToken() {
+    setMcpLoading(true);
+    try {
+      const session = await getSession();
+      const res = await fetch(API_ENDPOINTS.MCP_TOKEN, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMcpToken(data.token);
+      setMcpTokenExists(true);
+      toast.success("Token generated. Copy it now — it won't be shown again.");
+    } catch (err) {
+      toast.error(err.message || 'Failed to generate token.');
+    } finally {
+      setMcpLoading(false);
+    }
+  }
+
+  async function handleRevokeMcpToken() {
+    setMcpLoading(true);
+    try {
+      const session = await getSession();
+      const res = await fetch(API_ENDPOINTS.MCP_TOKEN, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error();
+      setMcpToken(null);
+      setMcpTokenExists(false);
+      toast.success('MCP token revoked.');
+    } catch {
+      toast.error('Failed to revoke token.');
+    } finally {
+      setMcpLoading(false);
+    }
+  }
+
+  async function handleCopyMcpToken() {
+    if (!mcpToken) return;
+    try {
+      await navigator.clipboard.writeText(mcpToken);
+      setMcpTokenCopied(true);
+      setTimeout(() => setMcpTokenCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy token. Please copy it manually.');
     }
   }
 
@@ -275,6 +354,91 @@ export default function SettingsPage() {
         </div>
       )}
       </div>
+      )}
+
+      <Divider />
+
+      {/* SECTION 4 — Claude Code Integration */}
+      <SectionHeading
+        title="Claude Code Integration"
+        description="Connect Claude Code to your projects. Generate a token once and paste it into your .mcp.json."
+      />
+      {mcpStatusLoading ? (
+        <Skeleton className="h-24 rounded-xl" />
+      ) : (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+          {!mcpTokenExists && !mcpToken && (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-[var(--text-primary)]">No token active</p>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">Generate a token to connect Claude Code to this account.</p>
+              </div>
+              <Button onClick={handleGenerateMcpToken} loading={mcpLoading} size="sm">
+                Generate token
+              </Button>
+            </div>
+          )}
+
+          {mcpToken && (
+            <div className="space-y-3">
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                Copy this token now — it won't be shown again.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={mcpToken}
+                  className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 font-mono text-xs text-[var(--text-primary)]"
+                />
+                <Button variant="secondary" size="sm" onClick={handleCopyMcpToken}>
+                  {mcpTokenCopied ? <Check size={14} /> : <Copy size={14} />}
+                </Button>
+              </div>
+              <Button variant="destructive" size="sm" onClick={handleRevokeMcpToken} loading={mcpLoading}>
+                Revoke
+              </Button>
+            </div>
+          )}
+
+          {mcpTokenExists && !mcpToken && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-500" />
+                <div>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Token active</p>
+                  {mcpTokenCreatedAt && (
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Generated {new Date(mcpTokenCreatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button variant="destructive" size="sm" onClick={handleRevokeMcpToken} loading={mcpLoading}>
+                Revoke
+              </Button>
+            </div>
+          )}
+
+          <details className="mt-4">
+            <summary className="cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+              Setup instructions
+            </summary>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-[var(--bg-elevated)] p-3 text-xs text-[var(--text-primary)]">{`// Add to your .mcp.json
+{
+  "mcpServers": {
+    "project-planner": {
+      "command": "node",
+      "args": ["/absolute/path/to/project-planner/mcp-server/index.js"],
+      "env": {
+        "MCP_TOKEN": "<your token>",
+        "SUPABASE_URL": "${VITE_SUPABASE_URL}",
+        "SUPABASE_SERVICE_ROLE_KEY": "<service role key>"
+      }
+    }
+  }
+}`}</pre>
+          </details>
+        </div>
       )}
 
       <Divider />
