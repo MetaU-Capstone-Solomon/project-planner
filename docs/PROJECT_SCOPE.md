@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single source of truth for every feature, technical decision, and implementation detail discussed. Feed it to Claude at the start of each session to resume without losing context.
 
-**Last updated:** 2026-04-03  
+**Last updated:** 2026-04-04  
 **Intern:** Solomon Agyire | **Manager:** Jessica Sun | **Director:** Zahra Surani
 
 ---
@@ -183,7 +183,70 @@ Each role then adds on top:
 1. Apply `backend/migrations/add-mcp-tokens.sql` in Supabase dashboard (SQL Editor)
 2. Enable Realtime for the `roadmap` table (Supabase dashboard → Database → Replication)
 3. Merge `phase-3-mcp-server` into `main` (same stash/merge flow as Phase 1 and 2)
-4. Determine Phase 4 scope
+4. Begin Phase 4 brainstorm
+
+---
+
+### Phase 4 — MCP CRUD + Terminal Project Creation ← NEXT (NOT STARTED)
+
+**Goal:** Extend the MCP server (Supabase/cloud mode) with structural mutation tools and a terminal-first project creation flow.
+
+**Approval flow:** Claude proposes the change in chat → user says yes → Claude calls the write tool. No frontend UI needed for approval.
+
+**New MCP tools:**
+
+*Mutation tools (all require user confirmation before Claude calls them):*
+- `add_task` — add a new task under a specified milestone
+- `add_milestone` — add a new milestone under a specified phase
+- `add_phase` — add a new phase to the project
+- `edit_task` — edit title and/or description of an existing task
+- `edit_milestone` — edit title of an existing milestone
+- `edit_phase` — edit title of an existing phase
+- `delete_task` — delete a task (with confirmation)
+- `delete_milestone` — delete a milestone and all its tasks (with confirmation)
+- `delete_phase` — delete a phase and all its milestones/tasks (with confirmation)
+
+*Terminal project creation:*
+- `create_project` — takes a fully structured roadmap object (projectName, phases → milestones → tasks) and writes it to Supabase as a new project. Claude builds this by asking clarifying questions in the terminal conversation, then calls the tool once with the complete plan.
+
+**How terminal creation works:**
+1. User describes their idea in Claude Code terminal
+2. Claude asks clarifying questions (stack, timeline, experience, scope)
+3. Claude generates the full structured plan and proposes it
+4. User approves
+5. Claude calls `create_project` → project appears in the web app immediately
+
+---
+
+### Phase 5 — Local-First Mode (SQLite, No Sign-In) ← PLANNED
+
+**Goal:** Allow developers to use Project Planner entirely without Supabase, Google OAuth, or any cloud service. All data lives in a SQLite file in the user's repo.
+
+**Storage technology:** **SQLite via `better-sqlite3`** — production-ready, used by billions of devices, embedded in the process (no server), synchronous API (ideal for MCP's stdio model), and the most battle-tested embedded DB available. No sync engine needed for Phase 5 — local mode is intentionally offline-first.
+
+**Architecture:**
+- Storage adapter pattern: `StorageAdapter` interface implemented by both `SupabaseAdapter` (existing) and `SqliteAdapter` (new)
+- MCP server detects mode on startup: if `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` present → cloud mode; otherwise → local mode
+- Local DB file: `.project-planner/db.sqlite` created in the user's repo on first run
+- `npx project-planner init` initialises the local DB and creates a starter `.mcp.json`
+
+**New MCP tools in local mode (same as cloud + additions):**
+- All Phase 3 + Phase 4 tools work identically against SQLite
+- `create_project` — terminal-first project creation writes to local SQLite
+- No PAT needed in local mode — the file IS the auth boundary
+
+**Business model:**
+- Local mode = free, no account, data stays on machine → developer adoption
+- Cloud/Supabase mode = team collaboration, multi-device, web dashboard → paid tier
+- Mirrors Obsidian's proven model ($25M ARR, bootstrapped)
+
+**What is NOT in Phase 5:**
+- Local → cloud sync (deferred — this is the paid upsell, not a free feature)
+- Multi-user collaboration on local file
+- Any CRDT or conflict resolution
+
+**Next session — first action for Phase 5:**
+- Begin brainstorm once Phase 4 is shipped
 
 ---
 
