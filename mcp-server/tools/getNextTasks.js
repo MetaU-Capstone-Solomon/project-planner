@@ -18,7 +18,12 @@ export async function getNextTasks(supabase, userId, args) {
 
   if (error || !data) throw new Error(`Project ${args.project_id} not found`);
 
-  const roadmap = JSON.parse(data.content);
+  let roadmap;
+  try {
+    roadmap = JSON.parse(data.content);
+  } catch {
+    throw new Error(`Project ${data.id} has corrupted roadmap data`);
+  }
   const results = [];
 
   const phases = [...(roadmap.phases || [])].sort((a, b) => a.order - b.order);

@@ -15,6 +15,8 @@ import { supabase } from '@/lib/supabase';
 import { pageTransition, spring } from '@/constants/motion';
 import toast from 'react-hot-toast';
 
+const VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '<your Supabase URL>';
+
 const ROLES = [
   { value: 'developer',  label: 'Developer',   icon: Terminal,       desc: 'I build things with code' },
   { value: 'founder_pm', label: 'Founder / PM', icon: Briefcase,      desc: 'I lead teams and ship products' },
@@ -47,6 +49,7 @@ export default function SettingsPage() {
   const [savingKey, setSavingKey] = useState(false);
   const [removingKey, setRemovingKey] = useState(false);
   const [mcpTokenExists, setMcpTokenExists] = useState(false);
+  const [mcpTokenCreatedAt, setMcpTokenCreatedAt] = useState(null);
   const [mcpToken, setMcpToken] = useState(null);
   const [mcpTokenCopied, setMcpTokenCopied] = useState(false);
   const [mcpLoading, setMcpLoading] = useState(false);
@@ -81,8 +84,9 @@ export default function SettingsPage() {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (!res.ok) return;
-        const { exists } = await res.json();
+        const { exists, createdAt } = await res.json();
         setMcpTokenExists(exists);
+        setMcpTokenCreatedAt(createdAt);
       } catch {
         // silently fail
       } finally {
@@ -400,7 +404,14 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-green-500" />
-                <p className="text-sm font-medium text-[var(--text-primary)]">Token active</p>
+                <div>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Token active</p>
+                  {mcpTokenCreatedAt && (
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                      Generated {new Date(mcpTokenCreatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
               </div>
               <Button variant="destructive" size="sm" onClick={handleRevokeMcpToken} loading={mcpLoading}>
                 Revoke
@@ -420,7 +431,7 @@ export default function SettingsPage() {
       "args": ["/absolute/path/to/project-planner/mcp-server/index.js"],
       "env": {
         "MCP_TOKEN": "<your token>",
-        "SUPABASE_URL": "<your Supabase URL>",
+        "SUPABASE_URL": "${VITE_SUPABASE_URL}",
         "SUPABASE_SERVICE_ROLE_KEY": "<service role key>"
       }
     }

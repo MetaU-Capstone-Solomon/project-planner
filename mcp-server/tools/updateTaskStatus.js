@@ -21,7 +21,12 @@ export async function updateTaskStatus(supabase, userId, args) {
 
   if (error || !data) throw new Error(`Project ${args.project_id} not found`);
 
-  const roadmap = JSON.parse(data.content);
+  let roadmap;
+  try {
+    roadmap = JSON.parse(data.content);
+  } catch {
+    throw new Error(`Project ${data.id} has corrupted roadmap data`);
+  }
   let targetTask = null;
 
   for (const phase of (roadmap.phases || [])) {

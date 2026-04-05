@@ -184,11 +184,11 @@ router.get('/mcp-token/status', extractUserId, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('mcp_tokens')
-      .select('id')
+      .select('id, created_at')
       .eq('user_id', req.userId)
       .single();
     if (error && error.code !== 'PGRST116') throw error;
-    res.json({ exists: !!data });
+    res.json({ exists: !!data, createdAt: data?.created_at ?? null });
   } catch (err) {
     console.error('GET /api/user/mcp-token/status error:', err);
     res.status(500).json({ error: err.message });

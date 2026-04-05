@@ -15,5 +15,11 @@ export async function getProjectRoadmap(supabase, userId, args) {
 
   if (error || !data) throw new Error(`Project ${args.project_id} not found`);
 
-  return JSON.parse(data.content);
+  let roadmap;
+  try {
+    roadmap = JSON.parse(data.content);
+  } catch {
+    throw new Error(`Project ${data.id} has corrupted roadmap data`);
+  }
+  return roadmap;
 }

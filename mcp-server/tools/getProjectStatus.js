@@ -28,7 +28,12 @@ export async function getProjectStatus(supabase, userId, args) {
       .single();
     if (error || !data) throw new Error(`Project ${args.project_id} not found`);
 
-    const roadmap = JSON.parse(data.content);
+    let roadmap;
+    try {
+      roadmap = JSON.parse(data.content);
+    } catch {
+      throw new Error(`Project ${data.id} has corrupted roadmap data`);
+    }
     const { total, completed } = countTasks(roadmap.phases || []);
     const currentPhase = (roadmap.phases || []).find(p =>
       (p.milestones || []).some(m => (m.tasks || []).some(t => t.status !== 'completed'))
@@ -53,7 +58,12 @@ export async function getProjectStatus(supabase, userId, args) {
   if (error) throw new Error(`Failed to fetch projects: ${error.message}`);
 
   return (data || []).map(row => {
-    const roadmap = JSON.parse(row.content);
+    let roadmap;
+    try {
+      roadmap = JSON.parse(row.content);
+    } catch {
+      return { id: row.id, title: row.title, totalTasks: 0, completedTasks: 0, completionPercent: 0, error: 'corrupted roadmap data' };
+    }
     const { total, completed } = countTasks(roadmap.phases || []);
     return {
       id: row.id,
