@@ -4,6 +4,9 @@ import { addPhase } from '../tools/addPhase.js';
 import { editTask } from '../tools/editTask.js';
 import { editMilestone } from '../tools/editMilestone.js';
 import { editPhase } from '../tools/editPhase.js';
+import { deleteTask } from '../tools/deleteTask.js';
+import { deleteMilestone } from '../tools/deleteMilestone.js';
+import { deletePhase } from '../tools/deletePhase.js';
 
 // ---------------------------------------------------------------------------
 // Shared helpers (reused across all tasks in this file)
@@ -326,6 +329,123 @@ describe('editPhase', () => {
     const mock = readOnlyMock({ id: 'p1', content });
     await expect(
       editPhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', title: 'T', dry_run: true })
+    ).rejects.toThrow('Phase nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteTask
+// ---------------------------------------------------------------------------
+
+describe('deleteTask', () => {
+  const task = makeTask('task-1', 'Build auth');
+  const phase = makePhase('phase-1', 'Phase A', [makeMilestone('m-1', 'MS A', [task])]);
+  const content = makeContent([phase]);
+
+  test('dry_run returns item + warning without writing', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await deleteTask(mock, 'user-1', {
+      project_id: 'p1', task_id: 'task-1', dry_run: true
+    });
+    expect(result.action).toBe('delete_task');
+    expect(result.item.id).toBe('task-1');
+    expect(result.item.title).toBe('Build auth');
+    expect(result.warning).toContain('permanently delete 1 task');
+    expect(result.warning).toContain('cannot be undone');
+  });
+
+  test('dry_run=false removes task and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await deleteTask(mock, 'user-1', {
+      project_id: 'p1', task_id: 'task-1', dry_run: false
+    });
+    expect(result.deleted).toBe(true);
+    expect(result.id).toBe('task-1');
+  });
+
+  test('throws when task not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      deleteTask(mock, 'user-1', { project_id: 'p1', task_id: 'nope', dry_run: true })
+    ).rejects.toThrow('Task nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deleteMilestone
+// ---------------------------------------------------------------------------
+
+describe('deleteMilestone', () => {
+  const tasks = [makeTask('t1', 'T1'), makeTask('t2', 'T2'), makeTask('t3', 'T3')];
+  const phase = makePhase('phase-1', 'Phase A', [makeMilestone('m-1', 'Big MS', tasks)]);
+  const content = makeContent([phase]);
+
+  test('dry_run returns item + warning with task count', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await deleteMilestone(mock, 'user-1', {
+      project_id: 'p1', milestone_id: 'm-1', dry_run: true
+    });
+    expect(result.action).toBe('delete_milestone');
+    expect(result.item.id).toBe('m-1');
+    expect(result.warning).toContain('1 milestone');
+    expect(result.warning).toContain('3 tasks');
+    expect(result.warning).toContain('cannot be undone');
+  });
+
+  test('dry_run=false removes milestone and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await deleteMilestone(mock, 'user-1', {
+      project_id: 'p1', milestone_id: 'm-1', dry_run: false
+    });
+    expect(result.deleted).toBe(true);
+    expect(result.id).toBe('m-1');
+  });
+
+  test('throws when milestone not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      deleteMilestone(mock, 'user-1', { project_id: 'p1', milestone_id: 'nope', dry_run: true })
+    ).rejects.toThrow('Milestone nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// deletePhase
+// ---------------------------------------------------------------------------
+
+describe('deletePhase', () => {
+  const phase = makePhase('phase-1', 'Big Phase', [
+    makeMilestone('m-1', 'MS 1', [makeTask('t1', 'T1'), makeTask('t2', 'T2')]),
+    makeMilestone('m-2', 'MS 2', [makeTask('t3', 'T3')]),
+  ]);
+  const content = makeContent([phase]);
+
+  test('dry_run returns item + warning with milestone + task counts', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    const result = await deletePhase(mock, 'user-1', {
+      project_id: 'p1', phase_id: 'phase-1', dry_run: true
+    });
+    expect(result.action).toBe('delete_phase');
+    expect(result.item.id).toBe('phase-1');
+    expect(result.warning).toContain('1 phase');
+    expect(result.warning).toContain('2 milestones');
+    expect(result.warning).toContain('3 tasks');
+    expect(result.warning).toContain('cannot be undone');
+  });
+
+  test('dry_run=false removes phase and writes to DB', async () => {
+    const mock = writeableMock({ id: 'p1', content });
+    const result = await deletePhase(mock, 'user-1', {
+      project_id: 'p1', phase_id: 'phase-1', dry_run: false
+    });
+    expect(result.deleted).toBe(true);
+    expect(result.id).toBe('phase-1');
+  });
+
+  test('throws when phase not found', async () => {
+    const mock = readOnlyMock({ id: 'p1', content });
+    await expect(
+      deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
   });
 });
