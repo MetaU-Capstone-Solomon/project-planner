@@ -7,6 +7,7 @@ import { editPhase } from '../tools/editPhase.js';
 import { deleteTask } from '../tools/deleteTask.js';
 import { deleteMilestone } from '../tools/deleteMilestone.js';
 import { deletePhase } from '../tools/deletePhase.js';
+import { createProject } from '../tools/createProject.js';
 
 // ---------------------------------------------------------------------------
 // Shared helpers (reused across all tasks in this file)
@@ -42,6 +43,30 @@ function writeableMock(row) {
       update: () => ({
         eq: () => ({
           eq: () => ({ error: null })
+        })
+      })
+    })
+  };
+}
+
+function insertableMock(returnedId) {
+  return {
+    from: () => ({
+      insert: () => ({
+        select: () => ({
+          single: async () => ({ data: { id: returnedId }, error: null })
+        })
+      })
+    })
+  };
+}
+
+function failingInsertMock() {
+  return {
+    from: () => ({
+      insert: () => ({
+        select: () => ({
+          single: async () => ({ data: null, error: { message: 'DB connection failed' } })
         })
       })
     })
@@ -447,5 +472,66 @@ describe('deletePhase', () => {
     await expect(
       deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createProject
+// ---------------------------------------------------------------------------
+
+describe('createProject', () => {
+  const minimalInput = {
+    title: 'My New App',
+    phases: [
+      {
+        title: 'Phase 1',
+        milestones: [
+          {
+            title: 'Milestone 1',
+            tasks: [
+              { title: 'Task 1', description: 'First task', technology: 'Node.js' }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  test('inserts project and returns summary counts', async () => {
+    const mock = insertableMock('new-project-uuid');
+    const result = await createProject(mock, 'user-1', minimalInput);
+    expect(result.projectId).toBe('new-project-uuid');
+    expect(result.title).toBe('My New App');
+    expect(result.phaseCount).toBe(1);
+    expect(result.milestoneCount).toBe(1);
+    expect(result.taskCount).toBe(1);
+  });
+
+  test('returns correct counts for multi-phase input', async () => {
+    const mock = insertableMock('proj-id');
+    const input = {
+      title: 'Multi-phase',
+      phases: [
+        { title: 'P1', milestones: [{ title: 'M1', tasks: [{ title: 'T1' }, { title: 'T2' }] }] },
+        { title: 'P2', milestones: [{ title: 'M2', tasks: [{ title: 'T3' }] }] },
+      ]
+    };
+    const result = await createProject(mock, 'user-1', input);
+    expect(result.phaseCount).toBe(2);
+    expect(result.milestoneCount).toBe(2);
+    expect(result.taskCount).toBe(3);
+  });
+
+  test('throws when phases array is empty', async () => {
+    const mock = insertableMock('x');
+    await expect(
+      createProject(mock, 'user-1', { title: 'Empty', phases: [] })
+    ).rejects.toThrow('Project must have at least one phase');
+  });
+
+  test('throws when DB insert fails', async () => {
+    await expect(
+      createProject(failingInsertMock(), 'user-1', minimalInput)
+    ).rejects.toThrow('Failed to save: DB connection failed');
   });
 });
