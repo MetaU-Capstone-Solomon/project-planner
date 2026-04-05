@@ -96,6 +96,25 @@
 
 ---
 
+### Phase 3 — MCP Server ✅ COMPLETE (on branch `phase-3-mcp-server`, 2026-04-04)
+
+**Branch:** `phase-3-mcp-server` — ready to merge into `main`.
+
+**Completed:**
+- Database: `mcp_tokens` table with RLS
+- Backend: 3 new routes (`POST /api/user/mcp-token`, `DELETE /api/user/mcp-token`, `GET /api/user/mcp-token/status`)
+- MCP Server: Standalone ESM package with 5 tools (project status, next tasks, update task, add note, roadmap)
+- Frontend: `McpStatusBadge`, Settings integration, Realtime subscription for live updates
+- Tests: 17 tests covering token format, PAT validation, all 5 tools
+
+**Next session — first action:**
+1. Apply `backend/migrations/add-mcp-tokens.sql` in Supabase dashboard (SQL Editor)
+2. Enable Realtime for the `roadmap` table (Supabase dashboard → Database → Replication)
+3. Merge `phase-3-mcp-server` into `main` (same stash/merge flow as Phase 1 and 2)
+4. Determine Phase 4 scope
+
+---
+
 ### Phase 2 — Role Functionalities (detail, for reference)
 
 **All three roles (Developer, Founder/PM, Student) get MCP connection as a base feature.**
@@ -126,20 +145,45 @@ Each role then adds on top:
 
 ---
 
-### Phase 3 — MCP Server ← NEXT (NOT STARTED)
+### Phase 3 — MCP Server ✅ COMPLETE (on branch `phase-3-mcp-server`, 2026-04-04)
 
-**Status:** Defined at high level only. Phase 2 is now shipped — Phase 3 design can begin.
+**Branch:** `phase-3-mcp-server` — ready to merge into `main`.  
+**Spec:** `docs/superpowers/specs/2026-04-03-phase3-mcp-server-design.md`  
+**Plan:** `docs/superpowers/plans/2026-04-03-phase3-mcp-server.md`
 
-**Goal:** Build an MCP server that exposes the user's Project Planner data as tools Claude Code can call. This turns every project into a living memory — Claude Code reads project status, picks up tasks, marks them complete, and continues work across sessions.
+**What was delivered:**
 
-**Planned MCP tools (high level):**
-- `get_project_status` — returns current phase, milestone, task completion
-- `get_next_tasks` — returns pending/in-progress tasks ordered by priority
-- `update_task_status` — marks a task as in-progress or completed
-- `add_note_to_task` — attaches a progress note to a task
-- `get_project_roadmap` — full roadmap dump for context
+**Database:**
+- `backend/migrations/add-mcp-tokens.sql` — `mcp_tokens` table with RLS (one token per user, service-role insert only)
 
-**Auth:** MCP server authenticates via user's Supabase JWT or a generated personal access token.
+**Backend (new routes in `backend/routes/user.js`):**
+- `POST /api/user/mcp-token` — generate/replace PAT (`mcp_` + 32 random bytes hex)
+- `DELETE /api/user/mcp-token` — revoke PAT
+- `GET /api/user/mcp-token/status` — returns `{ exists: boolean }` (never exposes token value)
+
+**MCP Server (`mcp-server/`):**
+- Standalone ESM package using `@modelcontextprotocol/sdk` + `@supabase/supabase-js` v2 + `zod`
+- PAT validated once on startup → `userId` cached for lifetime of process
+- Five tools: `get_project_status`, `get_next_tasks`, `update_task_status`, `add_note_to_task`, `get_project_roadmap`
+- `get_next_tasks` supports `limit` param (default 5, max 20) — Claude can fetch 1, 3, or N tasks
+- `update_task_status` called once per task — Claude marks a batch complete with sequential calls
+- Users configure via `.mcp.json` with `MCP_TOKEN` + Supabase credentials (copy once, done)
+
+**Frontend:**
+- `McpStatusBadge` — checks `GET /mcp-token/status` on mount; shows green dot "MCP connected" or gray "MCP disconnected"
+- Settings — "Claude Code Integration" section: generate/copy/revoke token + collapsible `.mcp.json` setup instructions
+- `ProjectDetailPage` — Supabase Realtime subscription on `roadmap` table; invalidates React Query cache on MCP write → live UI updates
+
+**Tests:**
+- `backend/tests/mcpToken.test.js` — token format (3 tests)
+- `mcp-server/tests/auth.test.js` — PAT validation (2 tests)
+- `mcp-server/tests/tools.test.js` — all 5 tools (12 tests)
+
+**Next session — first action:**
+1. Apply `backend/migrations/add-mcp-tokens.sql` in Supabase dashboard (SQL Editor)
+2. Enable Realtime for the `roadmap` table (Supabase dashboard → Database → Replication)
+3. Merge `phase-3-mcp-server` into `main` (same stash/merge flow as Phase 1 and 2)
+4. Determine Phase 4 scope
 
 ---
 
