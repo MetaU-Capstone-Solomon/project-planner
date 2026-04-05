@@ -313,7 +313,7 @@ const ProjectDetailPage = () => {
           filter: `id=eq.${projectId}`,
         },
         () => {
-          queryClient.invalidateQueries([QUERY_KEYS.PROJECT_DETAILS, projectId]);
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROJECT_DETAILS, projectId] });
         }
       )
       .subscribe();

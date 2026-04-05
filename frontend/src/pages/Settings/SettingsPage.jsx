@@ -198,11 +198,15 @@ export default function SettingsPage() {
     }
   }
 
-  function handleCopyMcpToken() {
+  async function handleCopyMcpToken() {
     if (!mcpToken) return;
-    navigator.clipboard.writeText(mcpToken);
-    setMcpTokenCopied(true);
-    setTimeout(() => setMcpTokenCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(mcpToken);
+      setMcpTokenCopied(true);
+      setTimeout(() => setMcpTokenCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy token. Please copy it manually.');
+    }
   }
 
   return (
