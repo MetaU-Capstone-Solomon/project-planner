@@ -187,7 +187,7 @@ Each role then adds on top:
 
 ---
 
-### Phase 4 — MCP CRUD + Terminal Project Creation ← NEXT (NOT STARTED)
+### Phase 4 — MCP CRUD + Terminal Project Creation ✅ COMPLETE (merged to main 2026-04-05)
 
 **Goal:** Extend the MCP server (Supabase/cloud mode) with structural mutation tools and a terminal-first project creation flow.
 
@@ -218,7 +218,7 @@ Each role then adds on top:
 
 ---
 
-### Phase 5 — Local-First Mode (SQLite, No Sign-In) ← PLANNED
+### Phase 5 — Local-First Mode (SQLite, No Sign-In) ← NEXT
 
 **Goal:** Allow developers to use Project Planner entirely without Supabase, Google OAuth, or any cloud service. All data lives in a SQLite file in the user's repo.
 
