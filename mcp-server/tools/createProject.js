@@ -1,11 +1,6 @@
 // mcp-server/tools/createProject.js
 
-/**
- * @param {object} supabase
- * @param {string} userId
- * @param {{ title: string, description?: string, timeline?: string, experienceLevel?: string, technologies?: string[], phases: Array }} args
- */
-export async function createProject(supabase, userId, args) {
+export async function createProject(adapter, args) {
   if (!args.phases || args.phases.length === 0) {
     throw new Error('Project must have at least one phase');
   }
@@ -66,22 +61,10 @@ export async function createProject(supabase, userId, args) {
     phases,
   };
 
-  const { data, error } = await supabase
-    .from('roadmap')
-    .insert({
-      user_id: userId,
-      title: args.title,
-      content: JSON.stringify(roadmap),
-      created_at: now,
-      updated_at: now,
-    })
-    .select('id')
-    .single();
-
-  if (error || !data) throw new Error(`Failed to save: ${error?.message ?? 'unknown error'}`);
+  const { id } = await adapter.insertProject(args.title, JSON.stringify(roadmap));
 
   return {
-    projectId: data.id,
+    projectId: id,
     title: args.title,
     phaseCount: phases.length,
     milestoneCount,

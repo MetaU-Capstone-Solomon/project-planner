@@ -1,19 +1,8 @@
 // mcp-server/tools/deleteTask.js
 
-/**
- * @param {object} supabase
- * @param {string} userId
- * @param {{ project_id: string, task_id: string, dry_run: boolean }} args
- */
-export async function deleteTask(supabase, userId, args) {
-  const { data, error } = await supabase
-    .from('roadmap')
-    .select('id, content')
-    .eq('user_id', userId)
-    .eq('id', args.project_id)
-    .single();
-
-  if (error || !data) throw new Error(`Project ${args.project_id} not found`);
+export async function deleteTask(adapter, args) {
+  const data = await adapter.getProject(args.project_id);
+  if (!data) throw new Error(`Project ${args.project_id} not found`);
 
   let roadmap;
   try {
@@ -45,13 +34,7 @@ export async function deleteTask(supabase, userId, args) {
 
   targetMilestone.tasks = targetMilestone.tasks.filter(t => t.id !== args.task_id);
 
-  const { error: writeError } = await supabase
-    .from('roadmap')
-    .update({ content: JSON.stringify(roadmap), updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('id', args.project_id);
-
-  if (writeError) throw new Error(`Failed to save: ${writeError.message}`);
+  await adapter.saveProject(args.project_id, data.title, JSON.stringify(roadmap), new Date().toISOString());
 
   return { deleted: true, id: args.task_id };
 }

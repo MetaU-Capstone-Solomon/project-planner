@@ -1,3 +1,8 @@
+import { describe, it, expect, test, beforeEach, afterEach } from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
 import { addTask } from '../tools/addTask.js';
 import { addMilestone } from '../tools/addMilestone.js';
 import { addPhase } from '../tools/addPhase.js';
@@ -10,7 +15,30 @@ import { deletePhase } from '../tools/deletePhase.js';
 import { createProject } from '../tools/createProject.js';
 
 // ---------------------------------------------------------------------------
-// Shared helpers (reused across all tasks in this file)
+// Shared setup
+// ---------------------------------------------------------------------------
+
+let tmpDir;
+let adapter;
+
+beforeEach(() => {
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pp-crud-'));
+  adapter = new SqliteAdapter(path.join(tmpDir, 'db.sqlite'));
+});
+
+afterEach(() => {
+  fs.rmSync(tmpDir, { recursive: true, force: true });
+});
+
+function seedProject(id, title, content) {
+  const now = new Date().toISOString();
+  adapter._db.prepare(
+    'INSERT INTO projects (id, user_id, title, content, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(id, 'local', title, content, now, now);
+}
+
+// ---------------------------------------------------------------------------
+// Shared helpers (content builders)
 // ---------------------------------------------------------------------------
 
 function makeContent(phases = []) {
@@ -29,84 +57,6 @@ function makeTask(id, title, status = 'pending') {
   return { id, title, status, order: 1 };
 }
 
-// Supports: select chain (read) + update chain (write)
-function writeableMock(row) {
-  return {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            single: async () => ({ data: row, error: null })
-          })
-        })
-      }),
-      update: () => ({
-        eq: () => ({
-          eq: () => ({ error: null })
-        })
-      })
-    })
-  };
-}
-
-function failingWriteMock(row) {
-  return {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            single: async () => ({ data: row, error: null })
-          })
-        })
-      }),
-      update: () => ({
-        eq: () => ({
-          eq: () => ({ error: { message: 'connection timeout' } })
-        })
-      })
-    })
-  };
-}
-
-function insertableMock(returnedId) {
-  return {
-    from: () => ({
-      insert: () => ({
-        select: () => ({
-          single: async () => ({ data: { id: returnedId }, error: null })
-        })
-      })
-    })
-  };
-}
-
-function failingInsertMock() {
-  return {
-    from: () => ({
-      insert: () => ({
-        select: () => ({
-          single: async () => ({ data: null, error: { message: 'DB connection failed' } })
-        })
-      })
-    })
-  };
-}
-
-// Read-only mock (for dry_run tests that never reach write)
-function readOnlyMock(row) {
-  return {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          eq: () => ({
-            single: async () => ({ data: row, error: row ? null : { code: 'PGRST116' } })
-          })
-        })
-      })
-    })
-  };
-}
-
 // ---------------------------------------------------------------------------
 // addTask
 // ---------------------------------------------------------------------------
@@ -116,8 +66,8 @@ describe('addTask', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns preview without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await addTask(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await addTask(adapter, {
       project_id: 'p1', phase_id: 'phase-1', milestone_id: 'm-1',
       title: 'Add CI pipeline', dry_run: true
     });
@@ -129,9 +79,9 @@ describe('addTask', () => {
     expect(result.target).toContain('Setup');
   });
 
-  test('dry_run=false creates task and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await addTask(mock, 'user-1', {
+  test('dry_run=false creates task and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await addTask(adapter, {
       project_id: 'p1', phase_id: 'phase-1', milestone_id: 'm-1',
       title: 'Add CI pipeline', description: 'GitHub Actions', technology: 'GitHub Actions',
       dry_run: false
@@ -150,8 +100,8 @@ describe('addTask', () => {
         { id: 'task-b', title: 'B', status: 'pending', order: 7 },
       ])
     ]);
-    const mock = writeableMock({ id: 'p1', content: makeContent([phaseWithTasks]) });
-    const result = await addTask(mock, 'user-1', {
+    seedProject('p1', 'Test', makeContent([phaseWithTasks]));
+    const result = await addTask(adapter, {
       project_id: 'p1', phase_id: 'phase-1', milestone_id: 'm-1',
       title: 'New task', dry_run: false
     });
@@ -159,36 +109,23 @@ describe('addTask', () => {
   });
 
   test('throws when project not found', async () => {
-    const mock = readOnlyMock(null);
     await expect(
-      addTask(mock, 'user-1', { project_id: 'bad', phase_id: 'p', milestone_id: 'm', title: 'T', dry_run: true })
+      addTask(adapter, { project_id: 'bad', phase_id: 'p', milestone_id: 'm', title: 'T', dry_run: true })
     ).rejects.toThrow('Project bad not found');
   });
 
   test('throws when phase not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content: makeContent([]) });
+    seedProject('p1', 'Test', makeContent([]));
     await expect(
-      addTask(mock, 'user-1', { project_id: 'p1', phase_id: 'missing', milestone_id: 'm-1', title: 'T', dry_run: true })
+      addTask(adapter, { project_id: 'p1', phase_id: 'missing', milestone_id: 'm-1', title: 'T', dry_run: true })
     ).rejects.toThrow('Phase missing not found in project p1');
   });
 
   test('throws when milestone not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content: makeContent([makePhase('phase-1', 'P', [])]) });
+    seedProject('p1', 'Test', makeContent([makePhase('phase-1', 'P', [])]));
     await expect(
-      addTask(mock, 'user-1', { project_id: 'p1', phase_id: 'phase-1', milestone_id: 'missing', title: 'T', dry_run: true })
+      addTask(adapter, { project_id: 'p1', phase_id: 'phase-1', milestone_id: 'missing', title: 'T', dry_run: true })
     ).rejects.toThrow('Milestone missing not found in project p1');
-  });
-
-  test('throws when DB write fails', async () => {
-    const phase = makePhase('phase-1', 'Setup', [makeMilestone('m-1', 'Infra', [])]);
-    const content = makeContent([phase]);
-    const mock = failingWriteMock({ id: 'p1', content });
-    await expect(
-      addTask(mock, 'user-1', {
-        project_id: 'p1', phase_id: 'phase-1', milestone_id: 'm-1',
-        title: 'New task', dry_run: false
-      })
-    ).rejects.toThrow('Failed to save: connection timeout');
   });
 });
 
@@ -201,8 +138,8 @@ describe('addMilestone', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns preview without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await addMilestone(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await addMilestone(adapter, {
       project_id: 'p1', phase_id: 'phase-1', title: 'Database', dry_run: true
     });
     expect(result.action).toBe('add_milestone');
@@ -211,9 +148,9 @@ describe('addMilestone', () => {
     expect(result.target).toContain('Backend');
   });
 
-  test('dry_run=false creates milestone and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await addMilestone(mock, 'user-1', {
+  test('dry_run=false creates milestone and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await addMilestone(adapter, {
       project_id: 'p1', phase_id: 'phase-1', title: 'Database', dry_run: false
     });
     expect(result.id).toMatch(/^milestone-\d+$/);
@@ -223,9 +160,9 @@ describe('addMilestone', () => {
   });
 
   test('throws when phase not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content: makeContent([]) });
+    seedProject('p1', 'Test', makeContent([]));
     await expect(
-      addMilestone(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', title: 'M', dry_run: true })
+      addMilestone(adapter, { project_id: 'p1', phase_id: 'nope', title: 'M', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
   });
 });
@@ -238,8 +175,8 @@ describe('addPhase', () => {
   const content = makeContent([makePhase('phase-1', 'Existing', [])]);
 
   test('dry_run returns preview without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await addPhase(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await addPhase(adapter, {
       project_id: 'p1', title: 'Deployment', dry_run: true
     });
     expect(result.action).toBe('add_phase');
@@ -247,9 +184,9 @@ describe('addPhase', () => {
     expect(result.preview.title).toBe('Deployment');
   });
 
-  test('dry_run=false creates phase and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await addPhase(mock, 'user-1', {
+  test('dry_run=false creates phase and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await addPhase(adapter, {
       project_id: 'p1', title: 'Deployment', dry_run: false
     });
     expect(result.id).toMatch(/^phase-\d+$/);
@@ -259,8 +196,8 @@ describe('addPhase', () => {
   });
 
   test('first phase gets order 1', async () => {
-    const mock = writeableMock({ id: 'p1', content: makeContent([]) });
-    const result = await addPhase(mock, 'user-1', {
+    seedProject('p1', 'Test', makeContent([]));
+    const result = await addPhase(adapter, {
       project_id: 'p1', title: 'Phase One', dry_run: false
     });
     expect(result.order).toBe(1);
@@ -277,8 +214,8 @@ describe('editTask', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns before/after without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await editTask(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await editTask(adapter, {
       project_id: 'p1', task_id: 'task-1', title: 'New title', dry_run: true
     });
     expect(result.action).toBe('edit_task');
@@ -286,9 +223,9 @@ describe('editTask', () => {
     expect(result.after.title).toBe('New title');
   });
 
-  test('dry_run=false applies edit and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await editTask(mock, 'user-1', {
+  test('dry_run=false applies edit and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await editTask(adapter, {
       project_id: 'p1', task_id: 'task-1',
       title: 'Updated title', description: 'New desc', technology: 'React',
       dry_run: false
@@ -299,8 +236,8 @@ describe('editTask', () => {
   });
 
   test('partial update — only provided fields change', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await editTask(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await editTask(adapter, {
       project_id: 'p1', task_id: 'task-1', description: 'Only desc changed', dry_run: false
     });
     expect(result.title).toBe('Old title');
@@ -308,16 +245,16 @@ describe('editTask', () => {
   });
 
   test('throws when no fields provided', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      editTask(mock, 'user-1', { project_id: 'p1', task_id: 'task-1', dry_run: true })
+      editTask(adapter, { project_id: 'p1', task_id: 'task-1', dry_run: true })
     ).rejects.toThrow('Provide at least one field to update: title, description, technology');
   });
 
   test('throws when task not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      editTask(mock, 'user-1', { project_id: 'p1', task_id: 'nope', title: 'T', dry_run: true })
+      editTask(adapter, { project_id: 'p1', task_id: 'nope', title: 'T', dry_run: true })
     ).rejects.toThrow('Task nope not found in project p1');
   });
 });
@@ -331,8 +268,8 @@ describe('editMilestone', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns before/after without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await editMilestone(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await editMilestone(adapter, {
       project_id: 'p1', milestone_id: 'm-1', title: 'New MS', dry_run: true
     });
     expect(result.action).toBe('edit_milestone');
@@ -340,18 +277,18 @@ describe('editMilestone', () => {
     expect(result.after.title).toBe('New MS');
   });
 
-  test('dry_run=false applies edit and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await editMilestone(mock, 'user-1', {
+  test('dry_run=false applies edit and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await editMilestone(adapter, {
       project_id: 'p1', milestone_id: 'm-1', title: 'New MS', dry_run: false
     });
     expect(result.title).toBe('New MS');
   });
 
   test('throws when milestone not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      editMilestone(mock, 'user-1', { project_id: 'p1', milestone_id: 'nope', title: 'T', dry_run: true })
+      editMilestone(adapter, { project_id: 'p1', milestone_id: 'nope', title: 'T', dry_run: true })
     ).rejects.toThrow('Milestone nope not found in project p1');
   });
 });
@@ -364,8 +301,8 @@ describe('editPhase', () => {
   const content = makeContent([makePhase('phase-1', 'Old Phase')]);
 
   test('dry_run returns before/after without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await editPhase(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await editPhase(adapter, {
       project_id: 'p1', phase_id: 'phase-1', title: 'New Phase', dry_run: true
     });
     expect(result.action).toBe('edit_phase');
@@ -373,18 +310,18 @@ describe('editPhase', () => {
     expect(result.after.title).toBe('New Phase');
   });
 
-  test('dry_run=false applies edit and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await editPhase(mock, 'user-1', {
+  test('dry_run=false applies edit and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await editPhase(adapter, {
       project_id: 'p1', phase_id: 'phase-1', title: 'New Phase', dry_run: false
     });
     expect(result.title).toBe('New Phase');
   });
 
   test('throws when phase not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      editPhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', title: 'T', dry_run: true })
+      editPhase(adapter, { project_id: 'p1', phase_id: 'nope', title: 'T', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
   });
 });
@@ -399,8 +336,8 @@ describe('deleteTask', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns item + warning without writing', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await deleteTask(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await deleteTask(adapter, {
       project_id: 'p1', task_id: 'task-1', dry_run: true
     });
     expect(result.action).toBe('delete_task');
@@ -410,9 +347,9 @@ describe('deleteTask', () => {
     expect(result.warning).toContain('cannot be undone');
   });
 
-  test('dry_run=false removes task and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await deleteTask(mock, 'user-1', {
+  test('dry_run=false removes task and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await deleteTask(adapter, {
       project_id: 'p1', task_id: 'task-1', dry_run: false
     });
     expect(result.deleted).toBe(true);
@@ -420,9 +357,9 @@ describe('deleteTask', () => {
   });
 
   test('throws when task not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      deleteTask(mock, 'user-1', { project_id: 'p1', task_id: 'nope', dry_run: true })
+      deleteTask(adapter, { project_id: 'p1', task_id: 'nope', dry_run: true })
     ).rejects.toThrow('Task nope not found in project p1');
   });
 });
@@ -437,8 +374,8 @@ describe('deleteMilestone', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns item + warning with task count', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await deleteMilestone(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await deleteMilestone(adapter, {
       project_id: 'p1', milestone_id: 'm-1', dry_run: true
     });
     expect(result.action).toBe('delete_milestone');
@@ -448,9 +385,9 @@ describe('deleteMilestone', () => {
     expect(result.warning).toContain('cannot be undone');
   });
 
-  test('dry_run=false removes milestone and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await deleteMilestone(mock, 'user-1', {
+  test('dry_run=false removes milestone and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await deleteMilestone(adapter, {
       project_id: 'p1', milestone_id: 'm-1', dry_run: false
     });
     expect(result.deleted).toBe(true);
@@ -458,9 +395,9 @@ describe('deleteMilestone', () => {
   });
 
   test('throws when milestone not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      deleteMilestone(mock, 'user-1', { project_id: 'p1', milestone_id: 'nope', dry_run: true })
+      deleteMilestone(adapter, { project_id: 'p1', milestone_id: 'nope', dry_run: true })
     ).rejects.toThrow('Milestone nope not found in project p1');
   });
 });
@@ -477,8 +414,8 @@ describe('deletePhase', () => {
   const content = makeContent([phase]);
 
   test('dry_run returns item + warning with milestone + task counts', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
-    const result = await deletePhase(mock, 'user-1', {
+    seedProject('p1', 'Test', content);
+    const result = await deletePhase(adapter, {
       project_id: 'p1', phase_id: 'phase-1', dry_run: true
     });
     expect(result.action).toBe('delete_phase');
@@ -489,9 +426,9 @@ describe('deletePhase', () => {
     expect(result.warning).toContain('cannot be undone');
   });
 
-  test('dry_run=false removes phase and writes to DB', async () => {
-    const mock = writeableMock({ id: 'p1', content });
-    const result = await deletePhase(mock, 'user-1', {
+  test('dry_run=false removes phase and persists', async () => {
+    seedProject('p1', 'Test', content);
+    const result = await deletePhase(adapter, {
       project_id: 'p1', phase_id: 'phase-1', dry_run: false
     });
     expect(result.deleted).toBe(true);
@@ -499,19 +436,10 @@ describe('deletePhase', () => {
   });
 
   test('throws when phase not found', async () => {
-    const mock = readOnlyMock({ id: 'p1', content });
+    seedProject('p1', 'Test', content);
     await expect(
-      deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', dry_run: true })
+      deletePhase(adapter, { project_id: 'p1', phase_id: 'nope', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
-  });
-
-  test('throws when DB write fails', async () => {
-    const phase = makePhase('phase-1', 'Test Phase', []);
-    const content = makeContent([phase]);
-    const mock = failingWriteMock({ id: 'p1', content });
-    await expect(
-      deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'phase-1', dry_run: false })
-    ).rejects.toThrow('Failed to save: connection timeout');
   });
 });
 
@@ -538,9 +466,8 @@ describe('createProject', () => {
   };
 
   test('inserts project and returns summary counts', async () => {
-    const mock = insertableMock('new-project-uuid');
-    const result = await createProject(mock, 'user-1', minimalInput);
-    expect(result.projectId).toBe('new-project-uuid');
+    const result = await createProject(adapter, minimalInput);
+    expect(typeof result.projectId).toBe('string');
     expect(result.title).toBe('My New App');
     expect(result.phaseCount).toBe(1);
     expect(result.milestoneCount).toBe(1);
@@ -548,7 +475,6 @@ describe('createProject', () => {
   });
 
   test('returns correct counts for multi-phase input', async () => {
-    const mock = insertableMock('proj-id');
     const input = {
       title: 'Multi-phase',
       phases: [
@@ -556,22 +482,22 @@ describe('createProject', () => {
         { title: 'P2', milestones: [{ title: 'M2', tasks: [{ title: 'T3' }] }] },
       ]
     };
-    const result = await createProject(mock, 'user-1', input);
+    const result = await createProject(adapter, input);
     expect(result.phaseCount).toBe(2);
     expect(result.milestoneCount).toBe(2);
     expect(result.taskCount).toBe(3);
   });
 
   test('throws when phases array is empty', async () => {
-    const mock = insertableMock('x');
     await expect(
-      createProject(mock, 'user-1', { title: 'Empty', phases: [] })
+      createProject(adapter, { title: 'Empty', phases: [] })
     ).rejects.toThrow('Project must have at least one phase');
   });
 
-  test('throws when DB insert fails', async () => {
-    await expect(
-      createProject(failingInsertMock(), 'user-1', minimalInput)
-    ).rejects.toThrow('Failed to save: DB connection failed');
+  test('project is retrievable after creation', async () => {
+    const { projectId } = await createProject(adapter, minimalInput);
+    const project = adapter.getProject(projectId);
+    expect(project).not.toBeNull();
+    expect(project.title).toBe('My New App');
   });
 });

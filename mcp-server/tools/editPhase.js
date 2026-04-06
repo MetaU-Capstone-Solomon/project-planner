@@ -1,22 +1,12 @@
 // mcp-server/tools/editPhase.js
 
-/**
- * @param {object} supabase
- * @param {string} userId
- * @param {{ project_id: string, phase_id: string, title: string, dry_run: boolean }} args
- */
-export async function editPhase(supabase, userId, args) {
+export async function editPhase(adapter, args) {
   if (args.title === undefined) {
     throw new Error('Provide at least one field to update: title');
   }
-  const { data, error } = await supabase
-    .from('roadmap')
-    .select('id, content')
-    .eq('user_id', userId)
-    .eq('id', args.project_id)
-    .single();
 
-  if (error || !data) throw new Error(`Project ${args.project_id} not found`);
+  const data = await adapter.getProject(args.project_id);
+  if (!data) throw new Error(`Project ${args.project_id} not found`);
 
   let roadmap;
   try {
@@ -38,13 +28,7 @@ export async function editPhase(supabase, userId, args) {
 
   targetPhase.title = args.title;
 
-  const { error: writeError } = await supabase
-    .from('roadmap')
-    .update({ content: JSON.stringify(roadmap), updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('id', args.project_id);
-
-  if (writeError) throw new Error(`Failed to save: ${writeError.message}`);
+  await adapter.saveProject(args.project_id, data.title, JSON.stringify(roadmap), new Date().toISOString());
 
   return targetPhase;
 }

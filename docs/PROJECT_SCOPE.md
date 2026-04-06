@@ -2,7 +2,7 @@
 
 > **Purpose:** This document is the single source of truth for every feature, technical decision, and implementation detail discussed. Feed it to Claude at the start of each session to resume without losing context.
 
-**Last updated:** 2026-04-04  
+**Last updated:** 2026-04-06  
 **Intern:** Solomon Agyire | **Manager:** Jessica Sun | **Director:** Zahra Surani
 
 ---
@@ -218,35 +218,46 @@ Each role then adds on top:
 
 ---
 
-### Phase 5 — Local-First Mode (SQLite, No Sign-In) ← NEXT
+### Phase 5 — Local-First Mode (SQLite, No Sign-In) ✅ COMPLETE (on branch `phase-5-local-first`, 2026-04-06)
 
-**Goal:** Allow developers to use Project Planner entirely without Supabase, Google OAuth, or any cloud service. All data lives in a SQLite file in the user's repo.
+**Branch:** `phase-5-local-first` — ready to merge into `main`.  
+**Spec:** `docs/superpowers/specs/2026-04-06-phase5-local-first-design.md`  
+**Plan:** `docs/superpowers/plans/2026-04-06-phase5-local-first.md`
 
-**Storage technology:** **SQLite via `better-sqlite3`** — production-ready, used by billions of devices, embedded in the process (no server), synchronous API (ideal for MCP's stdio model), and the most battle-tested embedded DB available. No sync engine needed for Phase 5 — local mode is intentionally offline-first.
+**What was delivered:**
 
-**Architecture:**
-- Storage adapter pattern: `StorageAdapter` interface implemented by both `SupabaseAdapter` (existing) and `SqliteAdapter` (new)
-- MCP server detects mode on startup: if `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` present → cloud mode; otherwise → local mode
-- Local DB file: `.project-planner/db.sqlite` created in the user's repo on first run
-- `npx project-planner init` initialises the local DB and creates a starter `.mcp.json`
+**Storage Adapter Pattern:**
+- `mcp-server/adapters/SupabaseAdapter.js` — wraps existing Supabase client behind adapter interface
+- `mcp-server/adapters/SqliteAdapter.js` — wraps `better-sqlite3`, local DB at `.project-planner/db.sqlite`
+- All 15 existing tool functions refactored from `(supabase, userId, args)` → `(adapter, args)`
+- `mcp-server/supabase.js` — no longer crashes when env vars absent (exports `null`)
 
-**New MCP tools in local mode (same as cloud + additions):**
-- All Phase 3 + Phase 4 tools work identically against SQLite
-- `create_project` — terminal-first project creation writes to local SQLite
-- No PAT needed in local mode — the file IS the auth boundary
+**Mode Detection (index.js):**
+- Default → local SQLite mode (no env vars needed)
+- Cloud mode (opt-in) → `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` present
+- `MCP_TOKEN` required only in cloud mode
+- DB auto-created at `.project-planner/db.sqlite` on first local run
 
-**Business model:**
-- Local mode = free, no account, data stays on machine → developer adoption
-- Cloud/Supabase mode = team collaboration, multi-device, web dashboard → paid tier
-- Mirrors Obsidian's proven model ($25M ARR, bootstrapped)
+**Two New MCP Tools:**
+- `scan_repo` — reads full directory tree + all markdown files + package.json/README; Claude uses result to generate project plan via `create_project`
+- `export_to_cloud` — migrates all local SQLite projects to Supabase; user-initiated when ready to upgrade
+
+**Onboarding Flow (no new tooling needed):**
+- Empty DB = trigger: Claude calls `get_project_status`, sees 0 projects, asks user
+- Path A (existing repo): `scan_repo` → clarifying questions → `create_project`
+- Path B (has plan doc): user points Claude to doc → `scan_repo` reads it → `create_project`
+- Path C (ideation): Claude asks questions → `create_project`
+
+**Tests (80 total, all passing):**
+- `mcp-server/tests/adapters.test.js` — 7 SqliteAdapter unit tests
+- `mcp-server/tests/tools.test.js` — 20 Phase 3 tool tests (converted from Supabase mocks to SqliteAdapter)
+- `mcp-server/tests/crudTools.test.js` — 31 Phase 4 CRUD tool tests (converted from Supabase mocks to SqliteAdapter)
+- `mcp-server/tests/localTools.test.js` — 22 end-to-end integration tests against SqliteAdapter
 
 **What is NOT in Phase 5:**
 - Local → cloud sync (deferred — this is the paid upsell, not a free feature)
 - Multi-user collaboration on local file
 - Any CRDT or conflict resolution
-
-**Next session — first action for Phase 5:**
-- Begin brainstorm once Phase 4 is shipped
 
 ---
 
