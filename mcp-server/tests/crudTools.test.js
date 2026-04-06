@@ -49,6 +49,25 @@ function writeableMock(row) {
   };
 }
 
+function failingWriteMock(row) {
+  return {
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          eq: () => ({
+            single: async () => ({ data: row, error: null })
+          })
+        })
+      }),
+      update: () => ({
+        eq: () => ({
+          eq: () => ({ error: { message: 'connection timeout' } })
+        })
+      })
+    })
+  };
+}
+
 function insertableMock(returnedId) {
   return {
     from: () => ({
@@ -158,6 +177,18 @@ describe('addTask', () => {
     await expect(
       addTask(mock, 'user-1', { project_id: 'p1', phase_id: 'phase-1', milestone_id: 'missing', title: 'T', dry_run: true })
     ).rejects.toThrow('Milestone missing not found in project p1');
+  });
+
+  test('throws when DB write fails', async () => {
+    const phase = makePhase('phase-1', 'Setup', [makeMilestone('m-1', 'Infra', [])]);
+    const content = makeContent([phase]);
+    const mock = failingWriteMock({ id: 'p1', content });
+    await expect(
+      addTask(mock, 'user-1', {
+        project_id: 'p1', phase_id: 'phase-1', milestone_id: 'm-1',
+        title: 'New task', dry_run: false
+      })
+    ).rejects.toThrow('Failed to save: connection timeout');
   });
 });
 
@@ -472,6 +503,15 @@ describe('deletePhase', () => {
     await expect(
       deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'nope', dry_run: true })
     ).rejects.toThrow('Phase nope not found in project p1');
+  });
+
+  test('throws when DB write fails', async () => {
+    const phase = makePhase('phase-1', 'Test Phase', []);
+    const content = makeContent([phase]);
+    const mock = failingWriteMock({ id: 'p1', content });
+    await expect(
+      deletePhase(mock, 'user-1', { project_id: 'p1', phase_id: 'phase-1', dry_run: false })
+    ).rejects.toThrow('Failed to save: connection timeout');
   });
 });
 
