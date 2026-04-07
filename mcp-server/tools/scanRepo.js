@@ -107,5 +107,23 @@ export function scanRepo(args) {
     }
   }
 
-  return { tree, keyFiles };
+  // Size guard: truncate file contents if total payload exceeds 200KB
+  const SIZE_LIMIT = 200 * 1024;
+  let totalSize = Buffer.byteLength(tree, 'utf8');
+  let truncated = false;
+  const guardedFiles = [];
+
+  for (const file of keyFiles) {
+    const fileSize = Buffer.byteLength(file.content, 'utf8');
+    if (totalSize + fileSize > SIZE_LIMIT) {
+      truncated = true;
+      break;
+    }
+    guardedFiles.push(file);
+    totalSize += fileSize;
+  }
+
+  const result = { tree, keyFiles: guardedFiles };
+  if (truncated) result.truncated = true;
+  return result;
 }

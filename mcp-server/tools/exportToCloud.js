@@ -62,6 +62,7 @@ export async function exportToCloud(args) {
   return {
     exported: exportedIds.length,
     projectIds: exportedIds,
-    message: `${exportedIds.length} project(s) exported to cloud successfully. Update your .mcp.json with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and MCP_TOKEN, then restart to switch to cloud mode.`,
+    message: `${exportedIds.length} project(s) exported to cloud successfully.`,
+    warning: 'Your local SQLite file is no longer in sync with the cloud. Update your .mcp.json with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and MCP_TOKEN, then restart the MCP server. The web dashboard (app.proplan.dev) becomes your primary visualizer — do not continue using local mode for this project.',
   };
 }

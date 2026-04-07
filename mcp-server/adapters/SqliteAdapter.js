@@ -50,4 +50,14 @@ export class SqliteAdapter {
       .run(id, 'local', title, content, now, now);
     return { id };
   }
+
+  deleteProject(projectId) {
+    this._db.prepare('DELETE FROM projects WHERE id = ?').run(projectId);
+  }
+
+  renameProject(projectId, newTitle, updatedAt) {
+    this._db
+      .prepare('UPDATE projects SET title = ?, updated_at = ? WHERE id = ?')
+      .run(newTitle, updatedAt, projectId);
+  }
 }

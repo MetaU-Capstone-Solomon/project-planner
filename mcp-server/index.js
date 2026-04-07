@@ -26,6 +26,9 @@ import { deletePhase } from './tools/deletePhase.js';
 import { createProject } from './tools/createProject.js';
 import { scanRepo } from './tools/scanRepo.js';
 import { exportToCloud } from './tools/exportToCloud.js';
+import { deleteProject } from './tools/deleteProject.js';
+import { renameProject } from './tools/renameProject.js';
+import { getSessionHandoff } from './tools/getSessionHandoff.js';
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
 const { MCP_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
@@ -289,7 +292,7 @@ server.tool(
 
 server.tool(
   'export_to_cloud',
-  'Export all local SQLite projects to your ProPlan cloud account. Run once after signing up and getting your Supabase credentials. Requires a ProPlan web app account.',
+  'Export all local SQLite projects to your ProPlan cloud account. Run once after signing up. WARNING: after export, your local SQLite file is no longer in sync — you must restart the MCP in cloud mode. The web dashboard becomes your primary visualizer. Requires a ProPlan web app account.',
   {
     supabase_url: z.string().url().describe('Your Supabase project URL (from .env or Supabase dashboard).'),
     supabase_service_role_key: z.string().min(1).describe('Your Supabase service role key.'),
@@ -297,6 +300,45 @@ server.tool(
   },
   async (args) => {
     const result = await exportToCloud(args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'delete_project',
+  'Permanently delete a project and all its phases, milestones, and tasks. Use dry_run: true first to see what will be deleted, then dry_run: false to apply. This is irreversible.',
+  {
+    project_id: z.string().describe('UUID of the project to delete.'),
+    dry_run: z.boolean().describe('true = preview only, false = permanently delete.'),
+  },
+  async (args) => {
+    const result = await deleteProject(adapter, args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'rename_project',
+  'Rename a project. Updates the title only — all phases, milestones, and tasks are preserved.',
+  {
+    project_id: z.string().describe('UUID of the project to rename.'),
+    new_title: z.string().min(1).describe('New project title.'),
+  },
+  async (args) => {
+    const result = await renameProject(adapter, args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'get_session_handoff',
+  'Get a session summary for a project — overall progress plus the most recently-updated tasks with their last notes. Call this at the start of a returning session to resume context without the user having to re-explain what they were working on.',
+  {
+    project_id: z.string().describe('UUID of the project.'),
+    last_n_tasks: z.number().int().min(1).max(20).optional().describe('How many recent tasks to return (default 5, max 20).'),
+  },
+  async (args) => {
+    const result = await getSessionHandoff(adapter, args);
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
