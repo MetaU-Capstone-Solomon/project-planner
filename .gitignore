@@ -1,2 +1,12 @@
 node_modules/
 .worktrees/
+
+# Internal dev tooling
+CLAUDE.md
+.superpowers/
+
+# Internal planning docs
+docs/
+
+# Database migration scripts
+*.sql
