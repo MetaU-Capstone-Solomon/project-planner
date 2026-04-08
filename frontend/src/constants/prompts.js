@@ -8,7 +8,6 @@
 export const PROMPT_VARIABLES = {
   PROJECT_TITLE: '[PROJECT_TITLE]',
   PROJECT_DESCRIPTION: '[PROJECT_DESCRIPTION]',
-  TIMELINE: '[TIMELINE]',
   EXPERIENCE_LEVEL: '[EXPERIENCE_LEVEL]',
   TECHNOLOGIES: '[TECHNOLOGIES]',
   PROJECT_SCOPE: '[PROJECT_SCOPE]',
@@ -25,7 +24,6 @@ Generate a structured JSON roadmap for [PROJECT_TITLE].
 PROJECT DETAILS:
 - Title: [PROJECT_TITLE]
 - Description: [PROJECT_DESCRIPTION]
-- Timeline: [TIMELINE]
 - Experience Level: [EXPERIENCE_LEVEL]
 - Technologies: [TECHNOLOGIES]
 - Scope: [PROJECT_SCOPE]
@@ -37,24 +35,21 @@ INSTRUCTIONS:
      "metadata": {
        "title": "[PROJECT_TITLE]",
        "description": "[PROJECT_DESCRIPTION]",
-       "timeline": "[TIMELINE]",
        "experienceLevel": "[EXPERIENCE_LEVEL]",
        "technologies": "[TECHNOLOGIES]",
        "scope": "[PROJECT_SCOPE]",
        "version": "1.0"
      },
-     "summary": "Brief 2-3 sentence summary of the project scope and timeline",
+     "summary": "Brief 2-3 sentence summary of the project scope",
      "phases": [
        {
          "id": "phase-1",
          "title": "Phase Title",
-         "timeline": "Appropriate timeline format (days/weeks/months based on project duration)",
          "order": 1,
          "milestones": [
            {
              "id": "milestone-1-1",
              "title": "Milestone Title",
-             "timeline": "Specific timeline within phase",
              "order": 1,
              "tasks": [
                {
@@ -67,8 +62,7 @@ INSTRUCTIONS:
                      "url": "https://actual-resource-url.com"
                    }
                  ],
-                 "status": "pending",
-                 "estimatedHours": "Realistic hours based on task complexity and experience level"
+                 "status": "pending"
                }
              ]
            }
@@ -78,8 +72,8 @@ INSTRUCTIONS:
    }
 
 3. Adapt complexity based on experience level:
-   - Beginner:simpler tech stack, longer timeline, higher hour estimates
-   - Intermediate: moderate hour estimates
+   - Beginner: simpler tech stack, more granular steps
+   - Intermediate: moderate task complexity
    - Advanced: Advanced patterns, optimization strategies
    - Expert: Enterprise patterns, advanced optimization
 
@@ -87,11 +81,7 @@ INSTRUCTIONS:
 5. Create appropriate number of phases based on project complexity (typically 3-6 phases)
 6. Include realistic number of milestones per phase (typically 2-5 milestones)
 7. Include sufficient tasks per milestone (typically 3-8 tasks)
-8. Use timeline format appropriate to project duration:
-   - Short projects (1-2 weeks): Use days (Day 1, Day 2, etc.)
-   - Medium projects (1-3 months): Use weeks (Week 1, Week 2, etc.)
-   - Long projects (3+ months): Use months or quarters
-10. Assign proper order numbers (1, 2, 3, etc.) for phases, milestones, and tasks
+8. Assign proper order numbers (1, 2, 3, etc.) for phases, milestones, and tasks
 11. Include relevant technologies and learning resources in the resources array with real URLs
 12. Write detailed task descriptions that explain step-by-step what needs to be done, including specific actions, tools, and expected outcomes. Each description should be comprehensive enough for someone to follow and complete the task.
 
@@ -108,17 +98,14 @@ INSTRUCTIONS:
 2. ALWAYS respond with valid JSON using the EXACT structure below
 3. Maintain all existing IDs, order numbers, and structure
 4. Only modify the specific aspects requested by the user
-5. If timeline changes are involved, recalculate phase and milestone timelines proportionally
-6. Generate new unique IDs for any additions (phases, milestones, tasks)
-7. Ensure all timelines remain consistent and add up correctly
-8. Keep the original summary unless specifically asked to change it
+5. Generate new unique IDs for any additions (phases, milestones, tasks)
+6. Keep the original summary unless specifically asked to change it
 
 REQUIRED JSON STRUCTURE:
 {
   "metadata": {
     "title": "Project Title",
     "description": "Project Description",
-    "timeline": "Project Timeline",
     "experienceLevel": "Experience Level",
     "technologies": "Technologies",
     "scope": "Project Scope",
@@ -129,13 +116,11 @@ REQUIRED JSON STRUCTURE:
     {
       "id": "phase-1",
       "title": "Phase Title",
-      "timeline": "Phase Timeline",
       "order": 1,
       "milestones": [
         {
           "id": "milestone-1-1",
           "title": "Milestone Title",
-          "timeline": "Milestone Timeline",
           "order": 1,
           "tasks": [
             {
@@ -148,8 +133,7 @@ REQUIRED JSON STRUCTURE:
                   "url": "https://resource-url.com"
                 }
               ],
-              "status": "pending",
-              "estimatedHours": "Hours"
+              "status": "pending"
             }
           ]
         }

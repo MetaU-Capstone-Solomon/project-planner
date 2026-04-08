@@ -1,7 +1,6 @@
 export const ROLE_CONFIG = {
   developer: {
     showTechFilter: true,
-    showEstimatedHours: true,
     showResourceBadges: true,
     settingsDefaultApiKey: true,
   },
@@ -22,7 +21,6 @@ export const ROLE_CONFIG = {
 
 export const DEFAULT_CONFIG = {
   showTechFilter: false,
-  showEstimatedHours: false,
   showResourceBadges: false,
   settingsDefaultApiKey: false,
   showTaskAssignment: false,

@@ -113,10 +113,6 @@ function PhaseSection({ phase, userRole, config, onTaskUpdate, onEditPhase, onDe
                         <span className={`text-sm ${task.status === 'completed' ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
                           {task.title}
                         </span>
-                        {/* Developer: estimated hours */}
-                        {config?.showEstimatedHours && task.estimatedHours && (
-                          <span className="ml-2 text-xs text-[var(--text-muted)]">~{task.estimatedHours}h</span>
-                        )}
                       </div>
                       {/* Developer: resource badges */}
                       {config?.showResourceBadges && task.resources?.length > 0 && (

@@ -12,14 +12,13 @@ import { PROMPT_VARIABLES, ROADMAP_GENERATION_PROMPT } from '@/constants/prompts
  * @param {Object} projectData - Project information
  * @param {string} projectData.title - Project title
  * @param {string} projectData.description - Project description
- * @param {string} projectData.timeline - Project timeline
  * @param {string} projectData.experienceLevel - Developer experience level
  * @param {string} projectData.technologies - Technologies to use
  * @param {string} projectData.scope - Project scope
  * @returns {string} Formatted prompt with actual values
  */
 export const buildRoadmapPrompt = (projectData) => {
-  const { title, description, timeline, experienceLevel, technologies, scope } = projectData;
+  const { title, description, experienceLevel, technologies, scope } = projectData;
 
   let prompt = ROADMAP_GENERATION_PROMPT;
 
@@ -27,7 +26,6 @@ export const buildRoadmapPrompt = (projectData) => {
   const replacements = {
     [PROMPT_VARIABLES.PROJECT_TITLE]: title || '',
     [PROMPT_VARIABLES.PROJECT_DESCRIPTION]: description || '',
-    [PROMPT_VARIABLES.TIMELINE]: timeline || '',
     [PROMPT_VARIABLES.EXPERIENCE_LEVEL]: experienceLevel || '',
     [PROMPT_VARIABLES.TECHNOLOGIES]: technologies || '',
     [PROMPT_VARIABLES.PROJECT_SCOPE]: scope || '',
@@ -53,7 +51,7 @@ export const buildRoadmapPrompt = (projectData) => {
  * @returns {Object} Validation result with isValid boolean and missing fields array
  */
 export const validateProjectData = (projectData) => {
-  const requiredFields = ['title', 'description', 'timeline', 'experienceLevel'];
+  const requiredFields = ['title', 'description', 'experienceLevel'];
   const missingFields = requiredFields.filter((field) => !projectData[field]);
 
   return {

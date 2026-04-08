@@ -96,9 +96,8 @@ export const useProjectSave = (messages, formValues) => {
 
         if (roadmap) {
           // Apply prioritization algorithm if user constraints are available
-          if (formValues?.timeline && formValues?.experienceLevel && formValues?.projectScope) {
+          if (formValues?.experienceLevel && formValues?.projectScope) {
             const userConstraints = {
-              timeline: formValues.timeline,
               experienceLevel: formValues.experienceLevel,
               scope: formValues.projectScope,
             };

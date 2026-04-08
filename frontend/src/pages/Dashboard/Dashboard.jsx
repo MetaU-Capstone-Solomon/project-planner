@@ -46,11 +46,6 @@ function getProjectTasks(project) {
   return data?.phases?.flatMap(p => p.milestones?.flatMap(m => m.tasks || []) || []) || [];
 }
 
-function getProjectEstimatedHours(project) {
-  const data = parseProjectData(project);
-  return data?.metadata?.estimatedHours || data?.metadata?.estimated_hours || null;
-}
-
 // ---------------------------------------------------------------------------
 // StatCard
 // ---------------------------------------------------------------------------
@@ -75,12 +70,11 @@ function StatCard({ label, value, icon: Icon, index }) {
 // ---------------------------------------------------------------------------
 // ProjectCardItem
 // ---------------------------------------------------------------------------
-function ProjectCardItem({ project, showEstimatedHours }) {
+function ProjectCardItem({ project }) {
   const navigate = useNavigate();
   const tasks = getProjectTasks(project);
   const completed = tasks.filter(t => t.status === 'completed').length;
   const progress = tasks.length ? Math.round((completed / tasks.length) * 100) : 0;
-  const hours = showEstimatedHours ? getProjectEstimatedHours(project) : null;
 
   return (
     <Card onClick={() => navigate(getProjectDetailPath(project.id))} className="group p-5">
@@ -95,9 +89,6 @@ function ProjectCardItem({ project, showEstimatedHours }) {
                   <Badge variant="accent">
                     <Users size={10} /> Shared
                   </Badge>
-                )}
-                {hours && (
-                  <Badge variant="secondary">{hours}h est.</Badge>
                 )}
               </div>
             </div>
@@ -375,7 +366,7 @@ export default function Dashboard() {
           >
             {filteredProjects.map((project, i) => (
               <motion.div key={project.id} variants={stagger.item} transition={{ duration: 0.3, delay: i * 0.06 }}>
-                <ProjectCardItem project={project} showEstimatedHours={config.showEstimatedHours} />
+                <ProjectCardItem project={project} />
               </motion.div>
             ))}
           </motion.div>

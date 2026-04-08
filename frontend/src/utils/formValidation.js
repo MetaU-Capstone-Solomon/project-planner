@@ -7,11 +7,10 @@
 
 /**
  * Check if all required project fields are filled
- * 
+ *
  * @param {Object} values - Form values object
  * @param {string} values.title - Project title
- * @param {string} values.timeline - Selected timeline option
- * @param {string} [values.customTimeline] - Custom timeline text
+ * @param {string} values.description - Project description
  * @param {string} values.experienceLevel - Experience level selection
  * @param {string} values.projectScope - Project scope selection
  * @returns {boolean} True if all required fields are present
@@ -19,24 +18,10 @@
 export const hasRequiredFields = (values) => {
   const hasTitle = values.title?.trim();
   const hasDescription = values.description?.trim();
-  const hasTimeline =
-    values.timeline && (values.timeline !== 'custom' || values.customTimeline?.trim());
   const hasExperienceLevel = values.experienceLevel;
   const hasProjectScope = values.projectScope;
 
-  return hasTitle && hasDescription && hasTimeline && hasExperienceLevel && hasProjectScope;
-};
-
-/**
- * Get final timeline value (custom or selected)
- * 
- * @param {Object} values - Form values object
- * @param {string} values.timeline - Selected timeline option
- * @param {string} [values.customTimeline] - Custom timeline text
- * @returns {string} Final timeline value to use
- */
-export const getFinalTimeline = (values) => {
-  return values.timeline === 'custom' ? values.customTimeline : values.timeline;
+  return hasTitle && hasDescription && hasExperienceLevel && hasProjectScope;
 };
 
 /**

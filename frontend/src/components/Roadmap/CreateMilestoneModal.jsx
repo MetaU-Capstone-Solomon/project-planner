@@ -32,13 +32,13 @@ import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
  * @param {number} props.nextOrder - Next order number for the milestone
  */
 const CreateMilestoneModal = ({ isOpen, onClose, onSave, nextOrder }) => {
-  const [formData, setFormData] = useState({ title: '', timeline: '' });
+  const [formData, setFormData] = useState({ title: '' });
   const [isValid, setIsValid] = useState(true);
 
   // Initialize form data when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({ title: '', timeline: '' });
+      setFormData({ title: '' });
       setIsValid(true);
     }
   }, [isOpen]);
@@ -60,7 +60,6 @@ const CreateMilestoneModal = ({ isOpen, onClose, onSave, nextOrder }) => {
     const newMilestone = {
       id: `milestone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: formData.title.trim(),
-      timeline: formData.timeline.trim() || `Milestone ${nextOrder}`,
       order: nextOrder,
       tasks: [],
     };
@@ -140,28 +139,6 @@ const CreateMilestoneModal = ({ isOpen, onClose, onSave, nextOrder }) => {
               )}
             </div>
 
-            {/* Timeline Field */}
-            <div>
-              <label
-                htmlFor="milestone-timeline"
-                className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}
-              >
-                Timeline (Optional)
-              </label>
-              <input
-                id="milestone-timeline"
-                type="text"
-                className={`w-full ${COLOR_CLASSES.text.body} rounded border border-gray-300 bg-gray-100 px-3 py-2 text-sm leading-relaxed dark:border-gray-600 dark:bg-gray-700 focus:${COLOR_CLASSES.border.focus} outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800`}
-                value={formData.timeline}
-                onChange={(e) => handleInputChange('timeline', e.target.value)}
-                onKeyDown={handleKeyDown}
-                maxLength={50}
-                placeholder="e.g., Days 1-3, Week 1, Month 1"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Leave empty to auto-generate as "Milestone {nextOrder}"
-              </p>
-            </div>
           </div>
         </div>
 

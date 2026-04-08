@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, Users } from 'lucide-react';
+import { Clock, ArrowRight, Users } from 'lucide-react';
 import { getProjectDetailPath } from '@/constants/routes';
 import { getProgressColor } from '@/constants/projectCard';
 import { calculateOverallProgress } from '@/utils/roadmapUtils';
@@ -97,13 +97,6 @@ const ProjectCard = ({ project, isShared }) => {
 
         {/* Metadata */}
         <div className="space-y-2">
-          {roadmapData?.metadata?.timeline && (
-            <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
-              <Calendar className="mr-2 h-4 w-4" />
-              <span>{roadmapData.metadata.timeline}</span>
-            </div>
-          )}
-
           <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <Clock className="mr-2 h-4 w-4" />
             <span>Updated {formatDate(project.updated_at || project.created_at)}</span>

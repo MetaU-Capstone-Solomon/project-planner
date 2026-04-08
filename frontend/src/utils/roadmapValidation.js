@@ -40,9 +40,6 @@ const TaskSchema = z.object({
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   resources: z.array(ResourceSchema).default([]),
   status: z.string().default('pending'), // AI always sets to "pending"
-  estimatedHours: z
-    .union([z.string().min(1), z.number().positive()])
-    .transform((val) => (typeof val === 'number' ? val.toString() : val)),
 });
 
 /**
@@ -52,7 +49,6 @@ const TaskSchema = z.object({
 const MilestoneSchema = z.object({
   id: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   order: z.number(), // AI provides numbers, no need for positive integer validation
   tasks: z.array(TaskSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
@@ -64,7 +60,6 @@ const MilestoneSchema = z.object({
 const PhaseSchema = z.object({
   id: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   order: z.number(), // AI provides numbers, no need for positive integer validation
   milestones: z.array(MilestoneSchema).min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
@@ -76,7 +71,6 @@ const PhaseSchema = z.object({
 const MetadataSchema = z.object({
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  timeline: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   experienceLevel: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   technologies: z.string().optional().default(''),
   scope: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),

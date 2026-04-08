@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, User, Target } from 'lucide-react';
+import { User, Target } from 'lucide-react';
 import {
   COLOR_CLASSES,
   COLOR_PATTERNS,
@@ -15,7 +15,6 @@ import {
  * @param {Object} props - Component props
  * @param {Object} props.metadata - Project metadata object
  * @param {string} props.metadata.title - Project title
- * @param {string} props.metadata.timeline - Project timeline
  * @param {string} props.metadata.experienceLevel - Developer experience level
  * @param {string} props.metadata.scope - Project scope
  * @param {string} props.summary - Project summary text
@@ -39,16 +38,6 @@ const Summary = ({ metadata, summary }) => {
 
       {/* Project Details - Horizontal on mobile, Grid on larger screens */}
       <div className="mb-6 flex flex-wrap gap-4">
-        <div className="flex min-w-0 flex-1 items-center space-x-2">
-          <Calendar className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-          <div className="min-w-0">
-            <div className={`text-sm ${COLOR_CLASSES.text.body}`}>Timeline</div>
-            <div className={`font-medium ${COLOR_CLASSES.text.heading} truncate`}>
-              {metadata.timeline}
-            </div>
-          </div>
-        </div>
-
         <div className="flex min-w-0 flex-1 items-center space-x-2">
           <User className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
           <div className="min-w-0">

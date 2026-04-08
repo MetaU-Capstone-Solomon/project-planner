@@ -35,7 +35,7 @@ import { MESSAGES } from '@/constants/messages';
  * @param {number} props.nextOrder - Next order number for new phases (create mode only)
  */
 const EditPhaseModal = ({ isOpen, onClose, phase, onSave, nextOrder }) => {
-  const [formData, setFormData] = useState({ title: '', timeline: '' });
+  const [formData, setFormData] = useState({ title: '' });
   const [isValid, setIsValid] = useState(true);
 
   // Determine mode based on phase prop
@@ -45,16 +45,10 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave, nextOrder }) => {
   useEffect(() => {
     if (isOpen) {
       if (phase) {
-        setFormData({
-          title: phase.title || '',
-          timeline: phase.timeline || '',
-        });
+        setFormData({ title: phase.title || '' });
         setIsValid(true);
       } else {
-        setFormData({
-          title: '',
-          timeline: '',
-        });
+        setFormData({ title: '' });
         setIsValid(false);
       }
     }
@@ -78,22 +72,12 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave, nextOrder }) => {
       const newPhase = {
         id: `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: formData.title.trim(),
-        timeline: formData.timeline.trim() || MESSAGES.PLACEHOLDERS.PHASE_TIMELINE,
         order: nextOrder || 1,
         milestones: [],
       };
       onSave(newPhase);
     } else {
-      const updates = {
-        title: formData.title.trim(),
-      };
-
-      // Only include timeline if it's not empty
-      if (formData.timeline.trim()) {
-        updates.timeline = formData.timeline.trim();
-      }
-
-      onSave(updates);
+      onSave({ title: formData.title.trim() });
     }
     onClose();
   };
@@ -172,28 +156,6 @@ const EditPhaseModal = ({ isOpen, onClose, phase, onSave, nextOrder }) => {
               </p>
             </div>
 
-            {/* Timeline Field */}
-            <div>
-              <label
-                htmlFor="phase-timeline"
-                className={`mb-2 block text-sm font-medium ${COLOR_CLASSES.text.heading}`}
-              >
-                Timeline
-              </label>
-              <input
-                id="phase-timeline"
-                type="text"
-                className={`w-full ${COLOR_CLASSES.text.heading} rounded border border-gray-300 bg-gray-100 px-3 py-2 dark:border-gray-600 dark:bg-gray-700 focus:${COLOR_CLASSES.border.focus} outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800`}
-                value={formData.timeline}
-                onChange={(e) => handleInputChange('timeline', e.target.value)}
-                onKeyDown={handleKeyDown}
-                maxLength={50}
-                placeholder="e.g., 2-3 weeks"
-              />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {formData.timeline.length}/50 characters
-              </p>
-            </div>
           </div>
         </div>
 

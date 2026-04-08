@@ -28,9 +28,6 @@
  */
 const _formatPhaseText = (phase, index) => {
   let text = `Phase ${index + 1}: ${phase.title}\n`;
-  if (phase.timeline) {
-    text += `Timeline: ${phase.timeline}\n`;
-  }
   text += '\n';
 
   if (phase.milestones && Array.isArray(phase.milestones)) {
@@ -50,9 +47,6 @@ const _formatPhaseText = (phase, index) => {
  */
 const _formatMilestoneText = (milestone, index) => {
   let text = `  Milestone ${index + 1}: ${milestone.title}\n`;
-  if (milestone.timeline) {
-    text += `  Timeline: ${milestone.timeline}\n`;
-  }
   text += '\n';
 
   if (milestone.tasks && Array.isArray(milestone.tasks)) {
@@ -73,11 +67,6 @@ const _formatMilestoneText = (milestone, index) => {
  */
 const _formatTaskText = (task, index) => {
   let text = `    ${index + 1}. ${task.title}\n`;
-
-  if (task.estimatedHours) {
-    text += `       Estimated: ${task.estimatedHours} hours\n`;
-  }
-
   text += '\n';
   return text;
 };

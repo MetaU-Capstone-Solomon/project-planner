@@ -6,7 +6,6 @@ import {
   ArrowUp,
   ArrowDown,
   Target,
-  Calendar,
   ExternalLink,
   Edit2,
   Plus,
@@ -281,7 +280,6 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
           <h2 className={`text-2xl font-bold ${COLOR_CLASSES.text.heading} mb-2`}>
             Phase {phase.order}: {phase.title}
           </h2>
-          <div className={`text-sm ${COLOR_CLASSES.text.body}`}>{phase.timeline}</div>
         </div>
 
         {/* Milestones and Tasks */}
@@ -313,12 +311,6 @@ const PhaseModal = ({ open, onClose, phase, onTaskUpdate, onMilestoneReorder }) 
                           <h3 className={`font-semibold ${COLOR_CLASSES.text.heading}`}>
                             {milestone.title}
                           </h3>
-                          <div
-                            className={`mt-1 flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.body}`}
-                          >
-                            <Calendar className="h-3 w-3" />
-                            <span>{milestone.timeline}</span>
-                          </div>
                         </div>
                       </div>
 
