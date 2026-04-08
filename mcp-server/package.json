@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "bin": {
+    "project-planner-init": "./bin/init.js"
+  },
   "scripts": {
     "start": "node index.js",
+    "init": "node bin/init.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathPatterns=tests/"
   },
   "dependencies": {
