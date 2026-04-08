@@ -10,5 +10,18 @@ export async function getProjectRoadmap(adapter, args) {
   } catch {
     throw new Error(`Project ${data.id} has corrupted roadmap data`);
   }
-  return roadmap;
+
+  if (!args.summary_only) return roadmap;
+
+  // summary_only: strip descriptions and notes from every task
+  return {
+    ...roadmap,
+    phases: (roadmap.phases || []).map(phase => ({
+      ...phase,
+      milestones: (phase.milestones || []).map(milestone => ({
+        ...milestone,
+        tasks: (milestone.tasks || []).map(({ description, notes, ...task }) => task),
+      })),
+    })),
+  };
 }

@@ -1,5 +1,8 @@
 // mcp-server/tools/createProject.js
 
+const DESC_MAX = 300;
+const cap = s => s ? s.slice(0, DESC_MAX) : s;
+
 export async function createProject(adapter, args) {
   if (!args.phases || args.phases.length === 0) {
     throw new Error('Project must have at least one phase');
@@ -29,7 +32,7 @@ export async function createProject(adapter, args) {
           title: taskInput.title,
           status: 'pending',
           order: taskOrder,
-          ...(taskInput.description && { description: taskInput.description }),
+          ...(taskInput.description && { description: cap(taskInput.description) }),
           ...(taskInput.technology && { technology: taskInput.technology }),
         };
       });

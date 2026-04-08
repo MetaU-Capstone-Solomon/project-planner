@@ -1,5 +1,7 @@
 // mcp-server/tools/editTask.js
 
+const DESC_MAX = 300;
+
 export async function editTask(adapter, args) {
   const hasFields = args.title !== undefined || args.description !== undefined || args.technology !== undefined;
   if (!hasFields) {
@@ -40,7 +42,7 @@ export async function editTask(adapter, args) {
   }
 
   if (args.title !== undefined) targetTask.title = args.title;
-  if (args.description !== undefined) targetTask.description = args.description;
+  if (args.description !== undefined) targetTask.description = args.description.slice(0, DESC_MAX);
   if (args.technology !== undefined) targetTask.technology = args.technology;
 
   await adapter.saveProject(args.project_id, data.title, JSON.stringify(roadmap), new Date().toISOString());

@@ -110,10 +110,13 @@ server.tool(
 
 server.tool(
   'get_project_roadmap',
-  'Get the full roadmap for a project — all phases, milestones, and tasks.',
-  { project_id: z.string().describe('UUID of the project.') },
-  async ({ project_id }) => {
-    const result = await getProjectRoadmap(adapter, { project_id });
+  'Get the roadmap for a project. Use summary_only: true for a lightweight view (titles only, no descriptions or notes).',
+  {
+    project_id: z.string().describe('UUID of the project.'),
+    summary_only: z.boolean().optional().describe('true = titles only, omit descriptions and notes.'),
+  },
+  async ({ project_id, summary_only }) => {
+    const result = await getProjectRoadmap(adapter, { project_id, summary_only });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );

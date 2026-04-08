@@ -1,5 +1,8 @@
 // mcp-server/tools/addTask.js
 
+const DESC_MAX = 300;
+const cap = s => s ? s.slice(0, DESC_MAX) : s;
+
 export async function addTask(adapter, args) {
   const data = await adapter.getProject(args.project_id);
   if (!data) throw new Error(`Project ${args.project_id} not found`);
@@ -38,7 +41,7 @@ export async function addTask(adapter, args) {
     title: args.title,
     status: 'pending',
     order: maxOrder + 1,
-    ...(args.description && { description: args.description }),
+    ...(args.description && { description: cap(args.description) }),
     ...(args.technology && { technology: args.technology }),
   };
   milestone.tasks = [...tasks, newTask];
