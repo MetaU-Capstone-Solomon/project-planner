@@ -75,6 +75,34 @@ describe('createProject (local)', () => {
     const tasks = roadmap.phases[0].milestones[0].tasks;
     expect(tasks.every(t => t.status === 'pending')).toBe(true);
   });
+
+  test('roadmap has summary field defaulting to empty string', async () => {
+    const { projectId } = await createTestProject();
+    const roadmap = await getProjectRoadmap(adapter, { project_id: projectId });
+    expect(roadmap).toHaveProperty('summary');
+    expect(roadmap.summary).toBe('');
+  });
+
+  test('all tasks have resources field defaulting to empty array', async () => {
+    const { projectId } = await createTestProject();
+    const roadmap = await getProjectRoadmap(adapter, { project_id: projectId });
+    const tasks = roadmap.phases[0].milestones[0].tasks;
+    expect(tasks.every(t => Array.isArray(t.resources) && t.resources.length === 0)).toBe(true);
+  });
+
+  test('metadata has scope defaulting to empty string', async () => {
+    const { projectId } = await createTestProject();
+    const roadmap = await getProjectRoadmap(adapter, { project_id: projectId });
+    expect(roadmap.metadata).toHaveProperty('scope');
+    expect(roadmap.metadata.scope).toBe('');
+  });
+
+  test('metadata has version defaulting to 1.0', async () => {
+    const { projectId } = await createTestProject();
+    const roadmap = await getProjectRoadmap(adapter, { project_id: projectId });
+    expect(roadmap.metadata).toHaveProperty('version');
+    expect(roadmap.metadata.version).toBe('1.0');
+  });
 });
 
 // ---------------------------------------------------------------------------
