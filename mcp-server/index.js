@@ -58,7 +58,7 @@ const server = new McpServer({
 
 server.tool(
   'get_project_status',
-  'Get completion status for one or all projects. Omit project_id for a summary of all projects. If no projects exist, ask the user if they have an existing project to map out, a plan doc to import, or are starting from ideation.',
+  'Get completion status for one or all projects.',
   { project_id: z.string().optional().describe('UUID of the project. Omit to get all projects.') },
   async ({ project_id }) => {
     const result = await getProjectStatus(adapter, { project_id });
@@ -81,7 +81,7 @@ server.tool(
 
 server.tool(
   'update_task_status',
-  'Mark a task as pending, in_progress, or completed. Always include a note when transitioning status — max 150 chars. When marking in_progress: note = what you are about to do (e.g. "Implementing size guard in scanRepo — truncation logic first"). When marking completed: note = what was done and what is next (e.g. "Size guard done, tests passing — moving to rename_project"). Single DB write — no separate add_note_to_task call needed.',
+  'Update the status of a task. Optionally attach a note in the same operation (max 150 chars).',
   {
     project_id: z.string().describe('UUID of the project.'),
     task_id: z.string().describe('ID of the task (e.g. "task-1").'),
@@ -256,7 +256,7 @@ server.tool(
 
 server.tool(
   'create_project',
-  'Create a new project from scratch with a full phase/milestone/task structure. Ask clarifying questions first, present the full plan in chat, wait for user approval, then call this tool once with the complete object.',
+  'Create a new project with a full phase/milestone/task structure.',
   {
     title: z.string().min(1).describe('Project title.'),
     description: z.string().optional().describe('Short project description.'),
@@ -283,7 +283,7 @@ server.tool(
 
 server.tool(
   'scan_repo',
-  'Scan the current repository and return a full directory tree plus contents of all markdown files and package.json/README. Use this when a user has an existing project or plan doc — read the result, ask clarifying questions, then call create_project.',
+  'Scan a repository and return the directory tree plus contents of key files (markdown, package.json, README).',
   {
     path: z.string().optional().describe('Path to scan or read. Defaults to current working directory. Pass a specific file path to read just that file (e.g. a plan doc at "docs/plan.md").'),
   },
@@ -295,7 +295,7 @@ server.tool(
 
 server.tool(
   'export_to_cloud',
-  'Export all local SQLite projects to your ProPlan cloud account. Run once after signing up. WARNING: after export, your local SQLite file is no longer in sync — you must restart the MCP in cloud mode. The web dashboard becomes your primary visualizer. Requires a ProPlan web app account.',
+  'Migrate all local SQLite projects to your ProPlan cloud account.',
   {
     supabase_url: z.string().url().describe('Your Supabase project URL (from .env or Supabase dashboard).'),
     supabase_service_role_key: z.string().min(1).describe('Your Supabase service role key.'),
@@ -335,7 +335,7 @@ server.tool(
 
 server.tool(
   'get_session_handoff',
-  'Get a full session resume context — projectGoal (permanent anchor), last session summary, overall progress, and the most recently-updated tasks with their last notes. Call this whenever the user says "continue", "proceed", "where were we", or starts a session without a specific command. Never ask the user to re-explain — read this first, then state what you see and continue working.',
+  'Get session resume context — project goal, last session summary, progress stats, and recently active tasks with notes.',
   {
     project_id: z.string().describe('UUID of the project.'),
     last_n_tasks: z.number().int().min(1).max(20).optional().describe('How many recent tasks to return (default 5, max 20).'),
@@ -348,7 +348,7 @@ server.tool(
 
 server.tool(
   'set_project_goal',
-  'Set or update the permanent project goal — a 1-3 sentence description of what this project is and what success looks like. This is the "north star" anchor returned in every get_session_handoff. Never deleted or rotated. Call this when creating a project or when the goal fundamentally changes.',
+  'Set or update the permanent project goal. Returned in every session handoff as the north-star anchor.',
   {
     project_id: z.string().describe('UUID of the project.'),
     goal: z.string().min(1).describe('1-3 sentence project goal. What is being built and what does success look like?'),
@@ -361,7 +361,7 @@ server.tool(
 
 server.tool(
   'add_session_summary',
-  'Save a summary of the current working session. Call this at the end of every session — 3-5 sentences covering: what was worked on, key decisions made, and what comes next. Summaries are capped at 10 — oldest are dropped automatically. The most recent summary is returned in get_session_handoff.',
+  'Save a session summary (what was done, decisions made, what is next). Capped at 10 entries.',
   {
     project_id: z.string().describe('UUID of the project.'),
     summary: z.string().min(1).describe('3-5 sentence session summary: what was done, decisions made, what is next.'),
