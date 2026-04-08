@@ -34,6 +34,11 @@ Before closing any working session, call `add_session_summary` with 3-5 sentence
 
 `docs/PROJECT_SCOPE.md` — full feature list, tech stack, DB schema, file map, what's done/pending. Read it when you need architectural context or when creating a new project plan from it.
 
+## Git Commits
+
+- **NEVER add `Co-Authored-By:` trailers to commit messages.** The user does not want Claude appearing as a contributor on GitHub.
+- Write clean commit messages with no attribution lines.
+
 ## Working Style
 
 - Always update `docs/PROJECT_SCOPE.md` when a phase completes or a new decision is made.
