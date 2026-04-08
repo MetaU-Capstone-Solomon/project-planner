@@ -1,68 +1,53 @@
 // mcp-server/tools/exportToCloud.js
 import { createClient } from '@supabase/supabase-js';
 import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
+import { validatePat } from '../auth.js';
+import { syncProjects } from './syncProjects.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
 export async function exportToCloud(args) {
-  const { supabase_url, supabase_service_role_key, mcp_token } = args;
+  const {
+    supabase_url,
+    supabase_service_role_key,
+    mcp_token,
+    delete_removed = false,
+  } = args;
 
-  // Validate credentials and get userId via PAT
+  // Validate credentials — fail fast before any DB operations
   const supabase = createClient(supabase_url, supabase_service_role_key, {
-    auth: { persistSession: false }
+    auth: { persistSession: false },
   });
+  const userId = await validatePat(supabase, mcp_token);
 
-  const { data: tokenRow, error: tokenError } = await supabase
-    .from('mcp_tokens')
-    .select('user_id')
-    .eq('token', mcp_token)
-    .single();
-
-  if (tokenError || !tokenRow) {
-    throw new Error('Invalid MCP token. Generate one in Project Planner Settings → Claude Code Integration.');
-  }
-
-  const userId = tokenRow.user_id;
-
-  // Open local SQLite DB
+  // Check local DB
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
   if (!existsSync(dbPath)) {
-    return { exported: 0, message: 'No local database found. No projects to export.' };
+    return {
+      inserted: 0,
+      updated: 0,
+      skipped: 0,
+      deleted: 0,
+      failed: [],
+      message: 'No local database found. No projects to export.',
+    };
   }
 
   const local = new SqliteAdapter(dbPath);
-  const projects = local.listProjects();
+  const result = await syncProjects(local, supabase, userId, { delete_removed });
 
-  if (projects.length === 0) {
-    return { exported: 0, message: 'No local projects found to export.' };
-  }
-
-  const now = new Date().toISOString();
-  const exportedIds = [];
-
-  for (const project of projects) {
-    const { data, error } = await supabase
-      .from('roadmap')
-      .insert({
-        user_id: userId,
-        title: project.title,
-        content: project.content,
-        created_at: now,
-        updated_at: now,
-      })
-      .select('id')
-      .single();
-
-    if (error || !data) {
-      throw new Error(`Failed to export project "${project.title}": ${error?.message ?? 'unknown error'}`);
-    }
-    exportedIds.push(data.id);
-  }
+  const parts = [
+    `${result.inserted} inserted`,
+    `${result.updated} updated`,
+    `${result.skipped} skipped`,
+    result.deleted > 0 ? `${result.deleted} deleted` : null,
+    result.failed.length > 0 ? `${result.failed.length} failed` : null,
+  ].filter(Boolean);
 
   return {
-    exported: exportedIds.length,
-    projectIds: exportedIds,
-    message: `${exportedIds.length} project(s) exported to cloud successfully.`,
-    warning: 'Your local SQLite file is no longer in sync with the cloud. Update your .mcp.json with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and MCP_TOKEN, then restart the MCP server. The web dashboard (app.proplan.dev) becomes your primary visualizer — do not continue using local mode for this project.',
+    ...result,
+    message: `Sync complete: ${parts.join(', ')}.`,
+    warning:
+      'Your local SQLite file is no longer in sync with the cloud. Update your .mcp.json with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and MCP_TOKEN, then restart the MCP server. The web dashboard (app.proplan.dev) becomes your primary visualizer — do not continue using local mode for this project.',
   };
 }
