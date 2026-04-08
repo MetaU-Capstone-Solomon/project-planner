@@ -1,6 +1,7 @@
 // mcp-server/tools/updateTaskStatus.js
 
 const VALID_STATUSES = ['pending', 'in_progress', 'completed'];
+const NOTE_MAX_CHARS = 150;
 
 export async function updateTaskStatus(adapter, args) {
   if (!VALID_STATUSES.includes(args.status)) {
@@ -23,6 +24,14 @@ export async function updateTaskStatus(adapter, args) {
       const task = (milestone.tasks || []).find(t => t.id === args.task_id);
       if (task) {
         task.status = args.status;
+
+        // Append note transactionally if provided (single DB write)
+        if (args.note && args.note.trim()) {
+          if (!Array.isArray(task.notes)) task.notes = [];
+          const noteText = args.note.trim().slice(0, NOTE_MAX_CHARS);
+          task.notes.push({ text: noteText, createdAt: new Date().toISOString() });
+        }
+
         targetTask = task;
         break;
       }

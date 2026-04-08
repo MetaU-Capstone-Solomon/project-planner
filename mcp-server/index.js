@@ -29,6 +29,8 @@ import { exportToCloud } from './tools/exportToCloud.js';
 import { deleteProject } from './tools/deleteProject.js';
 import { renameProject } from './tools/renameProject.js';
 import { getSessionHandoff } from './tools/getSessionHandoff.js';
+import { setProjectGoal } from './tools/setProjectGoal.js';
+import { addSessionSummary } from './tools/addSessionSummary.js';
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
 const { MCP_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
@@ -79,14 +81,15 @@ server.tool(
 
 server.tool(
   'update_task_status',
-  'Mark a task as pending, in_progress, or completed.',
+  'Mark a task as pending, in_progress, or completed. Always include a note when transitioning status — max 150 chars. When marking in_progress: note = what you are about to do (e.g. "Implementing size guard in scanRepo — truncation logic first"). When marking completed: note = what was done and what is next (e.g. "Size guard done, tests passing — moving to rename_project"). Single DB write — no separate add_note_to_task call needed.',
   {
     project_id: z.string().describe('UUID of the project.'),
     task_id: z.string().describe('ID of the task (e.g. "task-1").'),
     status: z.enum(['pending', 'in_progress', 'completed']).describe('New status.'),
+    note: z.string().max(150).optional().describe('Intent note (in_progress) or outcome note (completed). Max 150 chars.'),
   },
-  async ({ project_id, task_id, status }) => {
-    const result = await updateTaskStatus(adapter, { project_id, task_id, status });
+  async ({ project_id, task_id, status, note }) => {
+    const result = await updateTaskStatus(adapter, { project_id, task_id, status, note });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
@@ -332,13 +335,39 @@ server.tool(
 
 server.tool(
   'get_session_handoff',
-  'Get a session summary for a project — overall progress plus the most recently-updated tasks with their last notes. Call this at the start of a returning session to resume context without the user having to re-explain what they were working on.',
+  'Get a full session resume context — projectGoal (permanent anchor), last session summary, overall progress, and the most recently-updated tasks with their last notes. Call this whenever the user says "continue", "proceed", "where were we", or starts a session without a specific command. Never ask the user to re-explain — read this first, then state what you see and continue working.',
   {
     project_id: z.string().describe('UUID of the project.'),
     last_n_tasks: z.number().int().min(1).max(20).optional().describe('How many recent tasks to return (default 5, max 20).'),
   },
   async (args) => {
     const result = await getSessionHandoff(adapter, args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'set_project_goal',
+  'Set or update the permanent project goal — a 1-3 sentence description of what this project is and what success looks like. This is the "north star" anchor returned in every get_session_handoff. Never deleted or rotated. Call this when creating a project or when the goal fundamentally changes.',
+  {
+    project_id: z.string().describe('UUID of the project.'),
+    goal: z.string().min(1).describe('1-3 sentence project goal. What is being built and what does success look like?'),
+  },
+  async (args) => {
+    const result = await setProjectGoal(adapter, args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'add_session_summary',
+  'Save a summary of the current working session. Call this at the end of every session — 3-5 sentences covering: what was worked on, key decisions made, and what comes next. Summaries are capped at 10 — oldest are dropped automatically. The most recent summary is returned in get_session_handoff.',
+  {
+    project_id: z.string().describe('UUID of the project.'),
+    summary: z.string().min(1).describe('3-5 sentence session summary: what was done, decisions made, what is next.'),
+  },
+  async (args) => {
+    const result = await addSessionSummary(adapter, args);
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );

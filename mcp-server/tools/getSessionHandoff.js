@@ -47,7 +47,12 @@ export async function getSessionHandoff(adapter, args) {
   const completedTasks = allTasks.filter(t => t.status === 'completed').length;
   const inProgressTasks = allTasks.filter(t => t.status === 'in_progress').length;
 
+  // Last session summary (most recent only)
+  const sessions = Array.isArray(roadmap.sessions) ? roadmap.sessions : [];
+  const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
+
   return {
+    projectGoal: roadmap.projectGoal || null,
     project: {
       id: data.id,
       title: data.title,
@@ -56,6 +61,7 @@ export async function getSessionHandoff(adapter, args) {
       inProgressTasks,
       completionPercent: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
     },
+    lastSession,
     recentTasks,
   };
 }
