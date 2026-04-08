@@ -32,6 +32,7 @@ export async function createProject(adapter, args) {
           title: taskInput.title,
           status: 'pending',
           order: taskOrder,
+          resources: [],
           ...(taskInput.description && { description: cap(taskInput.description) }),
           ...(taskInput.technology && { technology: taskInput.technology }),
         };
@@ -55,7 +56,10 @@ export async function createProject(adapter, args) {
 
   const roadmap = {
     projectName: args.title,
+    summary: '',
     metadata: {
+      scope: '',
+      version: '1.0',
       ...(args.description && { description: args.description }),
       ...(args.timeline && { timeline: args.timeline }),
       ...(args.experienceLevel && { experienceLevel: args.experienceLevel }),
