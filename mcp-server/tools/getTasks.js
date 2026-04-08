@@ -17,18 +17,20 @@ export async function getTasks(adapter, args) {
   }
 
   const { status, phase_id, keyword } = args;
+  const limit = Math.min(args.limit ?? 100, 500);
   const kwLower = keyword ? keyword.toLowerCase() : null;
 
   const results = [];
   const phases = [...(roadmap.phases || [])].sort((a, b) => a.order - b.order);
 
-  for (const phase of phases) {
+  outer: for (const phase of phases) {
     if (phase_id && phase.id !== phase_id) continue;
 
     const milestones = [...(phase.milestones || [])].sort((a, b) => a.order - b.order);
     for (const milestone of milestones) {
       const tasks = [...(milestone.tasks || [])].sort((a, b) => a.order - b.order);
       for (const task of tasks) {
+        if (results.length >= limit) break outer;
         if (status && task.status !== status) continue;
 
         if (kwLower) {
@@ -54,5 +56,5 @@ export async function getTasks(adapter, args) {
     }
   }
 
-  return { total: results.length, tasks: results };
+  return { total: results.length, tasks: results, limit };
 }

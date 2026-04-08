@@ -28,7 +28,6 @@ import { scanRepo } from './tools/scanRepo.js';
 import { exportToCloud } from './tools/exportToCloud.js';
 import { deleteProject } from './tools/deleteProject.js';
 import { renameProject } from './tools/renameProject.js';
-import { getSessionHandoff } from './tools/getSessionHandoff.js';
 import { setProjectGoal } from './tools/setProjectGoal.js';
 import { addSessionSummary } from './tools/addSessionSummary.js';
 import { getTasks } from './tools/getTasks.js';
@@ -335,6 +334,7 @@ server.tool(
           topImports,
           fileCount: sourceAnalysis.length,
           treeHash: scanResult.treeHash,
+          fileMap: scanResult.fileMap ?? {},
           scannedAt: new Date().toISOString(),
         };
 
@@ -396,19 +396,6 @@ server.tool(
 );
 
 server.tool(
-  'get_session_handoff',
-  'Get session resume context — project goal, last session summary, progress stats, and recently active tasks with notes.',
-  {
-    project_id: z.string().describe('UUID of the project.'),
-    last_n_tasks: z.number().int().min(1).max(20).optional().describe('How many recent tasks to return (default 5, max 20).'),
-  },
-  async (args) => {
-    const result = await getSessionHandoff(adapter, args);
-    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
-  }
-);
-
-server.tool(
   'set_project_goal',
   'Set or update the permanent project goal. Returned in every session handoff as the north-star anchor.',
   {
@@ -442,6 +429,7 @@ server.tool(
     status: z.enum(['pending', 'in_progress', 'completed']).optional().describe('Filter by task status.'),
     phase_id: z.string().optional().describe('Filter to a specific phase (e.g. "phase-1").'),
     keyword: z.string().optional().describe('Case-insensitive keyword search across title, description, and technology.'),
+    limit: z.number().int().min(1).max(500).optional().describe('Max tasks to return (default 100, max 500).'),
   },
   async (args) => {
     const result = await getTasks(adapter, args);

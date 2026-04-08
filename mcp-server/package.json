@@ -1,15 +1,46 @@
 {
-  "name": "project-planner-mcp",
+  "name": "@proplan/mcp",
   "version": "1.0.0",
+  "description": "MCP server for Claude Code — persistent project memory, session continuity, and structural repo analysis",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "bin": {
-    "project-planner-init": "./bin/init.js"
+    "proplan-init": "./bin/init.js"
   },
   "scripts": {
     "start": "node index.js",
     "init": "node bin/init.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathPatterns=tests/"
+  },
+  "files": [
+    "index.js",
+    "bin/",
+    "adapters/",
+    "tools/",
+    "lib/",
+    "auth.js",
+    "supabase.js"
+  ],
+  "keywords": [
+    "mcp",
+    "claude",
+    "claude-code",
+    "project-planner",
+    "session-memory",
+    "ai-tools"
+  ],
+  "author": "Solomon Agyire",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaU-Capstone-Solomon/project-planner.git",
+    "directory": "mcp-server"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

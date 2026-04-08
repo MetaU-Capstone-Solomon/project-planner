@@ -127,13 +127,26 @@ export function scanRepo(args) {
     }
   }
 
-  // All markdown files recursively (plan docs, specs, READMEs in subdirs)
+  // Markdown files — capped at 15 files, each truncated to 30KB
+  // Enough for large repos with extensive docs, without token blowout
+  const MD_FILE_LIMIT = 15;
+  const MD_FILE_MAX_BYTES = 30 * 1024;
   const mdFiles = findMarkdownFiles(scanPath);
+  let mdCount = 0;
   for (const filePath of mdFiles) {
+    if (mdCount >= MD_FILE_LIMIT) break;
     const rel = relative(scanPath, filePath);
     if (!seen.has(rel)) {
-      const content = readFileSafe(filePath);
-      if (content) { keyFiles.push({ path: rel, content }); seen.add(rel); }
+      let content = readFileSafe(filePath);
+      if (content) {
+        // Truncate individual file if over 30KB
+        if (Buffer.byteLength(content, 'utf8') > MD_FILE_MAX_BYTES) {
+          content = content.slice(0, MD_FILE_MAX_BYTES) + '\n[truncated]';
+        }
+        keyFiles.push({ path: rel, content });
+        seen.add(rel);
+        mdCount++;
+      }
     }
   }
 
@@ -176,6 +189,27 @@ export function scanRepo(args) {
     }
   }
 
-  if (sourceAnalysis.length > 0) result.sourceAnalysis = sourceAnalysis;
+  if (sourceAnalysis.length > 0) {
+    result.sourceAnalysis = sourceAnalysis;
+
+    // fileMap — hierarchical tree of source files with their structural summaries
+    // Stored in tech_metadata for the dashboard to render as a code map
+    const fileMap = {};
+    for (const entry of sourceAnalysis) {
+      const parts = entry.path.split('/');
+      const fileName = parts.pop();
+      const dir = parts.join('/') || '.';
+      if (!fileMap[dir]) fileMap[dir] = [];
+      fileMap[dir].push({
+        file: fileName,
+        language: entry.language,
+        functions: entry.functions,
+        classes: entry.classes,
+        exports: entry.exports,
+      });
+    }
+    result.fileMap = fileMap;
+  }
+
   return result;
 }

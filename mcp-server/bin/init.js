@@ -7,6 +7,17 @@
 // Usage:  node bin/init.js
 // No dependencies beyond Node built-ins.
 
+// ─── Node version guard ───────────────────────────────────────────────────────
+const [major] = process.versions.node.split('.').map(Number);
+if (major < 18) {
+  process.stderr.write(
+    `\n  ProPlan init requires Node.js 18 or later.\n` +
+    `  You are running Node ${process.versions.node}.\n` +
+    `  Please upgrade: https://nodejs.org\n\n`
+  );
+  process.exit(1);
+}
+
 import readline from 'readline';
 import fs from 'fs';
 import path from 'path';
