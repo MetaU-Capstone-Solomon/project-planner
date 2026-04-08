@@ -59,10 +59,14 @@ const server = new McpServer({
 
 server.tool(
   'get_project_status',
-  'Get completion status for one or all projects.',
-  { project_id: z.string().optional().describe('UUID of the project. Omit to get all projects.') },
-  async ({ project_id }) => {
-    const result = await getProjectStatus(adapter, { project_id });
+  'Get completion status for one or all projects. Pass include_handoff: true to get session resume context (goal, last session, recent tasks) in the same call.',
+  {
+    project_id: z.string().optional().describe('UUID of the project. Omit to get all projects.'),
+    include_handoff: z.boolean().optional().describe('true = include session resume context (projectGoal, lastSession, recentTasks). Requires project_id.'),
+    last_n_tasks: z.number().int().min(1).max(20).optional().describe('How many recent tasks to include in handoff (default 5). Only used when include_handoff: true.'),
+  },
+  async ({ project_id, include_handoff, last_n_tasks }) => {
+    const result = await getProjectStatus(adapter, { project_id, include_handoff, last_n_tasks });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
@@ -287,11 +291,65 @@ server.tool(
 
 server.tool(
   'scan_repo',
-  'Scan a repository and return the directory tree plus contents of key files (markdown, package.json, README).',
+  'Scan a repository directory tree and key files. Pass project_id to persist tech stack metadata and enable hash-based cache.',
   {
-    path: z.string().optional().describe('Path to scan or read. Defaults to current working directory. Pass a specific file path to read just that file (e.g. a plan doc at "docs/plan.md").'),
+    path: z.string().optional().describe('Path to scan. Defaults to cwd. Pass a file path to read just that file.'),
+    project_id: z.string().optional().describe('UUID of the project to persist tech_metadata into. If hash unchanged since last scan, returns cached metadata instead of re-scanning.'),
   },
-  async ({ path }) => {
+  async ({ path, project_id }) => {
+    // If project_id given, check for a cached hash first
+    if (project_id) {
+      const projectData = await adapter.getProject(project_id);
+      if (projectData) {
+        const roadmap = JSON.parse(projectData.content);
+        const cached = roadmap.tech_metadata;
+
+        const scanResult = scanRepo({ path });
+
+        // Cache hit — tree unchanged, return cached metadata
+        if (cached && cached.treeHash === scanResult.treeHash) {
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({ ...scanResult, tech_metadata: cached, cached: true }, null, 2),
+            }],
+          };
+        }
+
+        // Cache miss — extract and persist new tech_metadata
+        const sourceAnalysis = scanResult.sourceAnalysis ?? [];
+        const languages = [...new Set(sourceAnalysis.map(f => f.language))];
+        const importCounts = {};
+        for (const f of sourceAnalysis) {
+          for (const imp of f.imports) {
+            importCounts[imp] = (importCounts[imp] || 0) + 1;
+          }
+        }
+        const topImports = Object.entries(importCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 20)
+          .map(([name]) => name);
+
+        const tech_metadata = {
+          languages,
+          topImports,
+          fileCount: sourceAnalysis.length,
+          treeHash: scanResult.treeHash,
+          scannedAt: new Date().toISOString(),
+        };
+
+        roadmap.tech_metadata = tech_metadata;
+        adapter.saveProject(project_id, projectData.title, JSON.stringify(roadmap), new Date().toISOString());
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({ ...scanResult, tech_metadata, cached: false }, null, 2),
+          }],
+        };
+      }
+    }
+
     const result = scanRepo({ path });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }

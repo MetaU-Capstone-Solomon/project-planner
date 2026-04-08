@@ -7,10 +7,11 @@
    - Read `docs/PROJECT_SCOPE.md` (if it exists) and offer to create a tracking project from it
    - If no scope doc exists, ask: "Do you have an existing project to map out, a plan doc to import, or are you starting from scratch?"
 3. **If projects exist:**
-   - Call `get_session_handoff` on the active/most-recently-updated project
-   - Read `projectGoal`, `lastSession`, and `recentTasks`
+   - Call `get_project_status` with `include_handoff: true` on the active/most-recently-updated project
+   - Read `projectGoal`, `lastSession`, `recentTasks`, and `tech_metadata` from the single response
    - State exactly where things stand and continue — your first words should be "I see we were working on X..."
    - **Never ask the user to re-explain context**
+   - **Never call `get_session_handoff` separately — `include_handoff: true` covers it**
 
 ## Resuming Work
 

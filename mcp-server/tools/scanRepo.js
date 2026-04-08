@@ -3,6 +3,16 @@ import { readdirSync, statSync, readFileSync, existsSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
 import { canAnalyze, analyzeFile } from '../lib/fileAnalyzer.js';
 
+// djb2 hash — fast, no dependencies
+function djb2(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+    hash = hash >>> 0; // keep unsigned 32-bit
+  }
+  return hash.toString(16);
+}
+
 const EXCLUDED_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', '.next', 'coverage',
   '__pycache__', '.cache', '.turbo', 'out', '.vercel',
@@ -143,7 +153,8 @@ export function scanRepo(args) {
     totalSize += fileSize;
   }
 
-  const result = { tree, keyFiles: guardedFiles };
+  const treeHash = djb2(tree);
+  const result = { tree, treeHash, keyFiles: guardedFiles };
   if (truncated) result.truncated = true;
 
   // Structural analysis for source files (JS/TS/Python/Go/Rust)

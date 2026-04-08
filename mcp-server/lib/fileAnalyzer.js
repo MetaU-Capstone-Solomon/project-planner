@@ -106,7 +106,13 @@ function analyzeJS(content) {
 
     // class declaration
     const cls = trimmed.match(/^class\s+(\w+)/);
-    if (cls) { classes.add(cls[1]); }
+    if (cls) { classes.add(cls[1]); continue; }
+
+    // class method shorthand: methodName(...) { or async methodName(...) {
+    const method = trimmed.match(/^(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/);
+    if (method && !['if', 'for', 'while', 'switch', 'catch'].includes(method[1])) {
+      functions.add(method[1]);
+    }
   }
 
   return {
