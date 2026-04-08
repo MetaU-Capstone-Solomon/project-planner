@@ -2,11 +2,10 @@ node_modules/
 .worktrees/
 
 # Internal dev tooling
-CLAUDE.md
 .superpowers/
 
-# Internal planning docs
-docs/
+# Internal planning docs (specs, plans — not user-facing)
+docs/superpowers/
 
 # Database migration scripts
 *.sql
