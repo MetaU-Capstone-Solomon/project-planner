@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Target, Calendar } from 'lucide-react';
+import { ChevronDown, ChevronRight, Target } from 'lucide-react';
 import TaskCard from './TaskCard';
 import { calculateMilestoneProgress } from '@/utils/roadmapUtils';
 import { COLOR_CLASSES } from '../../constants/colors';
@@ -8,7 +8,7 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * MilestoneCard - Displays a milestone with expandable functionality and task management
  * 
  * Features:
- * - Shows milestone title and timeline
+ * - Shows milestone title
  * - Expandable/collapsible design with chevron indicators
  * - Progress percentage and task count display
  * - Displays expandable task cards when milestone is expanded
@@ -20,7 +20,6 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * @param {Object} props.milestone - The milestone data object
  * @param {string} props.milestone.id - Unique identifier for the milestone
  * @param {string} props.milestone.title - Title of the milestone
- * @param {string} props.milestone.timeline - Timeline information
  * @param {Array} props.milestone.tasks - Array of task objects
  * @param {boolean} props.isExpanded - Whether the milestone is expanded (controlled by parent)
  * @param {Function} props.onToggle - Callback function to toggle expansion state
@@ -63,12 +62,6 @@ const MilestoneCard = ({ milestone, isExpanded = false, onToggle, onTaskUpdate }
             <Target className="h-5 w-5 text-status-info-main" />
             <div>
               <h4 className={`font-semibold ${COLOR_CLASSES.text.primary}`}>{milestone.title}</h4>
-              <div
-                className={`mt-1 flex items-center space-x-1 text-sm ${COLOR_CLASSES.text.secondary}`}
-              >
-                <Calendar className="h-3 w-3" />
-                <span>{milestone.timeline}</span>
-              </div>
             </div>
           </div>
 

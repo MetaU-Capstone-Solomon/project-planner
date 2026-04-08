@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, CheckCircle, Edit2, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Clock, CheckCircle, Edit2, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { getButtonClasses, getDisabledButtonClasses } from '@/utils/buttonUtils';
@@ -29,7 +29,6 @@ import { getPhaseColor } from '@/utils/roadmapUtils';
  * @param {Object} props.phase - Phase data object
  * @param {number} props.phase.order - Phase sequence number (1, 2, 3, etc.)
  * @param {string} props.phase.title - Phase title/name
- * @param {string} props.phase.timeline - Phase timeline description
  * @param {Array} props.phase.milestones - Array of milestone objects
  * @param {Array} props.phase.milestones[].tasks - Array of task objects
  * @param {string} props.phase.milestones[].tasks[].status - Task status ('pending', 'completed', etc.)
@@ -128,11 +127,6 @@ const PhaseCardNew = ({ phase, onClick, onEdit, onDelete, onReorder, isFirst, is
 
         {/* Metadata */}
         <div className="space-y-2">
-          <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>{phase.timeline}</span>
-          </div>
-
           <div className={`flex items-center text-sm ${COLOR_CLASSES.text.body}`}>
             <Clock className="mr-2 h-4 w-4" />
             <span>

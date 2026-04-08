@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MilestoneCard from './MilestoneCard';
-import { ChevronDown, ChevronRight, Calendar, Clock } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { getPhaseColor, calculatePhaseProgress } from '@/utils/roadmapUtils';
 import { TASK_STATUS } from '@/constants/roadmap';
 import { COLOR_CLASSES } from '../../constants/colors';
@@ -15,14 +15,13 @@ import { COLOR_CLASSES } from '../../constants/colors';
  * @param {string} props.phase.id - Phase unique identifier
  * @param {number} props.phase.order - Phase order/sequence number
  * @param {string} props.phase.title - Phase title
- * @param {string} props.phase.timeline - Phase timeline/date range
  * @param {Array} props.phase.milestones - Array of milestone objects
  * @param {boolean} props.isExpanded - Whether the phase is expanded
  * @param {Function} props.onToggle - Callback function to toggle phase expansion
  * @param {Set} props.expandedMilestones - Set of expanded milestone IDs
  * @param {Function} props.onMilestoneToggle - Callback function to toggle milestone expansion
  *
- * @returns {JSX.Element} Phase card with title, timeline, expandable milestones, and real progress
+ * @returns {JSX.Element} Phase card with title, expandable milestones, and real progress
  */
 const PhaseCard = ({
   phase,
@@ -87,10 +86,6 @@ const PhaseCard = ({
               <div
                 className={`mt-2 flex items-center space-x-4 text-sm ${COLOR_CLASSES.text.secondary}`}
               >
-                <div className="flex items-center space-x-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{phase.timeline}</span>
-                </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="h-4 w-4" />
                   <span>{totalTasks} tasks</span>
