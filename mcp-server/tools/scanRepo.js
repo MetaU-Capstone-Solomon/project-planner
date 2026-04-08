@@ -1,6 +1,7 @@
 // mcp-server/tools/scanRepo.js
 import { readdirSync, statSync, readFileSync, existsSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
+import { canAnalyze, analyzeFile } from '../lib/fileAnalyzer.js';
 
 const EXCLUDED_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', '.next', 'coverage',
@@ -29,6 +30,25 @@ function buildTree(dir, rootDir, lines = [], depth = 0) {
     }
   }
   return lines;
+}
+
+function findSourceFiles(dir, found = []) {
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return found;
+  }
+
+  for (const entry of entries) {
+    if (EXCLUDED_DIRS.has(entry.name) || entry.name.startsWith('.')) continue;
+    if (entry.isDirectory()) {
+      findSourceFiles(join(dir, entry.name), found);
+    } else if (canAnalyze(entry.name)) {
+      found.push(join(dir, entry.name));
+    }
+  }
+  return found;
 }
 
 function findMarkdownFiles(dir, found = []) {
@@ -125,5 +145,26 @@ export function scanRepo(args) {
 
   const result = { tree, keyFiles: guardedFiles };
   if (truncated) result.truncated = true;
+
+  // Structural analysis for source files (JS/TS/Python/Go/Rust)
+  // Returns summaries (functions, classes, imports, exports) instead of raw content
+  const sourceFiles = findSourceFiles(scanPath);
+  const sourceAnalysis = [];
+  const SOURCE_LIMIT = 150 * 1024; // 150KB cap for structural analysis
+  let sourceSize = 0;
+
+  for (const filePath of sourceFiles) {
+    const content = readFileSafe(filePath);
+    if (!content) continue;
+    const fileSize = Buffer.byteLength(content, 'utf8');
+    if (sourceSize + fileSize > SOURCE_LIMIT) break;
+    const analysis = analyzeFile(relative(scanPath, filePath), content);
+    if (analysis) {
+      sourceAnalysis.push(analysis);
+      sourceSize += fileSize;
+    }
+  }
+
+  if (sourceAnalysis.length > 0) result.sourceAnalysis = sourceAnalysis;
   return result;
 }

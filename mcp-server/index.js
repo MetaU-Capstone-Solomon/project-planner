@@ -31,6 +31,7 @@ import { renameProject } from './tools/renameProject.js';
 import { getSessionHandoff } from './tools/getSessionHandoff.js';
 import { setProjectGoal } from './tools/setProjectGoal.js';
 import { addSessionSummary } from './tools/addSessionSummary.js';
+import { getTasks } from './tools/getTasks.js';
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
 const { MCP_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
@@ -371,6 +372,21 @@ server.tool(
   },
   async (args) => {
     const result = await addSessionSummary(adapter, args);
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'get_tasks',
+  'Filter tasks by status, phase, and/or keyword. Returns a flat list with phase/milestone context.',
+  {
+    project_id: z.string().describe('UUID of the project.'),
+    status: z.enum(['pending', 'in_progress', 'completed']).optional().describe('Filter by task status.'),
+    phase_id: z.string().optional().describe('Filter to a specific phase (e.g. "phase-1").'),
+    keyword: z.string().optional().describe('Case-insensitive keyword search across title, description, and technology.'),
+  },
+  async (args) => {
+    const result = await getTasks(adapter, args);
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
