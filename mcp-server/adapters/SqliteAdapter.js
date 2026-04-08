@@ -22,6 +22,13 @@ export class SqliteAdapter {
     this._db.exec(SCHEMA);
   }
 
+  _applyMigrations() {
+    const cols = this._db.pragma('table_info(projects)');
+    if (!cols.some(c => c.name === 'last_synced_at')) {
+      this._db.exec('ALTER TABLE projects ADD COLUMN last_synced_at TEXT');
+    }
+  }
+
   getUserId() {
     return 'local';
   }
@@ -59,5 +66,17 @@ export class SqliteAdapter {
     this._db
       .prepare('UPDATE projects SET title = ?, updated_at = ? WHERE id = ?')
       .run(newTitle, updatedAt, projectId);
+  }
+
+  getProjectsSyncStatus() {
+    return this._db
+      .prepare('SELECT id, title, content, updated_at, last_synced_at FROM projects')
+      .all();
+  }
+
+  markSynced(projectId, syncedAt) {
+    this._db
+      .prepare('UPDATE projects SET last_synced_at = ? WHERE id = ?')
+      .run(syncedAt, projectId);
   }
 }

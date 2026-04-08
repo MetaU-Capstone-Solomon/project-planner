@@ -66,4 +66,40 @@ describe('SqliteAdapter', () => {
     a.listProjects();
     expect(fs.existsSync(nestedPath)).toBe(true);
   });
+
+  describe('_applyMigrations', () => {
+    it('adds last_synced_at column on fresh DB', () => {
+      adapter._applyMigrations();
+      const cols = adapter._db.pragma('table_info(projects)');
+      expect(cols.some(c => c.name === 'last_synced_at')).toBe(true);
+    });
+
+    it('is idempotent — running twice does not throw', () => {
+      adapter._applyMigrations();
+      expect(() => adapter._applyMigrations()).not.toThrow();
+    });
+  });
+
+  describe('getProjectsSyncStatus', () => {
+    it('returns id, title, content, updated_at, last_synced_at for all projects', () => {
+      adapter._applyMigrations();
+      adapter.insertProject('P1', '{"phases":[]}');
+      const rows = adapter.getProjectsSyncStatus();
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ title: 'P1', last_synced_at: null });
+      expect(typeof rows[0].updated_at).toBe('string');
+      expect(typeof rows[0].content).toBe('string');
+    });
+  });
+
+  describe('markSynced', () => {
+    it('sets last_synced_at for a project', () => {
+      adapter._applyMigrations();
+      const { id } = adapter.insertProject('P2', '{}');
+      const ts = '2026-04-08T00:00:00.000Z';
+      adapter.markSynced(id, ts);
+      const rows = adapter.getProjectsSyncStatus();
+      expect(rows[0].last_synced_at).toBe(ts);
+    });
+  });
 });
