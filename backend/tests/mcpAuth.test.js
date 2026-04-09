@@ -41,10 +41,19 @@ describe('extractMcpUserId', () => {
 
   test('returns 401 for invalid token', async () => {
     req.headers.authorization = 'Bearer mcp_bad_token';
-    _mockSingle.mockResolvedValue({ data: null, error: { message: 'not found' } });
+    _mockSingle.mockResolvedValue({ data: null, error: { code: 'PGRST116', message: 'not found' } });
     await extractMcpUserId(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({ error: 'Invalid MCP token' });
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test('returns 500 when Supabase has a connection error', async () => {
+    req.headers.authorization = 'Bearer mcp_any_token';
+    _mockSingle.mockResolvedValue({ data: null, error: { code: 'PGSQL_ERROR', message: 'connection timeout' } });
+    await extractMcpUserId(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Service error' });
     expect(next).not.toHaveBeenCalled();
   });
 
