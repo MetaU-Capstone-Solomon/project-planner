@@ -19,19 +19,27 @@ export class BackendApiAdapter {
   }
 
   async _request(method, path, body) {
-    const res = await fetch(`${this._apiUrl}${path}`, {
-      method,
-      headers: this._headers(),
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30_000);
 
-    if (!res.ok) {
-      if (res.status === 404) return null;
-      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(err.error || `Request failed: ${res.status}`);
+    try {
+      const res = await fetch(`${this._apiUrl}${path}`, {
+        method,
+        headers: this._headers(),
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        if (res.status === 404) return null;
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `Request failed: ${res.status}`);
+      }
+
+      return res.json();
+    } finally {
+      clearTimeout(timer);
     }
-
-    return res.json();
   }
 
   async listProjects() {

@@ -171,6 +171,20 @@ describe('BackendApiAdapter', () => {
 
       await expect(adapter.listProjects()).rejects.toThrow('HTTP 503');
     });
+
+    test('_request throws on timeout (abort)', async () => {
+      global.fetch = jest.fn().mockImplementationOnce(() =>
+        new Promise((_, reject) =>
+          setTimeout(() => {
+            const err = new Error('The operation was aborted.');
+            err.name = 'AbortError';
+            reject(err);
+          }, 100)
+        )
+      );
+      const adapter = new BackendApiAdapter('token', 'https://api.proplan.dev');
+      await expect(adapter.listProjects()).rejects.toThrow('aborted');
+    });
   });
 
   describe('local-only no-ops', () => {
