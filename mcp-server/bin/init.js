@@ -145,21 +145,41 @@ if (mode === 'local') {
 }
 print();
 
-// 5. allowedTools tip
+// 5. allowedTools — offer to auto-write
+const ALLOWED_TOOLS = [
+  'mcp__project-planner__get_project_status',
+  'mcp__project-planner__get_next_tasks',
+  'mcp__project-planner__get_project_roadmap',
+  'mcp__project-planner__get_tasks',
+  'mcp__project-planner__add_session_summary',
+  'mcp__project-planner__update_task_status',
+  'mcp__project-planner__add_note_to_task',
+];
+
+const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');
 print(bold('  Tip — skip approval prompts for read-only tools'));
-print(dim('  Add this to ~/.claude/settings.json:'));
+const autoWrite = (await ask('  Add these to your Claude settings automatically? [Y/n]: ')).trim().toLowerCase();
 print();
-print(dim('  {'));
-print(dim('    "allowedTools": ['));
-print(dim('      "mcp__project-planner__get_project_status",'));
-print(dim('      "mcp__project-planner__get_next_tasks",'));
-print(dim('      "mcp__project-planner__get_project_roadmap",'));
-print(dim('      "mcp__project-planner__get_tasks",'));
-print(dim('      "mcp__project-planner__add_session_summary",'));
-print(dim('      "mcp__project-planner__update_task_status",'));
-print(dim('      "mcp__project-planner__add_note_to_task"'));
-print(dim('    ]'));
-print(dim('  }'));
+
+if (autoWrite !== 'n') {
+  try {
+    let settings = {};
+    try { settings = JSON.parse(fs.readFileSync(claudeSettingsPath, 'utf8')); } catch { /* new file */ }
+    const existing_tools = Array.isArray(settings.allowedTools) ? settings.allowedTools : [];
+    const merged = [...new Set([...existing_tools, ...ALLOWED_TOOLS])];
+    settings.allowedTools = merged;
+    fs.mkdirSync(path.dirname(claudeSettingsPath), { recursive: true });
+    fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf8');
+    print(green('  ✓ Claude settings updated') + '  ' + dim(claudeSettingsPath));
+  } catch (err) {
+    print('  ' + YELLOW + '⚠  Could not write settings: ' + err.message + RESET);
+    print(dim('  Add manually to ~/.claude/settings.json:'));
+    print(dim('  "allowedTools": ' + JSON.stringify(ALLOWED_TOOLS, null, 4).replace(/\n/g, '\n  ')));
+  }
+} else {
+  print(dim('  To add manually, paste into ~/.claude/settings.json:'));
+  print(dim('  "allowedTools": ' + JSON.stringify(ALLOWED_TOOLS, null, 4).replace(/\n/g, '\n  ')));
+}
 print();
 
 rl.close();
