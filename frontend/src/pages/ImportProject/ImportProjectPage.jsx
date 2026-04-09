@@ -1,17 +1,16 @@
 // frontend/src/pages/ImportProject/ImportProjectPage.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Upload, FileJson, Terminal, CheckCircle, X } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { ROUTES } from '@/constants/routes';
+import { ROUTES, getProjectDetailPath } from '@/constants/routes';
 import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 import { pageTransition } from '@/constants/motion';
 
 export default function ImportProjectPage() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [file, setFile] = useState(null);
   const [importing, setImporting] = useState(false);
@@ -73,7 +72,7 @@ export default function ImportProjectPage() {
       if (error || !data) throw new Error(error?.message ?? 'Import failed');
 
       toast.success('Project imported successfully.');
-      navigate(`/project/${data.id}`);
+      navigate(getProjectDetailPath(data.id));
     } catch (err) {
       setParseError(err.message || 'Import failed. Please check the file and try again.');
     } finally {
@@ -141,7 +140,7 @@ export default function ImportProjectPage() {
             dragOver ? 'border-[var(--accent)] bg-[var(--accent-subtle)]' : 'border-[var(--border)] hover:border-[var(--accent)]'
           }`}
           onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
+          onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(false); }}
           onDrop={handleDrop}
         >
           {file ? (
@@ -150,6 +149,7 @@ export default function ImportProjectPage() {
               <span className="text-sm font-medium text-[var(--text-primary)]">{file.name}</span>
               <button
                 type="button"
+                aria-label="Remove selected file"
                 onClick={e => { e.preventDefault(); setFile(null); setParseError(null); }}
                 className="text-[var(--text-muted)] hover:text-[var(--destructive)]"
               >
@@ -164,7 +164,6 @@ export default function ImportProjectPage() {
           )}
           <input
             id="import-file"
-            ref={fileInputRef}
             type="file"
             accept=".json"
             className="hidden"
