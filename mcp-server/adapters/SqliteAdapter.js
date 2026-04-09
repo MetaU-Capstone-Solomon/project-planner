@@ -70,7 +70,7 @@ export class SqliteAdapter {
 
   getProjectsSyncStatus() {
     return this._db
-      .prepare('SELECT id, title, content, updated_at, last_synced_at FROM projects')
+      .prepare('SELECT id, title, content, created_at, updated_at, last_synced_at FROM projects')
       .all();
   }
 

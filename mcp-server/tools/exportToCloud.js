@@ -29,7 +29,7 @@ export async function exportToCloud({ mcp_token, api_url }) {
   for (const project of projects) {
     if (!project.last_synced_at) {
       toSync.push({ ...project, _action: 'insert' });
-    } else if (project.updated_at > project.last_synced_at) {
+    } else if (new Date(project.updated_at) > new Date(project.last_synced_at)) {
       toSync.push({ ...project, _action: 'update' });
     } else {
       stats.skipped++;
@@ -41,7 +41,7 @@ export async function exportToCloud({ mcp_token, api_url }) {
       inserted: 0,
       updated: 0,
       skipped: stats.skipped,
-      dashboardUrl: `${resolvedApiUrl.replace('/api', '')}/dashboard`,
+      dashboardUrl: 'https://project-planner-7zw4.onrender.com/dashboard',
       message: 'All projects are already up to date.',
     };
   }
@@ -58,7 +58,7 @@ export async function exportToCloud({ mcp_token, api_url }) {
         id: p.id,
         title: p.title,
         content: p.content,
-        created_at: p.updated_at,
+        created_at: p.created_at || p.updated_at,  // use actual created_at, fall back to updated_at if null
         updated_at: p.updated_at,
       })),
     }),
