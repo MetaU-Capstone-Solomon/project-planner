@@ -54,6 +54,9 @@ app.use((req, res, next) => {
 // User settings routes
 app.use('/api/user', userRouter);
 
+const mcpRouter = require('./routes/mcp');
+app.use('/api/mcp', mcpRouter);
+
 // Multer configuration for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),

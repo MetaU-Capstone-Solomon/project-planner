@@ -26,7 +26,8 @@
     "word-extractor": "^1.0.4"
   },
   "devDependencies": {
-    "jest": "^30.3.0"
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
   },
   "jest": {
     "testEnvironment": "node",
