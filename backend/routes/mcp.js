@@ -100,6 +100,13 @@ router.post('/sync', async (req, res) => {
     if (!Array.isArray(projects) || projects.length === 0) {
       return res.status(400).json({ error: 'projects array is required and must not be empty' });
     }
+    // Validate every project has required fields
+    const invalid = projects.filter(p => !p.id || !p.title || !p.content);
+    if (invalid.length > 0) {
+      return res.status(400).json({
+        error: `${invalid.length} project(s) missing required fields (id, title, content)`,
+      });
+    }
     const now = new Date().toISOString();
     const rows = projects.map(p => ({
       id: p.id,

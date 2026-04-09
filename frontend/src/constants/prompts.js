@@ -14,8 +14,8 @@ export const PROMPT_VARIABLES = {
 };
 
 export const ROADMAP_CONSTRAINTS = `
-- ONLY respond to roadmap-related questions (timeline, tech stack, scope, milestones, tasks)
-- If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
+- ONLY respond to roadmap-related questions (tech stack, scope, milestones, tasks)
+- If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: tech stack, scope, milestones, or tasks."
 `;
 
 export const ROADMAP_GENERATION_PROMPT = `
@@ -85,8 +85,8 @@ INSTRUCTIONS:
 11. Include relevant technologies and learning resources in the resources array with real URLs
 12. Write detailed task descriptions that explain step-by-step what needs to be done, including specific actions, tools, and expected outcomes. Each description should be comprehensive enough for someone to follow and complete the task.
 
-- ONLY respond to roadmap-related questions (timeline, tech stack, scope, milestones, tasks)
-- If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
+- ONLY respond to roadmap-related questions (tech stack, scope, milestones, tasks)
+- If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: tech stack, scope, milestones, or tasks."
 `;
 
 export const ROADMAP_MODIFICATION_PROMPT = `You are helping the user modify their project roadmap.
@@ -142,7 +142,7 @@ REQUIRED JSON STRUCTURE:
   ]
 }
 
-IMPORTANT: If the user asks something NOT related to roadmap modifications, respond with: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: timeline, tech stack, scope, milestones, or tasks."
+IMPORTANT: If the user asks something NOT related to roadmap modifications, respond with: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: tech stack, scope, milestones, or tasks."
 
 CRITICAL INSTRUCTIONS:
 1. DO NOT ask questions. Just make the requested modifications directly.

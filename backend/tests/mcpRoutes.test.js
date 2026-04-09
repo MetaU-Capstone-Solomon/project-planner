@@ -369,6 +369,14 @@ describe('POST /api/mcp/sync', () => {
     expect(res.body).toEqual({ error: 'projects array is required and must not be empty' });
   });
 
+  test('returns 400 if a project is missing required fields', async () => {
+    const res = await request(app)
+      .post('/api/mcp/sync')
+      .send({ projects: [{ id: 'some-id', title: 'No content' }] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/missing required fields/);
+  });
+
   test('returns 500 on supabase error', async () => {
     _mockUpsert.mockResolvedValue({ error: { message: 'upsert failed' } });
 

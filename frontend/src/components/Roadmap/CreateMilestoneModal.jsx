@@ -17,7 +17,7 @@ import { COLOR_CLASSES, COLOR_PATTERNS } from '@/constants/colors';
  *
  * USER INTERACTION FLOW:
  * 1. User clicks "Add Milestone" → Modal opens with empty form
- * 2. User enters title/timeline → Real-time validation
+ * 2. User enters title → Real-time validation
  * 3. User clicks Save → Creates milestone, closes modal
  * 4. User clicks Cancel/X → Discards changes, closes modal
  *

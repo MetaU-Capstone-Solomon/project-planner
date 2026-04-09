@@ -11,8 +11,8 @@ import { MESSAGES } from '@/constants/messages';
  * 1. MODE DETECTION: Determines if this is 'edit' mode (existing phase) or 'create' mode (new phase)
  *    based on whether the 'phase' prop is provided or null.
  *
- * 2. FORM STATE: Manages local form state with title and timeline inputs and validation status.
- *    - formData: Current form values (title, timeline)
+ * 2. FORM STATE: Manages local form state with title input and validation status.
+ *    - formData: Current form values (title)
  *    - isValid: Real-time validation state for immediate user feedback
  *
  * 3. INITIALIZATION: When modal opens, pre-populates form with existing phase data
@@ -22,7 +22,7 @@ import { MESSAGES } from '@/constants/messages';
  *    Shows error message and disables save button if validation fails.
  *
  * 5. SAVE HANDLING:
- *    - EDIT MODE: Sends updated title and timeline back to parent component
+ *    - EDIT MODE: Sends updated title back to parent component
  *    - CREATE MODE: Generates complete new phase object with unique ID and user-provided values
  *
  * 6. KEYBOARD SHORTCUTS: Supports Ctrl+Enter to save and Escape to cancel for better UX.
