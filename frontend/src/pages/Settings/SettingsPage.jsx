@@ -1,15 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Briefcase, GraduationCap, Check, Copy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserSettings, useInvalidateUserSettings } from '@/hooks/useUserSettings';
 import { useProfile } from '@/hooks/useProfile';
-import { useRoleConfig } from '@/hooks/useRoleConfig';
 import { Avatar } from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Skeleton from '@/components/ui/Skeleton';
-import Badge from '@/components/ui/Badge';
 import { API_ENDPOINTS } from '@/config/api';
 import { supabase } from '@/lib/supabase';
 import { pageTransition, spring } from '@/constants/motion';
@@ -38,14 +35,9 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { data: settings, isLoading } = useUserSettings();
   const invalidate = useInvalidateUserSettings();
-  const { config } = useRoleConfig();
-  const apiKeyRef = useRef(null);
 
   const [selectedRole, setSelectedRole] = useState(null);
   const [savingRole, setSavingRole] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [savingKey, setSavingKey] = useState(false);
-  const [removingKey, setRemovingKey] = useState(false);
   const [mcpTokenExists, setMcpTokenExists] = useState(false);
   const [mcpTokenCreatedAt, setMcpTokenCreatedAt] = useState(null);
   const [mcpToken, setMcpToken] = useState(null);
@@ -57,21 +49,11 @@ export default function SettingsPage() {
   const pendingRole = selectedRole ?? currentRole;
   const hasRoleChange = selectedRole && selectedRole !== currentRole;
 
-  const currentProvider = settings?.apiProvider;
-  const maskedKey = settings?.maskedKey;
-  const usage = settings?.usage;
   const {
     deleteLoading,
     handleDeleteAccount,
     handleSignOut,
   } = useProfile();
-
-  // Developer: scroll API key section into view on mount
-  useEffect(() => {
-    if (config.settingsDefaultApiKey && apiKeyRef.current && !isLoading) {
-      apiKeyRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [config.settingsDefaultApiKey, isLoading]);
 
   useEffect(() => {
     async function checkMcpStatus() {
@@ -117,47 +99,6 @@ export default function SettingsPage() {
       toast.error('Failed to save. Please try again.');
     } finally {
       setSavingRole(false);
-    }
-  }
-
-  async function handleSaveKey() {
-    if (!apiKey.trim()) return;
-    const provider = apiKey.startsWith('sk-ant-') ? 'claude' : apiKey.startsWith('AIza') ? 'gemini' : null;
-    if (!provider) { toast.error('Unrecognised key format. Use an Anthropic (sk-ant-…) or Gemini (AIza…) key.'); return; }
-    setSavingKey(true);
-    try {
-      const session = await getSession();
-      const res = await fetch(API_ENDPOINTS.USER_API_KEY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ key: apiKey, provider }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      await invalidate();
-      setApiKey('');
-      toast.success('API key saved and verified.');
-    } catch (err) {
-      toast.error(err.message || 'Failed to save API key.');
-    } finally {
-      setSavingKey(false);
-    }
-  }
-
-  async function handleRemoveKey() {
-    setRemovingKey(true);
-    try {
-      const session = await getSession();
-      await fetch(API_ENDPOINTS.USER_API_KEY, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      await invalidate();
-      toast.success("API key removed. You're back on the free tier.");
-    } catch {
-      toast.error('Failed to remove API key.');
-    } finally {
-      setRemovingKey(false);
     }
   }
 
@@ -286,72 +227,6 @@ export default function SettingsPage() {
             </div>
           )}
         </>
-      )}
-
-      {!config.hideApiKeyNudge && <Divider />}
-
-      {/* SECTION 3 — API Key (hidden for Student role) */}
-      {!config.hideApiKeyNudge && (
-      <div ref={apiKeyRef}>
-      <SectionHeading
-        title="API Key"
-        description="Add your own Gemini or Claude key to unlock unlimited generations."
-      />
-      {isLoading ? (
-        <Skeleton className="h-24 rounded-xl" />
-      ) : currentProvider ? (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Badge variant="accent">{currentProvider === 'claude' ? 'Anthropic Claude' : 'Google Gemini'}</Badge>
-              <span className="font-mono text-sm text-[var(--text-secondary)]">{maskedKey}</span>
-            </div>
-            <Button variant="destructive" size="sm" onClick={handleRemoveKey} loading={removingKey}>
-              Remove
-            </Button>
-          </div>
-          {usage && (
-            <div>
-              <div className="mb-1.5 flex items-center justify-between text-xs text-[var(--text-muted)]">
-                <span>Unlimited generations active</span>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
-          {usage && (
-            <div className="mb-5">
-              <div className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="text-[var(--text-secondary)]">Free tier usage</span>
-                <span className="text-[var(--text-muted)]">Resets {new Date(usage.resetAt).toLocaleDateString()}</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-elevated)]">
-                <div
-                  className="h-full rounded-full bg-[var(--accent)] transition-all"
-                  style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="mt-1.5 text-xs text-[var(--text-muted)]">{usage.used} of {usage.limit} generations used</p>
-            </div>
-          )}
-          <div className="flex gap-3">
-            <Input
-              placeholder="Paste your Gemini (AIza…) or Claude (sk-ant-…) key"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveKey} loading={savingKey} disabled={!apiKey.trim()}>
-              Save & Verify
-            </Button>
-          </div>
-          <p className="mt-3 text-xs text-[var(--text-muted)]">
-            Keys are encrypted at rest with AES-256-GCM and never exposed in responses.
-          </p>
-        </div>
-      )}
-      </div>
       )}
 
       <Divider />

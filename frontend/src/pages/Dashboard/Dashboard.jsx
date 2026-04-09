@@ -149,7 +149,6 @@ export default function Dashboard() {
   }, [user?.id, queryClient]);
 
   const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
-  const showUsageBanner = settings && !settings.apiProvider && settings.usage?.used > 0;
 
   // Compute completed tasks directly from projects
   const completedTasksCount = useMemo(() => {
@@ -254,21 +253,6 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Usage banner */}
-      {showUsageBanner && (
-        <div className="mb-6 flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
-          <p className="text-sm text-[var(--text-secondary)]">
-            <span className="font-medium text-[var(--text-primary)]">{settings.usage.used}</span> of{' '}
-            <span className="font-medium text-[var(--text-primary)]">{settings.usage.limit}</span> free generations used this month
-          </p>
-          <button
-            onClick={() => navigate(ROUTES.SETTINGS + '?section=api-key')}
-            className="text-xs font-medium text-[var(--accent)] hover:underline"
-          >
-            Add your key →
-          </button>
-        </div>
-      )}
 
       {/* Stats */}
       <motion.div
