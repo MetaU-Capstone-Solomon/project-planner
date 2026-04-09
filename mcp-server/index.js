@@ -44,6 +44,8 @@ if (isCloudMode) {
   adapter = new SqliteAdapter(dbPath);
 }
 
+console.error(`[ProPlan MCP] Starting in ${isCloudMode ? 'CLOUD' : 'LOCAL'} mode`);
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 const server = new McpServer({
   name: 'project-planner',
