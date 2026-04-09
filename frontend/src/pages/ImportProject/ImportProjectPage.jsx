@@ -112,7 +112,7 @@ export default function ImportProjectPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-subtle)] text-xs font-bold" style={{ color: 'var(--accent)' }}>2</span>
-            In your project terminal: <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 font-mono text-xs">npx @proplan/mcp@latest init</code>
+            In your project terminal: <code className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 font-mono text-xs">npx @proplandev/mcp@latest init</code>
           </li>
           <li className="flex items-start gap-2">
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent-subtle)] text-xs font-bold" style={{ color: 'var(--accent)' }}>3</span>

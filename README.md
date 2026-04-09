@@ -6,7 +6,7 @@
 
 Give Claude a permanent brain for your codebase — it remembers goals, decisions, and progress across every session.
 
-[![npm](https://img.shields.io/npm/v/@proplan/mcp?color=black&label=npm)](https://www.npmjs.com/package/@proplan/mcp)
+[![npm](https://img.shields.io/npm/v/@proplandev/mcp?color=black&label=npm)](https://www.npmjs.com/package/@proplandev/mcp)
 [![license](https://img.shields.io/github/license/MetaU-Capstone-Solomon/project-planner?color=black)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-199%20passing-black)](mcp-server/tests)
 [![node](https://img.shields.io/badge/node-%3E%3D18-black)](https://nodejs.org)

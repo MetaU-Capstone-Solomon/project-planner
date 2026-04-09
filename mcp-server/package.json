@@ -1,5 +1,5 @@
 {
-  "name": "@proplan/mcp",
+  "name": "@proplandev/mcp",
   "version": "1.0.0",
   "description": "MCP server for Claude Code — persistent project memory, session continuity, and structural repo analysis",
   "type": "module",
@@ -8,8 +8,8 @@
     "node": ">=18"
   },
   "bin": {
-    "proplan-init": "./bin/init.js",
-    "proplan-mcp": "./index.js"
+    "proplan-init": "bin/init.js",
+    "proplan-mcp": "index.js"
   },
   "scripts": {
     "start": "node index.js",
@@ -40,7 +40,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/King-Proplan/project-planner.git",
+    "url": "git+https://github.com/King-Proplan/project-planner.git",
     "directory": "mcp-server"
   },
   "dependencies": {

@@ -297,14 +297,14 @@ export default function SettingsPage() {
               Setup instructions
             </summary>
             <pre className="mt-2 overflow-x-auto rounded-lg bg-[var(--bg-elevated)] p-3 text-xs text-[var(--text-primary)]">{`// Option 1 — Run the setup wizard (recommended):
-npx @proplan/mcp@latest init
+npx @proplandev/mcp@latest init
 
 // Option 2 — Add manually to your .mcp.json:
 {
   "mcpServers": {
     "project-planner": {
       "command": "npx",
-      "args": ["-y", "@proplan/mcp@latest"],
+      "args": ["-y", "@proplandev/mcp@latest"],
       "env": {
         "MCP_TOKEN": "<paste your token here>"
       }

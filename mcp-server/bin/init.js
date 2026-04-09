@@ -60,7 +60,7 @@ function writeMcpJson(filePath, data) {
 function buildEntry(mode, mcpToken) {
   const entry = {
     command: 'npx',
-    args: ['-y', '@proplan/mcp'],
+    args: ['-y', '@proplandev/mcp'],
   };
   if (mode === 'cloud' && mcpToken) {
     entry.env = { MCP_TOKEN: mcpToken };
