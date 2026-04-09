@@ -1,6 +1,6 @@
 {
   "name": "@proplandev/mcp",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "MCP server for Claude Code — persistent project memory, session continuity, and structural repo analysis",
   "type": "module",
   "main": "index.js",
@@ -8,8 +8,7 @@
     "node": ">=18"
   },
   "bin": {
-    "proplan-init": "bin/init.js",
-    "proplan-mcp": "index.js"
+    "proplan-mcp": "./cli.js"
   },
   "scripts": {
     "start": "node index.js",
@@ -17,6 +16,7 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathPatterns=tests/"
   },
   "files": [
+    "cli.js",
     "index.js",
     "bin/",
     "adapters/",
