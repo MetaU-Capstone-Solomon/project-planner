@@ -1,6 +1,6 @@
 {
   "name": "@proplandev/mcp",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "MCP server for Claude Code — persistent project memory, session continuity, and structural repo analysis",
   "type": "module",
   "main": "index.js",
@@ -22,8 +22,7 @@
     "adapters/",
     "tools/",
     "lib/",
-    "auth.js",
-    "supabase.js"
+    "auth.js"
   ],
   "keywords": [
     "mcp",
@@ -45,7 +44,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@supabase/supabase-js": "^2.50.0",
     "better-sqlite3": "^12.8.0",
     "zod": "^3.23.0"
   },

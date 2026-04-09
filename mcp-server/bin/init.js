@@ -68,6 +68,43 @@ function buildEntry(mode, mcpToken) {
   return entry;
 }
 
+function addToGitignore(projectDir, entries) {
+  const gitignorePath = path.join(projectDir, '.gitignore');
+  let content = '';
+  try { content = fs.readFileSync(gitignorePath, 'utf8'); } catch { /* new file */ }
+  const lines = content.split('\n');
+  const toAdd = entries.filter(e => !lines.some(l => l.trim() === e));
+  if (toAdd.length === 0) return false;
+  const addition = (content.endsWith('\n') || content === '' ? '' : '\n') +
+    '# ProPlan MCP\n' + toAdd.join('\n') + '\n';
+  fs.writeFileSync(gitignorePath, content + addition, 'utf8');
+  return true;
+}
+
+const CLAUDE_MD_BLOCK = `
+## ProPlan MCP — Session Instructions
+
+At the start of every session:
+1. Call \`get_project_status\` with \`include_handoff: true\` on the active project
+2. If projects exist: resume where things left off — say "I see we were working on X..."
+3. If no projects exist: call \`scan_repo\` to read the codebase, then ask "Want me to build a roadmap from this?"
+4. Never ask the user to re-explain context
+`;
+
+function writeClaudeMd(projectDir) {
+  const claudeMdPath = path.join(projectDir, 'CLAUDE.md');
+  const marker = 'ProPlan MCP — Session Instructions';
+  try {
+    const existing = fs.readFileSync(claudeMdPath, 'utf8');
+    if (existing.includes(marker)) return 'already';
+    fs.writeFileSync(claudeMdPath, existing.trimEnd() + '\n' + CLAUDE_MD_BLOCK, 'utf8');
+    return 'appended';
+  } catch {
+    fs.writeFileSync(claudeMdPath, CLAUDE_MD_BLOCK.trimStart(), 'utf8');
+    return 'created';
+  }
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 print();
@@ -106,9 +143,10 @@ print(`  2. User-level     ${dim(userLevel)}  ${dim('(applies to all your projec
 print();
 const locChoice = (await ask('  Your choice [1/2, default 1]: ')).trim() || '1';
 const mcpPath = locChoice === '2' ? userLevel : projectLocal;
+const isProjectLocal = locChoice !== '2';
 print();
 
-// 3. Write
+// 3. Write .mcp.json
 const existing = readMcpJson(mcpPath);
 existing.mcpServers = existing.mcpServers || {};
 
@@ -126,14 +164,31 @@ if (alreadyHas) {
 
 existing.mcpServers['project-planner'] = buildEntry(mode, mcpToken);
 writeMcpJson(mcpPath, existing);
-
-// 4. Success
 print(green('  ✓ .mcp.json written') + '  ' + dim(mcpPath));
+
+// 4. CLAUDE.md — write or append session instructions
+const claudeResult = writeClaudeMd(process.cwd());
+if (claudeResult === 'created') {
+  print(green('  ✓ CLAUDE.md created') + '  ' + dim(path.join(process.cwd(), 'CLAUDE.md')));
+} else if (claudeResult === 'appended') {
+  print(green('  ✓ CLAUDE.md updated') + '  ' + dim('ProPlan session instructions appended'));
+} else {
+  print(dim('  ✓ CLAUDE.md already has ProPlan instructions — skipped'));
+}
+
+// 5. .gitignore — add relevant entries
+const gitignoreEntries = ['.project-planner/'];
+if (isProjectLocal && mode === 'cloud') gitignoreEntries.push('.mcp.json');
+const gitignoreUpdated = addToGitignore(process.cwd(), gitignoreEntries);
+if (gitignoreUpdated) {
+  print(green('  ✓ .gitignore updated') + '  ' + dim(gitignoreEntries.join(', ') + ' added'));
+}
+
 print();
 print(bold('  Next steps'));
 print(`  1. Restart Claude Code (or reload the MCP server)`);
-print(`  2. Open a project directory and start a new session`);
-print(`  3. Claude will call get_project_status automatically on session start`);
+print(`  2. Open your project directory in Claude Code`);
+print(`  3. Type ${bold('start')} or ${bold('continue')} — Claude will scan your project and get to work`);
 print();
 
 if (mode === 'local') {
@@ -145,7 +200,7 @@ if (mode === 'local') {
 }
 print();
 
-// 5. allowedTools — offer to auto-write
+// 6. allowedTools — offer to auto-write
 const ALLOWED_TOOLS = [
   'mcp__project-planner__get_project_status',
   'mcp__project-planner__get_next_tasks',
