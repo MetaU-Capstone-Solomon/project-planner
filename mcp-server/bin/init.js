@@ -25,7 +25,6 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const SERVER_PATH = path.resolve(__dirname, '..', 'index.js');
 
 const RESET  = '\x1b[0m';
 const BOLD   = '\x1b[1m';
@@ -60,8 +59,8 @@ function writeMcpJson(filePath, data) {
 
 function buildEntry(mode, mcpToken) {
   const entry = {
-    command: 'node',
-    args: [SERVER_PATH],
+    command: 'npx',
+    args: ['-y', '@proplan/mcp'],
   };
   if (mode === 'cloud' && mcpToken) {
     entry.env = { MCP_TOKEN: mcpToken };

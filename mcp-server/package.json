@@ -8,7 +8,8 @@
     "node": ">=18"
   },
   "bin": {
-    "proplan-init": "./bin/init.js"
+    "proplan-init": "./bin/init.js",
+    "proplan-mcp": "./index.js"
   },
   "scripts": {
     "start": "node index.js",
