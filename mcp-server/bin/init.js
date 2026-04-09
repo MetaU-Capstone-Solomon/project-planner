@@ -58,17 +58,13 @@ function writeMcpJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8');
 }
 
-function buildEntry(mode, supabaseUrl, supabaseKey, mcpToken) {
+function buildEntry(mode, mcpToken) {
   const entry = {
     command: 'node',
     args: [SERVER_PATH],
   };
-  if (mode === 'cloud') {
-    entry.env = {
-      SUPABASE_URL: supabaseUrl,
-      SUPABASE_SERVICE_ROLE_KEY: supabaseKey,
-      MCP_TOKEN: mcpToken,
-    };
+  if (mode === 'cloud' && mcpToken) {
+    entry.env = { MCP_TOKEN: mcpToken };
   }
   return entry;
 }
@@ -89,16 +85,15 @@ const modeChoice = (await ask('  Your choice [1/2, default 1]: ')).trim() || '1'
 const mode = modeChoice === '2' ? 'cloud' : 'local';
 print();
 
-let supabaseUrl = '', supabaseKey = '', mcpToken = '';
+let mcpToken = '';
 if (mode === 'cloud') {
   print(cyan('  Cloud credentials'));
-  supabaseUrl = (await ask('  SUPABASE_URL: ')).trim();
-  supabaseKey = (await ask('  SUPABASE_SERVICE_ROLE_KEY: ')).trim();
-  mcpToken    = (await ask('  MCP_TOKEN: ')).trim();
-  if (!supabaseUrl || !supabaseKey || !mcpToken) {
+  print(dim('  Generate your token at: https://project-planner-7zw4.onrender.com/settings'));
+  print();
+  mcpToken = (await ask('  MCP_TOKEN: ')).trim();
+  if (!mcpToken) {
     print();
-    print('  ' + YELLOW + '⚠  Missing credentials — switching to local mode.' + RESET);
-    mode === 'cloud' && (supabaseUrl = supabaseKey = mcpToken = '');
+    print('  ' + YELLOW + '⚠  No token entered — switching to local mode.' + RESET);
   }
   print();
 }
@@ -130,7 +125,7 @@ if (alreadyHas) {
   print();
 }
 
-existing.mcpServers['project-planner'] = buildEntry(mode, supabaseUrl, supabaseKey, mcpToken);
+existing.mcpServers['project-planner'] = buildEntry(mode, mcpToken);
 writeMcpJson(mcpPath, existing);
 
 // 4. Success
@@ -143,9 +138,11 @@ print(`  3. Claude will call get_project_status automatically on session start`)
 print();
 
 if (mode === 'local') {
-  print(dim('  Local mode: data stored in .project-planner/db.sqlite (auto-created on first use)'));
+  print(dim('  Local mode: data stored in .project-planner/db.sqlite'));
+  print(dim('  Run export_to_cloud later to push your projects to the dashboard.'));
 } else {
-  print(dim('  Cloud mode: data synced to Supabase, visible in the ProPlan web dashboard'));
+  print(dim('  Cloud mode: projects sync automatically to your dashboard.'));
+  print(dim('  View them at https://project-planner-7zw4.onrender.com/dashboard'));
 }
 print();
 
