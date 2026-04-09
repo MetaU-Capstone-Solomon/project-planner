@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   DISMISS_BYOK: `${API_BASE_URL}/api/user/dismiss-byok-nudge`,
   MCP_TOKEN: `${API_BASE_URL}/api/user/mcp-token`,
   MCP_TOKEN_STATUS: `${API_BASE_URL}/api/user/mcp-token/status`,
+  MCP_IMPORT: `${API_BASE_URL}/api/mcp/sync`,
 };
 
 export default API_ENDPOINTS;
