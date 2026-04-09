@@ -32,7 +32,6 @@ export async function createProject(adapter, args) {
           title: taskInput.title,
           status: 'pending',
           order: taskOrder,
-          resources: [],
           ...(taskInput.description && { description: cap(taskInput.description) }),
           ...(taskInput.technology && { technology: taskInput.technology }),
         };

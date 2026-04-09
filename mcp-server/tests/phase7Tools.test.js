@@ -2,7 +2,7 @@
 // - update_task_status with transactional note
 // - set_project_goal
 // - add_session_summary
-// - get_session_handoff (updated — projectGoal + lastSession)
+// - get_project_status include_handoff (projectGoal + lastSession)
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
@@ -13,7 +13,7 @@ import { createProject } from '../tools/createProject.js';
 import { updateTaskStatus } from '../tools/updateTaskStatus.js';
 import { setProjectGoal } from '../tools/setProjectGoal.js';
 import { addSessionSummary } from '../tools/addSessionSummary.js';
-import { getSessionHandoff } from '../tools/getSessionHandoff.js';
+import { getProjectStatus } from '../tools/getProjectStatus.js';
 
 let tmpDir;
 let adapter;
@@ -210,13 +210,13 @@ describe('addSessionSummary', () => {
 });
 
 // ---------------------------------------------------------------------------
-// getSessionHandoff — updated with projectGoal + lastSession
+// getProjectStatus include_handoff — projectGoal + lastSession
 // ---------------------------------------------------------------------------
 
-describe('getSessionHandoff with Phase 7 fields', () => {
+describe('getProjectStatus include_handoff Phase 7 fields', () => {
   it('returns null projectGoal and lastSession when not set', async () => {
     const { projectId } = await createTestProject();
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
     expect(result.projectGoal).toBeNull();
     expect(result.lastSession).toBeNull();
   });
@@ -224,7 +224,7 @@ describe('getSessionHandoff with Phase 7 fields', () => {
   it('returns projectGoal after set_project_goal', async () => {
     const { projectId } = await createTestProject();
     await setProjectGoal(adapter, { project_id: projectId, goal: 'Build the best roadmap tool.' });
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
     expect(result.projectGoal).toBe('Build the best roadmap tool.');
   });
 
@@ -232,7 +232,7 @@ describe('getSessionHandoff with Phase 7 fields', () => {
     const { projectId } = await createTestProject();
     await addSessionSummary(adapter, { project_id: projectId, summary: 'First session done.' });
     await addSessionSummary(adapter, { project_id: projectId, summary: 'Second session done.' });
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
     expect(result.lastSession.summary).toBe('Second session done.');
   });
 
@@ -247,11 +247,11 @@ describe('getSessionHandoff with Phase 7 fields', () => {
       status: 'in_progress', note: 'Working on transactional notes',
     });
 
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
 
     expect(result.projectGoal).toBe('ProPlan north star.');
     expect(result.lastSession.summary).toBe('Built Phase 7.');
-    expect(result.project.inProgressTasks).toBe(1);
+    expect(result.inProgressTasks).toBe(1);
     expect(result.recentTasks[0].status).toBe('in_progress');
     expect(result.recentTasks[0].lastNote.text).toBe('Working on transactional notes');
   });

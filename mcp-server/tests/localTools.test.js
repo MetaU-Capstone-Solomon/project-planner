@@ -83,11 +83,11 @@ describe('createProject (local)', () => {
     expect(roadmap.summary).toBe('');
   });
 
-  test('all tasks have resources field defaulting to empty array', async () => {
+  test('tasks do not have a resources field', async () => {
     const { projectId } = await createTestProject();
     const roadmap = await getProjectRoadmap(adapter, { project_id: projectId });
     const tasks = roadmap.phases[0].milestones[0].tasks;
-    expect(tasks.every(t => Array.isArray(t.resources) && t.resources.length === 0)).toBe(true);
+    expect(tasks.every(t => !('resources' in t))).toBe(true);
   });
 
   test('metadata has scope defaulting to empty string', async () => {

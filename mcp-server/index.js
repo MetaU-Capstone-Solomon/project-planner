@@ -50,7 +50,7 @@ console.error(`[ProPlan MCP] Starting in ${isCloudMode ? 'CLOUD' : 'LOCAL'} mode
 // ─── Server ───────────────────────────────────────────────────────────────────
 const server = new McpServer({
   name: 'project-planner',
-  version: '1.0.0',
+  version: '1.0.5',
 });
 
 server.tool(

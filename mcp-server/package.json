@@ -22,7 +22,7 @@
     "adapters/",
     "tools/",
     "lib/",
-    "auth.js"
+    "README.md"
   ],
   "keywords": [
     "mcp",

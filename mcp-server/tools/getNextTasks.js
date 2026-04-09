@@ -28,9 +28,9 @@ export async function getNextTasks(adapter, args) {
           results.push({
             taskId: task.id,
             title: task.title,
-            description: task.description ?? '',
+            ...(task.description && { description: task.description }),
             status: task.status,
-            technology: task.technology ?? null,
+            ...(task.technology && { technology: task.technology }),
             phaseTitle: phase.title,
             milestoneTitle: milestone.title,
           });

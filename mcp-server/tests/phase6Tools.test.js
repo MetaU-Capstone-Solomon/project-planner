@@ -1,5 +1,5 @@
-// Integration tests for Phase 6 tools: deleteProject, renameProject, getSessionHandoff
-// Also covers exportToCloud warning and scanRepo size guard.
+// Integration tests for Phase 6 tools: deleteProject, renameProject, session handoff.
+// Also covers scanRepo size guard.
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
@@ -9,7 +9,7 @@ import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
 import { createProject } from '../tools/createProject.js';
 import { deleteProject } from '../tools/deleteProject.js';
 import { renameProject } from '../tools/renameProject.js';
-import { getSessionHandoff } from '../tools/getSessionHandoff.js';
+import { getProjectStatus } from '../tools/getProjectStatus.js';
 import { addNoteToTask } from '../tools/addNoteToTask.js';
 import { updateTaskStatus } from '../tools/updateTaskStatus.js';
 import { scanRepo } from '../tools/scanRepo.js';
@@ -120,17 +120,17 @@ describe('renameProject', () => {
 });
 
 // ---------------------------------------------------------------------------
-// getSessionHandoff
+// session handoff (via get_project_status include_handoff: true)
 // ---------------------------------------------------------------------------
 
-describe('getSessionHandoff', () => {
-  it('returns project summary and empty recentTasks for fresh project', async () => {
+describe('getProjectStatus include_handoff', () => {
+  it('returns project summary and recentTasks for fresh project', async () => {
     const { projectId } = await createTestProject();
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
-    expect(result.project.title).toBe('Test App');
-    expect(result.project.totalTasks).toBe(2);
-    expect(result.project.completedTasks).toBe(0);
-    expect(result.project.completionPercent).toBe(0);
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
+    expect(result.title).toBe('Test App');
+    expect(result.totalTasks).toBe(2);
+    expect(result.completedTasks).toBe(0);
+    expect(result.completionPercent).toBe(0);
     expect(result.recentTasks).toHaveLength(2);
     expect(result.recentTasks[0].lastNote).toBeNull();
   });
@@ -142,20 +142,17 @@ describe('getSessionHandoff', () => {
     const taskAId = roadmap.phases[0].milestones[0].tasks[0].id;
     const taskBId = roadmap.phases[0].milestones[0].tasks[1].id;
 
-    // Add a note to Task A (so it has recent activity)
     await addNoteToTask(adapter, { project_id: projectId, task_id: taskAId, note: 'Working on this' });
-    // Mark Task B in_progress (no note)
     await updateTaskStatus(adapter, { project_id: projectId, task_id: taskBId, status: 'in_progress' });
 
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
-    // Task B (in_progress) should come first despite no note
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
     expect(result.recentTasks[0].id).toBe(taskBId);
     expect(result.recentTasks[0].status).toBe('in_progress');
   });
 
   it('respects last_n_tasks limit', async () => {
     const { projectId } = await createTestProject();
-    const result = await getSessionHandoff(adapter, { project_id: projectId, last_n_tasks: 1 });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true, last_n_tasks: 1 });
     expect(result.recentTasks).toHaveLength(1);
   });
 
@@ -167,7 +164,7 @@ describe('getSessionHandoff', () => {
 
     await addNoteToTask(adapter, { project_id: projectId, task_id: taskAId, note: 'Progress update' });
 
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
     const taskA = result.recentTasks.find(t => t.id === taskAId);
     expect(taskA.lastNote).not.toBeNull();
     expect(taskA.lastNote.text).toBe('Progress update');
@@ -175,20 +172,20 @@ describe('getSessionHandoff', () => {
 
   it('throws if project not found', async () => {
     await expect(
-      getSessionHandoff(adapter, { project_id: 'ghost' })
+      getProjectStatus(adapter, { project_id: 'ghost', include_handoff: true })
     ).rejects.toThrow('not found');
   });
 
-  it('reflects completed tasks in project summary', async () => {
+  it('reflects completed tasks in status', async () => {
     const { projectId } = await createTestProject();
     const project = adapter.getProject(projectId);
     const roadmap = JSON.parse(project.content);
     const taskAId = roadmap.phases[0].milestones[0].tasks[0].id;
     await updateTaskStatus(adapter, { project_id: projectId, task_id: taskAId, status: 'completed' });
 
-    const result = await getSessionHandoff(adapter, { project_id: projectId });
-    expect(result.project.completedTasks).toBe(1);
-    expect(result.project.completionPercent).toBe(50);
+    const result = await getProjectStatus(adapter, { project_id: projectId, include_handoff: true });
+    expect(result.completedTasks).toBe(1);
+    expect(result.completionPercent).toBe(50);
   });
 });
 
