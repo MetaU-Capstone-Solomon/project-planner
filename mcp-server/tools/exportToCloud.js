@@ -1,53 +1,90 @@
 // mcp-server/tools/exportToCloud.js
-import { createClient } from '@supabase/supabase-js';
 import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
-import { validatePat } from '../auth.js';
-import { syncProjects } from './syncProjects.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
-export async function exportToCloud(args) {
-  const {
-    supabase_url,
-    supabase_service_role_key,
-    mcp_token,
-    delete_removed = false,
-  } = args;
+export async function exportToCloud({ mcp_token, api_url }) {
+  const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || 'https://project-planner-7zw4.onrender.com';
 
-  // Validate credentials — fail fast before any DB operations
-  const supabase = createClient(supabase_url, supabase_service_role_key, {
-    auth: { persistSession: false },
-  });
-  const userId = await validatePat(supabase, mcp_token);
+  if (!mcp_token) {
+    throw new Error('mcp_token is required. Generate one at app.proplan.dev → Settings → Claude Code Integration.');
+  }
 
-  // Check local DB
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
   if (!existsSync(dbPath)) {
-    return {
-      inserted: 0,
-      updated: 0,
-      skipped: 0,
-      deleted: 0,
-      failed: [],
-      message: 'No local database found. No projects to export.',
-    };
+    return { inserted: 0, updated: 0, skipped: 0, message: 'No local database found. Nothing to sync.' };
   }
 
   const local = new SqliteAdapter(dbPath);
-  const result = await syncProjects(local, supabase, userId, { delete_removed });
+  const projects = local.getProjectsSyncStatus();
 
-  const parts = [
-    `${result.inserted} inserted`,
-    `${result.updated} updated`,
-    `${result.skipped} skipped`,
-    result.deleted > 0 ? `${result.deleted} deleted` : null,
-    result.failed.length > 0 ? `${result.failed.length} failed` : null,
-  ].filter(Boolean);
+  if (projects.length === 0) {
+    return { inserted: 0, updated: 0, skipped: 0, message: 'No local projects found. Create a project first with create_project or scan_repo.' };
+  }
+
+  // Determine which projects need syncing
+  const toSync = [];
+  const stats = { inserted: 0, updated: 0, skipped: 0 };
+
+  for (const project of projects) {
+    if (!project.last_synced_at) {
+      toSync.push({ ...project, _action: 'insert' });
+    } else if (project.updated_at > project.last_synced_at) {
+      toSync.push({ ...project, _action: 'update' });
+    } else {
+      stats.skipped++;
+    }
+  }
+
+  if (toSync.length === 0) {
+    return {
+      inserted: 0,
+      updated: 0,
+      skipped: stats.skipped,
+      dashboardUrl: `${resolvedApiUrl.replace('/api', '')}/dashboard`,
+      message: 'All projects are already up to date.',
+    };
+  }
+
+  // Push to backend
+  const res = await fetch(`${resolvedApiUrl}/api/mcp/sync`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${mcp_token}`,
+    },
+    body: JSON.stringify({
+      projects: toSync.map(p => ({
+        id: p.id,
+        title: p.title,
+        content: p.content,
+        created_at: p.updated_at,
+        updated_at: p.updated_at,
+      })),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+    throw new Error(err.error || `Sync failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  const now = new Date().toISOString();
+
+  // Mark synced projects in local DB
+  for (const project of toSync) {
+    local.markSynced(project.id, now);
+    if (project._action === 'insert') stats.inserted++;
+    else stats.updated++;
+  }
 
   return {
-    ...result,
-    message: `Sync complete: ${parts.join(', ')}.`,
-    warning:
-      'Your local SQLite file is no longer in sync with the cloud. Update your .mcp.json with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and MCP_TOKEN, then restart the MCP server. The web dashboard (app.proplan.dev) becomes your primary visualizer — do not continue using local mode for this project.',
+    inserted: stats.inserted,
+    updated: stats.updated,
+    skipped: stats.skipped,
+    dashboardUrl: data.dashboardUrl,
+    message: data.message,
+    nextStep: `Sign in at ${data.dashboardUrl} to view your projects.`,
   };
 }

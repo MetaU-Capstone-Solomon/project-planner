@@ -353,15 +353,13 @@ server.tool(
 
 server.tool(
   'export_to_cloud',
-  'Migrate all local SQLite projects to your ProPlan cloud account.',
+  'Sync local projects to the ProPlan dashboard. Only works in local mode. New projects are inserted, changed projects updated, unchanged ones skipped.',
   {
-    supabase_url: z.string().url().describe('Your Supabase project URL (from .env or Supabase dashboard).'),
-    supabase_service_role_key: z.string().min(1).describe('Your Supabase service role key.'),
-    mcp_token: z.string().min(1).describe('Your MCP token from Project Planner Settings → Claude Code Integration.'),
-    delete_removed: z.boolean().optional().describe('If true, removes cloud projects that no longer exist locally. Default false — cloud acts as a backup.'),
+    mcp_token: z.string().describe('Your MCP token from app.proplan.dev → Settings → Claude Code Integration.'),
+    api_url: z.string().optional().describe('Override the API base URL. Defaults to the production ProPlan backend.'),
   },
-  async (args) => {
-    const result = await exportToCloud(args);
+  async ({ mcp_token, api_url }) => {
+    const result = await exportToCloud({ mcp_token, api_url });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
