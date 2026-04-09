@@ -4,9 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { join } from 'path';
 
-import { supabase } from './supabase.js';
-import { validatePat } from './auth.js';
-import { SupabaseAdapter } from './adapters/SupabaseAdapter.js';
+import { BackendApiAdapter } from './adapters/BackendApiAdapter.js';
 import { SqliteAdapter } from './adapters/SqliteAdapter.js';
 
 import { getProjectStatus } from './tools/getProjectStatus.js';
@@ -33,18 +31,14 @@ import { addSessionSummary } from './tools/addSessionSummary.js';
 import { getTasks } from './tools/getTasks.js';
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
-const { MCP_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
-const isCloudMode = !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+const { MCP_TOKEN } = process.env;
+const PROPLAN_API_URL = process.env.PROPLAN_API_URL || 'https://project-planner-7zw4.onrender.com';
+const isCloudMode = !!MCP_TOKEN;
 
 let adapter;
 
 if (isCloudMode) {
-  if (!MCP_TOKEN) {
-    console.error('MCP_TOKEN is required in cloud mode. Generate one in Project Planner Settings → Claude Code Integration.');
-    process.exit(1);
-  }
-  const userId = await validatePat(supabase, MCP_TOKEN);
-  adapter = new SupabaseAdapter(supabase, userId);
+  adapter = new BackendApiAdapter(MCP_TOKEN, PROPLAN_API_URL);
 } else {
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
   adapter = new SqliteAdapter(dbPath);
