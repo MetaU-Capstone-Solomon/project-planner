@@ -12,7 +12,6 @@ import { MESSAGES } from '@/constants/messages';
  *
  * @param {Object} roadmap - Validated JSON roadmap from AI
  * @param {Object} userConstraints - User input constraints
- * @param {string} userConstraints.timeline - Project timeline
  * @param {string} userConstraints.experienceLevel - User experience level
  * @param {string} userConstraints.scope - Project scope
  * @returns {Promise<Object>} Optimized roadmap

@@ -32,7 +32,6 @@ import { useProjectSave } from '@/hooks/useProjectSave';
 import { MESSAGES, CHAT_STAGES } from '@/constants/messages';
 import { ROUTES } from '@/constants/routes';
 import {
-  TIMELINE_OPTIONS,
   EXPERIENCE_LEVEL_OPTIONS,
   PROJECT_SCOPE_OPTIONS,
   FORM_FIELDS,
@@ -185,31 +184,12 @@ const NewProjectChatPage = () => {
 
         <Textarea
           label="Description"
-          placeholder="What are you building? Who is it for? What's your experience level? Any specific technologies or timeline?"
+          placeholder="What are you building? Who is it for? What's your experience level? Any specific technologies or constraints?"
           name={FORM_FIELDS.DESCRIPTION}
           value={values[FORM_FIELDS.DESCRIPTION]}
           onChange={handleChange}
           className="min-h-[140px]"
         />
-
-        <FormField label="Timeline" isRequired={true}>
-          <Select
-            name={FORM_FIELDS.TIMELINE}
-            value={values[FORM_FIELDS.TIMELINE]}
-            onChange={handleChange}
-            options={TIMELINE_OPTIONS}
-          />
-        </FormField>
-
-        {values[FORM_FIELDS.TIMELINE] === 'custom' && (
-          <Input
-            label="Custom Timeline"
-            placeholder="e.g., 2 weeks, 4 months, 1.5 years"
-            name={FORM_FIELDS.CUSTOM_TIMELINE}
-            value={values[FORM_FIELDS.CUSTOM_TIMELINE] || ''}
-            onChange={handleChange}
-          />
-        )}
 
         <FormField label="Experience Level" isRequired={true}>
           <Select

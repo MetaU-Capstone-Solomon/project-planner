@@ -159,7 +159,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             className="mb-8 max-w-lg text-lg text-[var(--text-secondary)]"
           >
-            Describe your project, upload a doc, or start from scratch. We generate a custom step-by-step roadmap with timelines, tasks, and learning resources — tailored to your level.
+            Describe your project, upload a doc, or start from scratch. We generate a custom step-by-step roadmap with phases, tasks, and learning resources — tailored to your level.
           </motion.p>
           <motion.div variants={stagger.item} transition={{ duration: 0.3 }} className="flex gap-3">
             <Button size="lg" onClick={() => navigate(ROUTES.AUTH)}>

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import useProjectDetail from '@/hooks/useProjectDetail';
 import { FORM_FIELDS } from '@/constants/projectOptions';
-import { hasRequiredFields, getFinalTimeline } from '@/utils/formValidation';
+import { hasRequiredFields } from '@/utils/formValidation';
 import { CHAT_STAGES } from '@/constants/messages';
 import { summarizeDescription } from '@/utils/descriptionSummarizer';
 
@@ -11,8 +11,6 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
   const { values, handleChange, reset } = useProjectDetail({
     [FORM_FIELDS.TITLE]: '',
     [FORM_FIELDS.DESCRIPTION]: '',
-    [FORM_FIELDS.TIMELINE]: '',
-    [FORM_FIELDS.CUSTOM_TIMELINE]: '',
     [FORM_FIELDS.EXPERIENCE_LEVEL]: '',
     [FORM_FIELDS.TECHNOLOGIES]: '',
     [FORM_FIELDS.PROJECT_SCOPE]: '',
@@ -23,8 +21,6 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
     async (processedFile) => {
       if (hasRequiredFields(values)) {
         try {
-          const finalTimeline = getFinalTimeline(values);
-
           // Summarize description if it's too long
           const descriptionResult = await summarizeDescription(values[FORM_FIELDS.DESCRIPTION]);
 
@@ -32,7 +28,6 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
           const formData = {
             ...values,
             description: descriptionResult.summarizedText,
-            timeline: finalTimeline,
             processedFile,
           };
 

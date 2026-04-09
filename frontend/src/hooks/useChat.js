@@ -100,7 +100,6 @@ const useChat = () => {
     async ({
       title,
       description,
-      timeline,
       experienceLevel,
       technologies,
       projectScope,
@@ -148,7 +147,6 @@ const useChat = () => {
         const projectData = {
           title: extractedTitle,
           description: extractedDescription,
-          timeline,
           experienceLevel,
           technologies,
           scope: projectScope,

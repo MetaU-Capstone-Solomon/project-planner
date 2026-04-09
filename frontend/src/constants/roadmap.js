@@ -15,13 +15,6 @@ export const PHASE_COLORS = [
 
 export const DEFAULT_PHASE_COLOR = 'border-l-gray-500 bg-gray-50';
 
-// TODO: Add view modes when timeline view is implemented
-// export const VIEW_MODES = {
-//   ROADMAP: 'roadmap',
-//   TIMELINE: 'timeline'
-// };
-// export const DEFAULT_VIEW_MODE = VIEW_MODES.ROADMAP;
-
 // Task status constants
 export const TASK_STATUS = {
   COMPLETED: 'completed',
