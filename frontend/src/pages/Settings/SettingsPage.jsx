@@ -15,8 +15,6 @@ import { supabase } from '@/lib/supabase';
 import { pageTransition, spring } from '@/constants/motion';
 import toast from 'react-hot-toast';
 
-const VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '<your Supabase URL>';
-
 const ROLES = [
   { value: 'developer',  label: 'Developer',   icon: Terminal,       desc: 'I build things with code' },
   { value: 'founder_pm', label: 'Founder / PM', icon: Briefcase,      desc: 'I lead teams and ship products' },
@@ -423,16 +421,17 @@ export default function SettingsPage() {
             <summary className="cursor-pointer text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
               Setup instructions
             </summary>
-            <pre className="mt-2 overflow-x-auto rounded-lg bg-[var(--bg-elevated)] p-3 text-xs text-[var(--text-primary)]">{`// Add to your .mcp.json
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-[var(--bg-elevated)] p-3 text-xs text-[var(--text-primary)]">{`// Option 1 — Run the setup wizard (recommended):
+npx @proplan/mcp@latest init
+
+// Option 2 — Add manually to your .mcp.json:
 {
   "mcpServers": {
     "project-planner": {
-      "command": "node",
-      "args": ["/absolute/path/to/project-planner/mcp-server/index.js"],
+      "command": "npx",
+      "args": ["-y", "@proplan/mcp@latest"],
       "env": {
-        "MCP_TOKEN": "<your token>",
-        "SUPABASE_URL": "${VITE_SUPABASE_URL}",
-        "SUPABASE_SERVICE_ROLE_KEY": "<service role key>"
+        "MCP_TOKEN": "<paste your token here>"
       }
     }
   }
