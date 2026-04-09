@@ -356,7 +356,7 @@ server.tool(
   'export_to_cloud',
   'Sync local projects to the ProPlan dashboard. Only works in local mode. New projects are inserted, changed projects updated, unchanged ones skipped.',
   {
-    mcp_token: z.string().describe('Your MCP token from app.proplan.dev → Settings → Claude Code Integration.'),
+    mcp_token: z.string().describe('Your MCP token from project-planner-7zw4.onrender.com → Settings → Claude Code Integration.'),
     api_url: z.string().optional().describe('Override the API base URL. Defaults to the production ProPlan backend.'),
   },
   async ({ mcp_token, api_url }) => {

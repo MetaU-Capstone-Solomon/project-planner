@@ -1,6 +1,6 @@
 {
   "name": "@proplandev/mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP server for Claude Code — persistent project memory, session continuity, and structural repo analysis",
   "type": "module",
   "main": "index.js",

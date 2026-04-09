@@ -7,7 +7,7 @@ export async function exportToCloud({ mcp_token, api_url }) {
   const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || 'https://project-planner-7zw4.onrender.com';
 
   if (!mcp_token) {
-    throw new Error('mcp_token is required. Generate one at app.proplan.dev → Settings → Claude Code Integration.');
+    throw new Error('mcp_token is required. Generate one at project-planner-7zw4.onrender.com → Settings → Claude Code Integration.');
   }
 
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
