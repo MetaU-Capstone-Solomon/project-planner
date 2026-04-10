@@ -17,7 +17,7 @@ Thumbs.db
 .superpowers/
 
 # Internal planning docs (specs, plans — not user-facing)
-docs/superpowers/
+docs/
 
 # Database files
 *.sql
