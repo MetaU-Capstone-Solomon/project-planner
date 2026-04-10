@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/ProPlan-MCP-black?style=for-the-badge" alt="ProPlan MCP" />
+<a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/ProPlan-MCP-6366f1?style=for-the-badge" alt="ProPlan MCP" /></a>
 
 # ProPlan
 
@@ -8,11 +8,11 @@
 
 It tracks progress, knows your codebase, and resumes exactly where you left off — every single session.
 
-[![npm](https://img.shields.io/npm/v/@proplandev/mcp?color=black&label=npm)](https://www.npmjs.com/package/@proplandev/mcp)
-[![license](https://img.shields.io/github/license/King-Proplan/project-planner?color=black)](LICENSE)
-[![tests](https://img.shields.io/badge/tests-199%20passing-black)](mcp-server/tests)
-[![node](https://img.shields.io/badge/node-%3E%3D18-black)](https://nodejs.org)
-[![MCP](https://img.shields.io/badge/MCP-compatible-black)](https://modelcontextprotocol.io)
+[![npm](https://img.shields.io/npm/v/@proplandev/mcp?color=e74c3c&logo=npm&logoColor=white)](https://www.npmjs.com/package/@proplandev/mcp)
+[![license](https://img.shields.io/badge/license-ELv2-3b82f6)](LICENSE)
+[![tests](https://img.shields.io/badge/tests-199%20passing-22c55e)](mcp-server/tests)
+[![node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
+[![MCP](https://img.shields.io/badge/MCP-compatible-6366f1)](https://modelcontextprotocol.io)
 
 [Quick Start](#quick-start) · [How It Works](#how-it-works) · [Dashboard](#dashboard) · [Tools](#tools) · [Manual Setup](#manual-setup)
 
@@ -42,25 +42,14 @@ Claude: I see we were working on the auth middleware. Last session you finished
 
 There are memory tools for Claude. There are project management tools like Linear and Jira. **ProPlan is the only one that does both — inside Claude's tool context.**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   Linear / Jira / Notion       Claude's built-in memory    │
-│   ───────────────────          ────────────────────────     │
-│   ✓ Visual dashboards          ✓ Remembers facts            │
-│   ✗ Outside Claude             ✗ No structure               │
-│   ✗ Manual updates             ✗ No roadmap                 │
-│   ✗ No codebase context        ✗ No dashboard               │
-│                                                             │
-│   ┌─────────────────────────────────────────────────────┐  │
-│   │              ProPlan                                │  │
-│   │   ✓ Visual dashboard   ✓ Lives inside Claude        │  │
-│   │   ✓ Structured roadmap ✓ Reads your codebase        │  │
-│   │   ✓ Claude updates it  ✓ Syncs across machines      │  │
-│   └─────────────────────────────────────────────────────┘  │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+|  | Linear / Jira / Notion | Claude's built-in memory | **ProPlan** |
+|--|--|--|--|
+| Visual dashboard | ✅ | ❌ | ✅ |
+| Lives inside Claude | ❌ | ✅ | ✅ |
+| Structured roadmap | ✅ | ❌ | ✅ |
+| Reads your codebase | ❌ | ❌ | ✅ |
+| Claude updates it | ❌ | ❌ | ✅ |
+| Syncs across machines | ✅ | ❌ | ✅ |
 
 ---
 
@@ -86,43 +75,36 @@ Then restart Claude Code and type `start`.
 
 ### The Flow
 
-```
-┌──────────────┐     npx init      ┌─────────────────┐
-│  Your Repo   │ ─────────────────▶│  .mcp.json       │
-└──────────────┘                   │  CLAUDE.md        │
-                                   │  .gitignore       │
-                                   └────────┬──────────┘
-                                            │ Claude Code starts
-                                            ▼
-                                   ┌─────────────────┐
-                                   │  ProPlan MCP     │
-                                   │  Server          │
-                                   └────────┬──────────┘
-                                            │
-                     ┌──────────────────────┼────────────────────────┐
-                     ▼                      ▼                        ▼
-            ┌──────────────┐      ┌──────────────────┐     ┌──────────────────┐
-            │ New project? │      │ Existing project? │     │ Resuming work?   │
-            │              │      │                   │     │                  │
-            │ scan_repo    │      │ get_project_status│     │ get_project_     │
-            │ → roadmap    │      │ → full context    │     │ status           │
-            │   generated  │      │   instantly       │     │ → "last session  │
-            └──────────────┘      └──────────────────┘     │   you were..."   │
-                                                            └──────────────────┘
+```mermaid
+flowchart TD
+    A["Your Repo"] -->|npx init| B["Config files written<br/>.mcp.json · CLAUDE.md · .gitignore"]
+    B -->|Claude Code starts| C(ProPlan MCP Server)
+    C -->|new project| D["scan_repo<br/>→ roadmap generated"]
+    C -->|existing project| E["get_project_status<br/>→ full context instantly"]
+    C -->|resuming work| F["get_project_status<br/>→ 'last session you were...'"]
+
+    classDef server fill:#6366f1,stroke:#4f46e5,color:#ffffff
+    classDef outcome fill:#f0fdf4,stroke:#86efac,color:#166534
+    class C server
+    class D,E,F outcome
 ```
 
 ### Session Lifecycle
 
-```
-Session Start                    During Work                  Session End
-─────────────                    ───────────                  ───────────
-get_project_status                update_task_status           add_session_summary
-  ├── projectGoal                   ├── note: what you did       ├── what was done
-  ├── lastSession                   └── status: completed        ├── decisions made
-  ├── recentTasks                                                 └── what comes next
-  └── tech_metadata              add_note_to_task
-                                   └── mid-task observations
-```
+**Session Start** — `get_project_status(include_handoff: true)`
+- `projectGoal` — your north-star goal for the project
+- `lastSession` — summary of what was done last time
+- `recentTasks` — tasks worked on recently
+- `tech_metadata` — codebase structure and stack
+
+**During Work** — after each task
+- `update_task_status` — mark progress with a short note (required)
+- `add_note_to_task` — log observations without changing status
+
+**Session End** — `add_session_summary`
+- What was worked on
+- Decisions made
+- What comes next
 
 ### Roadmap Structure
 
@@ -150,27 +132,19 @@ ProPlan includes a web dashboard at [project-planner-7zw4.onrender.com](https://
 - **Generate your MCP token** for cloud sync
 - **Share progress** with teammates or stakeholders
 
-### Local → Dashboard Flow
+### Local → Dashboard
 
-```
-1. Run init in local mode         2. Build your project in Claude
-   npx @proplandev/mcp@latest init    create_project, update tasks...
+1. Run `npx @proplandev/mcp@latest init` → choose **local**
+2. Use Claude to build your project — `create_project`, update tasks as you go
+3. Run `export_to_cloud` with your MCP token from the dashboard Settings
+4. View your projects at [project-planner-7zw4.onrender.com](https://project-planner-7zw4.onrender.com)
 
-3. Export to dashboard            4. View at the dashboard
-   export_to_cloud                    project-planner-7zw4.onrender.com
-   (mcp_token from Settings)
-```
+### Dashboard → Local
 
-### Dashboard → Local Flow
-
-```
-1. Sign up at the dashboard       2. Generate MCP token
-   project-planner-7zw4.onrender.com   Settings → Claude Code Integration
-
-3. Run init in cloud mode         4. Open Claude Code — projects
-   npx @proplandev/mcp@latest init    sync automatically on every session
-   → choose cloud → paste token
-```
+1. Sign up at [project-planner-7zw4.onrender.com](https://project-planner-7zw4.onrender.com)
+2. Go to **Settings → Claude Code Integration** → generate an MCP token
+3. Run `npx @proplandev/mcp@latest init` → choose **cloud** → paste your token
+4. Open Claude Code — your projects sync automatically on every session start
 
 ---
 
@@ -291,4 +265,4 @@ mcp-server/
 
 ## License
 
-MIT · Built by [Solomon Agyire](https://github.com/King-Proplan)
+[Elastic License 2.0 (ELv2)](LICENSE) · Built by [Solomon Agyire](https://github.com/King-Proplan)
