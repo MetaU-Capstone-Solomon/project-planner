@@ -51,6 +51,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check — used by MCP to wake the server before syncing
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 // User settings routes
 app.use('/api/user', userRouter);
 
