@@ -198,6 +198,7 @@ const ALLOWED_TOOLS = [
   'mcp__project-planner__delete_project',
   'mcp__project-planner__rename_project',
   'mcp__project-planner__export_to_cloud',
+  'mcp__project-planner__import_from_cloud',
 ];
 
 const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');

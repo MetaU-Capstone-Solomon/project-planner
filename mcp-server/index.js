@@ -25,6 +25,7 @@ import { deletePhase } from './tools/deletePhase.js';
 import { createProject } from './tools/createProject.js';
 import { scanRepo } from './tools/scanRepo.js';
 import { exportToCloud } from './tools/exportToCloud.js';
+import { importFromCloud } from './tools/importFromCloud.js';
 import { deleteProject } from './tools/deleteProject.js';
 import { renameProject } from './tools/renameProject.js';
 import { setProjectGoal } from './tools/setProjectGoal.js';
@@ -365,6 +366,19 @@ server.tool(
   },
   async ({ mcp_token, api_url }) => {
     const result = await exportToCloud({ mcp_token, api_url });
+    return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+  }
+);
+
+server.tool(
+  'import_from_cloud',
+  'Import a project from the ProPlan dashboard into local SQLite. Call with only mcp_token to list available cloud projects. Call with mcp_token + project_id to import a specific one.',
+  {
+    mcp_token: z.string().describe(`Your MCP token from ${DASHBOARD_URL} → Settings → Claude Code Integration.`),
+    project_id: z.string().optional().describe('ID of the cloud project to import. Omit to list available projects.'),
+  },
+  async ({ mcp_token, project_id }) => {
+    const result = await importFromCloud({ mcp_token, project_id });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
