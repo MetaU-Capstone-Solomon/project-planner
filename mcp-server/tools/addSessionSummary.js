@@ -1,4 +1,5 @@
 // mcp-server/tools/addSessionSummary.js
+import { exportToCloud } from './exportToCloud.js';
 
 const MAX_SESSIONS = 10;
 
@@ -31,9 +32,24 @@ export async function addSessionSummary(adapter, args) {
 
   await adapter.saveProject(args.project_id, data.title, JSON.stringify(roadmap), new Date().toISOString());
 
+  // Auto-export to cloud if a token is cached (LOCAL mode only — CLOUD mode syncs on every op)
+  let autoSync = { synced: false };
+  if (typeof adapter.getConfig === 'function') {
+    const token = adapter.getConfig('mcp_token');
+    if (token) {
+      try {
+        const result = await exportToCloud({ mcp_token: token });
+        autoSync = { synced: true, dashboardUrl: result.dashboardUrl };
+      } catch {
+        // silent — session summary is always the priority
+      }
+    }
+  }
+
   return {
     saved: true,
     totalSessions: roadmap.sessions.length,
     summary: roadmap.sessions[roadmap.sessions.length - 1],
+    autoSync,
   };
 }

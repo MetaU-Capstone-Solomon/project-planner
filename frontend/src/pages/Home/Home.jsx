@@ -158,7 +158,7 @@ export default function Home() {
             </Button>
             <button
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center justify-center rounded-lg font-medium transition-colors duration-150 h-11 px-6 text-base gap-2 border border-[var(--text-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+              className="inline-flex items-center justify-center rounded-lg font-medium transition-colors duration-150 h-11 px-6 text-base gap-2 border border-[var(--text-primary)] text-black hover:bg-[var(--bg-elevated)]"
             >
               See how it works
             </button>
