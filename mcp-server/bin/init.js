@@ -23,6 +23,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import { DASHBOARD_URL } from '../lib/constants.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -124,7 +125,7 @@ print();
 let mcpToken = '';
 if (mode === 'cloud') {
   print(cyan('  Cloud credentials'));
-  print(dim('  Generate your token at: https://project-planner-7zw4.onrender.com/settings'));
+  print(dim(`  Generate your token at: ${DASHBOARD_URL}/settings`));
   print();
   mcpToken = (await ask('  MCP_TOKEN: ')).trim();
   if (!mcpToken) {
@@ -196,7 +197,7 @@ if (mode === 'local') {
   print(dim('  Run export_to_cloud later to push your projects to the dashboard.'));
 } else {
   print(dim('  Cloud mode: projects sync automatically to your dashboard.'));
-  print(dim('  View them at https://project-planner-7zw4.onrender.com/dashboard'));
+  print(dim(`  View them at ${DASHBOARD_URL}/dashboard`));
 }
 print();
 
@@ -209,6 +210,21 @@ const ALLOWED_TOOLS = [
   'mcp__project-planner__add_session_summary',
   'mcp__project-planner__update_task_status',
   'mcp__project-planner__add_note_to_task',
+  'mcp__project-planner__create_project',
+  'mcp__project-planner__scan_repo',
+  'mcp__project-planner__set_project_goal',
+  'mcp__project-planner__add_phase',
+  'mcp__project-planner__add_milestone',
+  'mcp__project-planner__add_task',
+  'mcp__project-planner__edit_phase',
+  'mcp__project-planner__edit_milestone',
+  'mcp__project-planner__edit_task',
+  'mcp__project-planner__delete_phase',
+  'mcp__project-planner__delete_milestone',
+  'mcp__project-planner__delete_task',
+  'mcp__project-planner__delete_project',
+  'mcp__project-planner__rename_project',
+  'mcp__project-planner__export_to_cloud',
 ];
 
 const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');

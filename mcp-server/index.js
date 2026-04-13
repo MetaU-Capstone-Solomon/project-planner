@@ -30,10 +30,11 @@ import { renameProject } from './tools/renameProject.js';
 import { setProjectGoal } from './tools/setProjectGoal.js';
 import { addSessionSummary } from './tools/addSessionSummary.js';
 import { getTasks } from './tools/getTasks.js';
+import { API_URL, DASHBOARD_URL } from './lib/constants.js';
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
 const { MCP_TOKEN } = process.env;
-const PROPLAN_API_URL = process.env.PROPLAN_API_URL || 'https://project-planner-7zw4.onrender.com';
+const PROPLAN_API_URL = process.env.PROPLAN_API_URL || API_URL;
 const isCloudMode = !!MCP_TOKEN;
 
 let adapter;
@@ -356,7 +357,7 @@ server.tool(
   'export_to_cloud',
   'Sync local projects to the ProPlan dashboard. Only works in local mode. New projects are inserted, changed projects updated, unchanged ones skipped.',
   {
-    mcp_token: z.string().describe('Your MCP token from project-planner-7zw4.onrender.com → Settings → Claude Code Integration.'),
+    mcp_token: z.string().describe(`Your MCP token from ${DASHBOARD_URL} → Settings → Claude Code Integration.`),
     api_url: z.string().optional().describe('Override the API base URL. Defaults to the production ProPlan backend.'),
   },
   async ({ mcp_token, api_url }) => {

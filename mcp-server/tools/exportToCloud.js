@@ -2,12 +2,13 @@
 import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { API_URL, DASHBOARD_URL } from '../lib/constants.js';
 
 export async function exportToCloud({ mcp_token, api_url }) {
-  const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || 'https://project-planner-7zw4.onrender.com';
+  const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || API_URL;
 
   if (!mcp_token) {
-    throw new Error('mcp_token is required. Generate one at project-planner-7zw4.onrender.com → Settings → Claude Code Integration.');
+    throw new Error(`mcp_token is required. Generate one at ${DASHBOARD_URL} → Settings → Claude Code Integration.`);
   }
 
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
@@ -41,27 +42,43 @@ export async function exportToCloud({ mcp_token, api_url }) {
       inserted: 0,
       updated: 0,
       skipped: stats.skipped,
-      dashboardUrl: 'https://project-planner-7zw4.onrender.com/dashboard',
+      dashboardUrl: `${DASHBOARD_URL}/dashboard`,
       message: 'All projects are already up to date.',
     };
   }
 
+  // Wake the server first (Render free tier spins down after inactivity)
+  async function waitForServer(timeoutMs = 40000) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      try {
+        const r = await fetch(`${resolvedApiUrl}/health`, { method: 'GET' });
+        if (r.ok) return; // server is up
+      } catch {
+        // still booting, keep polling
+      }
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    throw new Error('ProPlan server did not respond within 40 seconds. Please try again.');
+  }
+
+  await waitForServer();
+
   // Push to backend
+  const payload = JSON.stringify({
+    projects: toSync.map(p => ({
+      id: p.id,
+      title: p.title,
+      content: p.content,
+      created_at: p.created_at || p.updated_at,
+      updated_at: p.updated_at,
+    })),
+  });
+
   const res = await fetch(`${resolvedApiUrl}/api/mcp/sync`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${mcp_token}`,
-    },
-    body: JSON.stringify({
-      projects: toSync.map(p => ({
-        id: p.id,
-        title: p.title,
-        content: p.content,
-        created_at: p.created_at || p.updated_at,  // use actual created_at, fall back to updated_at if null
-        updated_at: p.updated_at,
-      })),
-    }),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${mcp_token}` },
+    body: payload,
   });
 
   if (!res.ok) {
@@ -72,12 +89,13 @@ export async function exportToCloud({ mcp_token, api_url }) {
   const data = await res.json();
   const now = new Date().toISOString();
 
-  // Mark synced projects in local DB
+  // Mark synced projects in local DB and cache the token for auto-export
   for (const project of toSync) {
     local.markSynced(project.id, now);
     if (project._action === 'insert') stats.inserted++;
     else stats.updated++;
   }
+  local.setConfig('mcp_token', mcp_token);
 
   return {
     inserted: stats.inserted,
