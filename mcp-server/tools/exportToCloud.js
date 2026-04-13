@@ -11,6 +11,16 @@ export async function exportToCloud({ mcp_token, api_url }) {
     throw new Error(`mcp_token is required. Generate one at ${DASHBOARD_URL} → Settings → Claude Code Integration.`);
   }
 
+  // If MCP_TOKEN is set in env, server is in cloud mode — all ops already go to backend
+  if (process.env.MCP_TOKEN) {
+    return {
+      inserted: 0,
+      updated: 0,
+      skipped: 0,
+      message: 'You are in cloud mode — projects sync automatically on every operation. No manual export needed.',
+    };
+  }
+
   const dbPath = join(process.cwd(), '.project-planner', 'db.sqlite');
   if (!existsSync(dbPath)) {
     return { inserted: 0, updated: 0, skipped: 0, message: 'No local database found. Nothing to sync.' };
