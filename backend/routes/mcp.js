@@ -9,6 +9,7 @@ const supabase = createClient(
 );
 
 const DASHBOARD_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const { track } = require('../services/analyticsService');
 
 router.use(extractMcpUserId);
 
@@ -124,6 +125,7 @@ router.post('/sync', async (req, res) => {
       dashboardUrl: `${DASHBOARD_URL}/dashboard`,
       message: `${rows.length} project(s) synced. View at ${DASHBOARD_URL}/dashboard`,
     });
+    track('mcp_sync', req.userId, { project_count: rows.length });
   } catch (err) {
     console.error('POST /api/mcp/sync error:', err);
     res.status(500).json({ error: err.message });

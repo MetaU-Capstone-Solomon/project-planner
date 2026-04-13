@@ -5,6 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { extractUserId } = require('../middleware/auth');
 const { AIProviderService, ProviderError } = require('../services/aiProviderService');
 const { encrypt, decrypt } = require('../services/encryptionService');
+const { track } = require('../services/analyticsService');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -158,6 +159,7 @@ router.post('/mcp-token', extractUserId, async (req, res) => {
       .upsert({ user_id: req.userId, token, created_at: new Date().toISOString() }, { onConflict: 'user_id' });
     if (error) throw error;
     res.json({ token });
+    track('mcp_token_generated', req.userId);
   } catch (err) {
     console.error('POST /api/user/mcp-token error:', err);
     res.status(500).json({ error: err.message });
