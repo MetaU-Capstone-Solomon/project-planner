@@ -90,6 +90,7 @@ At the start of every session:
    c. Fresh: call \`scan_repo\`, then propose a project structure and call \`create_project\`
 4. Never ask the user to re-explain context
 5. At session end: always call \`add_session_summary\` — this auto-syncs to the dashboard if a token is cached
+6. If the user says they edited on the dashboard, updated the project online, or wants the latest cloud version — call \`import_from_cloud\` with \`project_id\` and \`force: true\` to pull the cloud version into local
 `;
 
 function writeClaudeMd(projectDir) {
