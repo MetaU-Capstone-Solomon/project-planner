@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, Plus, Settings, LayoutDashboard } from 'lucide-react';
+import { User, Plus, LayoutDashboard } from 'lucide-react';
 import { COLOR_CLASSES } from '@/constants/colors';
 import { ROUTES } from '@/constants/routes';
 import Logo from '@/components/Logo/Logo';
@@ -70,7 +70,6 @@ const Navbar = () => {
   // Navigation items
   const navItems = [
     { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: <LayoutDashboard size={16} />, isActive: location.pathname === ROUTES.DASHBOARD },
-    { path: ROUTES.SETTINGS, label: 'Settings', icon: <Settings size={16} />, isActive: location.pathname === ROUTES.SETTINGS },
   ];
 
   return (
