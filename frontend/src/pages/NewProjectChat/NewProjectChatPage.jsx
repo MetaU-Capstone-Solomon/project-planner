@@ -47,7 +47,7 @@ const NewProjectChatPage = () => {
     resetChat,
   } = useChat();
 
-  const { handleGenerateRoadmap, canGenerate, resetForm } = useProjectForm(
+  const { handleGenerateRoadmap, canGenerate } = useProjectForm(
     startChatWithDetails,
     chatLoading,
     fileLoading,
@@ -114,13 +114,12 @@ const NewProjectChatPage = () => {
     const handleReset = () => {
       clearFile();
       resetChat();
-      resetForm();
       setAutoTitle('');
       setMobileStep(1);
     };
     window.addEventListener('resetNewProject', handleReset);
     return () => window.removeEventListener('resetNewProject', handleReset);
-  }, [clearFile, resetChat, resetForm]);
+  }, [clearFile, resetChat]);
 
   const onGenerateClick = async () => {
     try {
@@ -139,7 +138,6 @@ const NewProjectChatPage = () => {
     resetNewProjectState();
     clearFile();
     resetChat();
-    resetForm();
     setAutoTitle('');
     setMobileStep(1);
   };

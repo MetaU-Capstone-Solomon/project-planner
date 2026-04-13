@@ -92,9 +92,6 @@ REQUIRED JSON STRUCTURE:
   "metadata": {
     "title": "Project Title",
     "description": "Project Description",
-    "experienceLevel": "Experience Level",
-    "technologies": "Technologies",
-    "scope": "Project Scope",
     "version": "1.0"
   },
   "summary": "Brief 2-3 sentence summary",

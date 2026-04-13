@@ -26,6 +26,5 @@ export const useProjectForm = (startChatWithDetails, chatLoading, fileLoading, s
   return {
     handleGenerateRoadmap,
     canGenerate,
-    resetForm: () => {},
   };
 };

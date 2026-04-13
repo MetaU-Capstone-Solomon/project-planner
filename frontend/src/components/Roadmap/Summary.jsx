@@ -38,29 +38,33 @@ const Summary = ({ metadata, summary }) => {
 
       {/* Project Details - Horizontal on mobile, Grid on larger screens */}
       <div className="mb-6 flex flex-wrap gap-4">
-        <div className="flex min-w-0 flex-1 items-center space-x-2">
-          <User className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-          <div className="min-w-0">
-            <div className={`text-sm ${COLOR_CLASSES.text.body}`}>Experience</div>
-            <span
-              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getExperienceColor(metadata.experienceLevel).bg} ${getExperienceColor(metadata.experienceLevel).text}`}
-            >
-              {metadata.experienceLevel}
-            </span>
+        {metadata.experienceLevel && (
+          <div className="flex min-w-0 flex-1 items-center space-x-2">
+            <User className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="min-w-0">
+              <div className={`text-sm ${COLOR_CLASSES.text.body}`}>Experience</div>
+              <span
+                className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getExperienceColor(metadata.experienceLevel).bg} ${getExperienceColor(metadata.experienceLevel).text}`}
+              >
+                {metadata.experienceLevel}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex min-w-0 flex-1 items-center space-x-2">
-          <Target className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-          <div className="min-w-0">
-            <div className={`text-sm ${COLOR_CLASSES.text.body}`}>Scope</div>
-            <span
-              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getScopeColor(metadata.scope).bg} ${getScopeColor(metadata.scope).text}`}
-            >
-              {metadata.scope}
-            </span>
+        {metadata.scope && (
+          <div className="flex min-w-0 flex-1 items-center space-x-2">
+            <Target className="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="min-w-0">
+              <div className={`text-sm ${COLOR_CLASSES.text.body}`}>Scope</div>
+              <span
+                className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getScopeColor(metadata.scope).bg} ${getScopeColor(metadata.scope).text}`}
+              >
+                {metadata.scope}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

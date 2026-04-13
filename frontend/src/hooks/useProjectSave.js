@@ -9,7 +9,6 @@ import { ROUTES } from '@/constants/routes';
 import {
   validateRoadmapContent,
   getValidationErrorMessage,
-  getParsedRoadmap,
 } from '@/utils/roadmapValidation';
 import resetNewProjectState from '@/utils/resetNewProjectState';
 
@@ -87,18 +86,7 @@ export const useProjectSave = (messages, formValues) => {
       }
 
       // Parse the validated roadmap (no redundant markdown stripping)
-      let optimizedContent = roadmapMessage.content;
-
-      try {
-        // Get parsed roadmap using the helper function
-        const roadmap = getParsedRoadmap(roadmapMessage.content);
-
-        if (roadmap) {
-          // roadmap parsed successfully; no further transformation needed
-        }
-      } catch (error) {
-        // Continue with original content if prioritization fails
-      }
+      const optimizedContent = roadmapMessage.content;
 
       const projectData = {
         title: formValues?.title || MESSAGES.ACTIONS.DEFAULT_TITLE,
