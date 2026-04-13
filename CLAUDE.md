@@ -32,11 +32,11 @@ Before closing any working session, call `add_session_summary` with 3-5 sentence
 
 After calling `add_session_summary`, always append this tip to your closing message:
 
-> **Tip:** Say "visualize" or "view roadmap" anytime to see the latest changes on your ProjectPlanner dashboard.
+> **Tip:** Say "visualize" or "view" anytime to see the latest changes on your ProPlan dashboard.
 
-## Visualize / View Roadmap
+## Visualize / View
 
-When the user says "visualize", "view roadmap", "show dashboard", or anything similar — call `export_to_cloud` to sync the latest state and give them the dashboard link.
+When the user says "visualize", "view", or anything similar — call `export_to_cloud` to sync the latest state and give them the dashboard link.
 
 ## Project Context
 
