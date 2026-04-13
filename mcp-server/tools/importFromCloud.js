@@ -1,9 +1,10 @@
 // mcp-server/tools/importFromCloud.js
 import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
 import { API_URL, DASHBOARD_URL } from '../lib/constants.js';
+import { waitForServer } from '../lib/utils.js';
 import { join } from 'path';
 
-export async function importFromCloud({ mcp_token, project_id, api_url, db_path }) {
+export async function importFromCloud({ mcp_token, project_id, force = false, api_url, db_path }) {
   const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || API_URL;
 
   if (!mcp_token) {
@@ -41,11 +42,11 @@ export async function importFromCloud({ mcp_token, project_id, api_url, db_path 
 
   // Check if already exists locally
   const existing = local.getProject(project_id);
-  if (existing) {
+  if (existing && !force) {
     return {
       already_exists: true,
       project: { id: existing.id, title: existing.title },
-      message: `"${existing.title}" is already in your local database. Use export_to_cloud to keep it in sync.`,
+      message: `"${existing.title}" is already in your local database. Pass force: true to overwrite with the cloud version.`,
     };
   }
 
@@ -62,27 +63,22 @@ export async function importFromCloud({ mcp_token, project_id, api_url, db_path 
   const project = await res.json();
   const now = new Date().toISOString();
 
-  local.insertProjectWithId(project.id, project.title, project.content, now);
+  if (existing && force) {
+    // Overwrite local with cloud version
+    await local.saveProject(project.id, project.title, project.content, now);
+    local.markSynced(project.id, now);
+  } else {
+    local.insertProjectWithId(project.id, project.title, project.content, now);
+  }
   local.setConfig('mcp_token', mcp_token);
 
   return {
     imported: true,
+    updated: existing ? true : false,
     project: { id: project.id, title: project.title },
-    message: `"${project.title}" imported successfully. Claude Code will now track this project locally.`,
+    message: existing
+      ? `"${project.title}" updated from cloud. Local copy is now in sync.`
+      : `"${project.title}" imported successfully. Claude Code will now track this project locally.`,
     nextStep: 'Your session summaries will auto-sync to the dashboard going forward.',
   };
-}
-
-async function waitForServer(apiUrl, timeoutMs = 40000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const r = await fetch(`${apiUrl}/health`, { method: 'GET' });
-      if (r.ok) return;
-    } catch {
-      // still booting
-    }
-    await new Promise(r => setTimeout(r, 3000));
-  }
-  throw new Error('ProPlan server did not respond within 40 seconds. Please try again.');
 }

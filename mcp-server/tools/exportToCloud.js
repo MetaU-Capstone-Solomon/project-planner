@@ -3,6 +3,7 @@ import { SqliteAdapter } from '../adapters/SqliteAdapter.js';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { API_URL, DASHBOARD_URL } from '../lib/constants.js';
+import { waitForServer } from '../lib/utils.js';
 
 export async function exportToCloud({ mcp_token, api_url }) {
   const resolvedApiUrl = api_url || process.env.PROPLAN_API_URL || API_URL;
@@ -57,22 +58,7 @@ export async function exportToCloud({ mcp_token, api_url }) {
     };
   }
 
-  // Wake the server first (Render free tier spins down after inactivity)
-  async function waitForServer(timeoutMs = 40000) {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      try {
-        const r = await fetch(`${resolvedApiUrl}/health`, { method: 'GET' });
-        if (r.ok) return; // server is up
-      } catch {
-        // still booting, keep polling
-      }
-      await new Promise(r => setTimeout(r, 3000));
-    }
-    throw new Error('ProPlan server did not respond within 40 seconds. Please try again.');
-  }
-
-  await waitForServer();
+  await waitForServer(resolvedApiUrl);
 
   // Push to backend
   const payload = JSON.stringify({

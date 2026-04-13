@@ -372,13 +372,14 @@ server.tool(
 
 server.tool(
   'import_from_cloud',
-  'Import a project from the ProPlan dashboard into local SQLite. Call with only mcp_token to list available cloud projects. Call with mcp_token + project_id to import a specific one.',
+  'Import or update a project from the ProPlan dashboard into local SQLite. Call with only mcp_token to list available cloud projects. Call with mcp_token + project_id to import. Pass force: true to overwrite a local copy with the latest cloud version.',
   {
     mcp_token: z.string().describe(`Your MCP token from ${DASHBOARD_URL} → Settings → Claude Code Integration.`),
     project_id: z.string().optional().describe('ID of the cloud project to import. Omit to list available projects.'),
+    force: z.boolean().optional().describe('Overwrite local copy with cloud version if the project already exists locally.'),
   },
-  async ({ mcp_token, project_id }) => {
-    const result = await importFromCloud({ mcp_token, project_id });
+  async ({ mcp_token, project_id, force }) => {
+    const result = await importFromCloud({ mcp_token, project_id, force });
     return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
   }
 );
