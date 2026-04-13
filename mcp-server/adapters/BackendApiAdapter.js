@@ -42,31 +42,44 @@ export class BackendApiAdapter {
     }
   }
 
+  async _requestWithRetry(method, path, body) {
+    try {
+      return await this._request(method, path, body);
+    } catch (err) {
+      // Retry once after 2s on network-level errors (not 4xx/5xx)
+      if (err.name === 'AbortError' || err.message === 'fetch failed' || err.message.includes('network')) {
+        await new Promise(r => setTimeout(r, 2000));
+        return this._request(method, path, body);
+      }
+      throw err;
+    }
+  }
+
   async listProjects() {
-    return (await this._request('GET', '/api/mcp/projects')) ?? [];
+    return (await this._requestWithRetry('GET', '/api/mcp/projects')) ?? [];
   }
 
   async getProject(projectId) {
-    return this._request('GET', `/api/mcp/projects/${projectId}`);
+    return this._requestWithRetry('GET', `/api/mcp/projects/${projectId}`);
   }
 
   async saveProject(projectId, title, content, _updatedAt) {
-    await this._request('PUT', `/api/mcp/projects/${projectId}`, { title, content });
+    await this._requestWithRetry('PUT', `/api/mcp/projects/${projectId}`, { title, content });
   }
 
   async insertProject(title, content) {
     const id = randomUUID();
-    const result = await this._request('POST', '/api/mcp/projects', { id, title, content });
+    const result = await this._requestWithRetry('POST', '/api/mcp/projects', { id, title, content });
     // Use the id we sent so local and cloud UUIDs stay in sync
     return { id: result?.id ?? id };
   }
 
   async deleteProject(projectId) {
-    await this._request('DELETE', `/api/mcp/projects/${projectId}`);
+    await this._requestWithRetry('DELETE', `/api/mcp/projects/${projectId}`);
   }
 
   async renameProject(projectId, newTitle, _updatedAt) {
-    await this._request('PUT', `/api/mcp/projects/${projectId}`, { title: newTitle });
+    await this._requestWithRetry('PUT', `/api/mcp/projects/${projectId}`, { title: newTitle });
   }
 
   // These are local-only operations — no-ops in cloud mode
