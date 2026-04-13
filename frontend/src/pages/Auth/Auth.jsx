@@ -25,15 +25,14 @@ export default function Auth() {
     <div className="flex min-h-screen bg-[var(--bg-base)]">
       {/* Left panel — dark, always */}
       <div className="relative hidden w-1/2 overflow-hidden bg-[#0a0a0a] lg:flex lg:flex-col lg:items-center lg:justify-center">
-        <div className="orb" style={{ top: '10%', left: '20%' }} />
         <div className="relative z-10 max-w-sm px-12 text-center">
           <div className="mb-6 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent)]">
-              <span className="text-xl font-bold text-white">PP</span>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white">
+              <span className="text-xl font-bold text-[#0a0a0a]">PP</span>
             </div>
           </div>
           <p className="text-2xl font-bold leading-snug text-white">
-            Your projects. Your pace. Powered by AI.
+            Your projects. Your pace.
           </p>
           <p className="mt-3 text-sm text-[#a3a3a3]">
             Generate roadmaps, track progress, and collaborate with your team — all in one place.
@@ -55,8 +54,8 @@ export default function Auth() {
         >
           {/* Mobile logo */}
           <motion.div variants={stagger.item} transition={{ duration: 0.3 }} className="mb-8 flex justify-center lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]">
-              <span className="font-bold text-white">PP</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--text-primary)]">
+              <span className="font-bold text-[var(--bg-base)]">PP</span>
             </div>
           </motion.div>
 
