@@ -80,23 +80,6 @@
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* === ORB ANIMATION (Landing + Auth) === */
-@keyframes orb-rotate {
-  0%   { transform: rotate(0deg)   translateX(80px); }
-  100% { transform: rotate(360deg) translateX(80px); }
-}
-
-.orb {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
-  filter: blur(80px);
-  animation: orb-rotate 24s linear infinite;
-  pointer-events: none;
-  border-radius: 50%;
-}
-
 /* === SCROLLBAR === */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
