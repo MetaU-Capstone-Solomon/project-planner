@@ -20,7 +20,7 @@ That's it. The wizard:
 - Writes `.mcp.json` so Claude Code finds the server
 - Writes `CLAUDE.md` with session resume instructions
 - Updates `.gitignore` to protect local data
-- Auto-adds read-only tools to Claude settings (skips approval prompts)
+- Auto-adds all ProPlan tools to Claude settings (skips approval prompts)
 
 Then restart Claude Code, open your project, and type **start** or **continue**.
 
@@ -48,16 +48,17 @@ Then restart Claude Code, open your project, and type **start** or **continue**.
 | `rename_project` | Rename a project |
 | `delete_project` | Permanently delete a project |
 | `set_project_goal` | Set the north-star goal for a project |
-| `add_session_summary` | Record what was done this session |
+| `add_session_summary` | Record what was done this session (auto-syncs if token cached) |
 | `export_to_cloud` | Sync local projects to the ProPlan dashboard |
+| `import_from_cloud` | Pull a project from the dashboard into local SQLite |
 
-## Storage modes
+## Storage
 
-**Local (default)** — data stored in `.project-planner/db.sqlite` in your project. No account needed.
+**Local (default)** — data stored in `.project-planner/db.sqlite` in your project. No account needed. Everything stays on your machine.
 
-**Cloud** — projects sync to [proplan.dev](https://project-planner-7zw4.onrender.com). Requires a free account and MCP token from Settings → Claude Code Integration.
+**Sync to dashboard** — run `export_to_cloud` from Claude Code at any time to push your projects to [proplan.dev](https://project-planner-7zw4.onrender.com). Requires a free account and MCP token from Settings → Claude Code Integration.
 
-Switch modes anytime by re-running `npx @proplandev/mcp init`.
+**Import from dashboard** — if you created a project on the dashboard first, run `import_from_cloud` to pull it into your local SQLite and start tracking it in Claude Code.
 
 ## Manual setup
 
@@ -69,22 +70,6 @@ If you prefer to configure `.mcp.json` yourself:
     "project-planner": {
       "command": "npx",
       "args": ["-y", "@proplandev/mcp"]
-    }
-  }
-}
-```
-
-For cloud mode, add your token:
-
-```json
-{
-  "mcpServers": {
-    "project-planner": {
-      "command": "npx",
-      "args": ["-y", "@proplandev/mcp"],
-      "env": {
-        "MCP_TOKEN": "your-token-here"
-      }
     }
   }
 }
