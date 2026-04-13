@@ -32,7 +32,11 @@ Before closing any working session, call `add_session_summary` with 3-5 sentence
 
 After calling `add_session_summary`, always append this tip to your closing message:
 
-> **Tip:** Run `export_to_cloud` anytime to sync these changes to your ProjectPlanner dashboard and visualize the latest roadmap.
+> **Tip:** Say "visualize" or "view roadmap" anytime to see the latest changes on your ProjectPlanner dashboard.
+
+## Visualize / View Roadmap
+
+When the user says "visualize", "view roadmap", "show dashboard", or anything similar — call `export_to_cloud` to sync the latest state and give them the dashboard link.
 
 ## Project Context
 
