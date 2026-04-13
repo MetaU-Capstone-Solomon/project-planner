@@ -109,9 +109,6 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[var(--bg-base)]">
-      {/* Background orb */}
-      <div className="orb" style={{ top: '-200px', right: '-100px' }} />
-
       {/* Nav */}
       <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-10">
         <div className="flex items-center gap-2">
@@ -140,12 +137,6 @@ export default function Home() {
           animate="animate"
           className="flex-1"
         >
-          <motion.div variants={stagger.item} transition={{ duration: 0.3 }}>
-            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
-              AI-powered roadmap generation
-            </span>
-          </motion.div>
           <motion.h1
             variants={stagger.item}
             transition={{ duration: 0.4 }}
@@ -165,9 +156,12 @@ export default function Home() {
             <Button size="lg" onClick={() => navigate(ROUTES.AUTH)}>
               Get Started free <ArrowRight size={16} />
             </Button>
-            <Button variant="secondary" size="lg" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
+            <button
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center justify-center rounded-lg font-medium transition-colors duration-150 h-11 px-6 text-base gap-2 border border-[var(--text-primary)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
+            >
               See how it works
-            </Button>
+            </button>
           </motion.div>
         </motion.div>
 
