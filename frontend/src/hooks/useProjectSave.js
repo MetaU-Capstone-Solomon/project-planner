@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveProject } from '@/services/projectService';
-import { optimizeRoadmap } from '@/services/prioritizationService';
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { createISOTimestamp } from '@/utils/dateUtils';
 import { MESSAGES } from '@/constants/messages';
@@ -95,16 +94,7 @@ export const useProjectSave = (messages, formValues) => {
         const roadmap = getParsedRoadmap(roadmapMessage.content);
 
         if (roadmap) {
-          // Apply prioritization algorithm if user constraints are available
-          if (formValues?.experienceLevel && formValues?.projectScope) {
-            const userConstraints = {
-              experienceLevel: formValues.experienceLevel,
-              scope: formValues.projectScope,
-            };
-
-            const optimizedRoadmap = await optimizeRoadmap(roadmap, userConstraints);
-            optimizedContent = JSON.stringify(optimizedRoadmap, null, 2);
-          }
+          // roadmap parsed successfully; no further transformation needed
         }
       } catch (error) {
         // Continue with original content if prioritization fails

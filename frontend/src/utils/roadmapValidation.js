@@ -71,9 +71,9 @@ const PhaseSchema = z.object({
 const MetadataSchema = z.object({
   title: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
   description: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
-  experienceLevel: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
+  experienceLevel: z.string().optional().default(''),
   technologies: z.string().optional().default(''),
-  scope: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
+  scope: z.string().optional().default(''),
   version: z.string().min(1, MESSAGES.VALIDATION.ROADMAP_INCOMPLETE),
 });
 
