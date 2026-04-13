@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Settings, Plus, User } from 'lucide-react';
+import { LayoutDashboard, Plus, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
 import ProfileDropdown from '@/components/Layout/ProfileDropdown';
@@ -12,7 +12,6 @@ import resetNewProjectState from '@/utils/resetNewProjectState';
 
 const navLinks = [
   { to: ROUTES.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard },
-  { to: ROUTES.SETTINGS,  label: 'Settings',  icon: Settings },
 ];
 
 function Navbar() {
