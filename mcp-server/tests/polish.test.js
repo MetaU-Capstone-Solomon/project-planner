@@ -10,3 +10,15 @@ describe('constants', () => {
     expect(API_URL).toBe('https://project-planner-backend-i4x4.onrender.com');
   });
 });
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+describe('server version', () => {
+  it('version in package.json matches what McpServer receives', () => {
+    const pkg = require('../package.json');
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+$/);
+    // Verify it's not hardcoded as 1.0.5
+    expect(pkg.version).not.toBe('1.0.5');
+  });
+});

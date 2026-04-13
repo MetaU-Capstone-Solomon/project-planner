@@ -31,6 +31,9 @@ import { setProjectGoal } from './tools/setProjectGoal.js';
 import { addSessionSummary } from './tools/addSessionSummary.js';
 import { getTasks } from './tools/getTasks.js';
 import { API_URL, DASHBOARD_URL } from './lib/constants.js';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
+const { version } = _require('./package.json');
 
 // ─── Mode detection ───────────────────────────────────────────────────────────
 const { MCP_TOKEN } = process.env;
@@ -51,7 +54,7 @@ console.error(`[ProPlan MCP] Starting in ${isCloudMode ? 'CLOUD' : 'LOCAL'} mode
 // ─── Server ───────────────────────────────────────────────────────────────────
 const server = new McpServer({
   name: 'project-planner',
-  version: '1.0.5',
+  version,
 });
 
 server.tool(
