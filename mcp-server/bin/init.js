@@ -125,7 +125,7 @@ const mcpPath = locChoice === '2' ? userLevel : projectLocal;
 const isProjectLocal = locChoice !== '2';
 print();
 
-// 3. Write .mcp.json
+// 2. Write .mcp.json
 const existing = readMcpJson(mcpPath);
 existing.mcpServers = existing.mcpServers || {};
 
@@ -209,8 +209,8 @@ if (autoWrite !== 'n') {
   try {
     let settings = {};
     try { settings = JSON.parse(fs.readFileSync(claudeSettingsPath, 'utf8')); } catch { /* new file */ }
-    const existing_tools = Array.isArray(settings.allowedTools) ? settings.allowedTools : [];
-    const merged = [...new Set([...existing_tools, ...ALLOWED_TOOLS])];
+    const existingTools = Array.isArray(settings.allowedTools) ? settings.allowedTools : [];
+    const merged = [...new Set([...existingTools, ...ALLOWED_TOOLS])];
     settings.allowedTools = merged;
     fs.mkdirSync(path.dirname(claudeSettingsPath), { recursive: true });
     fs.writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf8');
