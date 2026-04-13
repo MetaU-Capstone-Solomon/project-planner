@@ -47,7 +47,7 @@ export class BackendApiAdapter {
       return await this._request(method, path, body);
     } catch (err) {
       // Retry once after 2s on network-level errors (not 4xx/5xx)
-      if (err.name === 'AbortError' || err.message === 'fetch failed' || err.message.includes('network')) {
+      if (err.message === 'fetch failed' || (err.message.includes('network') && err.name !== 'AbortError')) {
         await new Promise(r => setTimeout(r, 2000));
         return this._request(method, path, body);
       }
