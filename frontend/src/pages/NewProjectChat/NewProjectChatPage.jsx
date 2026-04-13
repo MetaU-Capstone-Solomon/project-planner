@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Upload, X, FileText } from 'lucide-react';
-import { CheckCircle, Plus } from 'lucide-react';
+import { ArrowLeft, Upload, X, FileText, CheckCircle, Plus } from 'lucide-react';
 import ChatContainer from '@/components/Chat/ChatContainer';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -68,7 +67,7 @@ const NewProjectChatPage = () => {
     }
   }, [processedFile]);
 
-  const { saving, savedProjectId, handleSaveProject } = useProjectSave(
+  const { saving, handleSaveProject } = useProjectSave(
     messages,
     { title: autoTitle }
   );
@@ -125,7 +124,7 @@ const NewProjectChatPage = () => {
 
   const onGenerateClick = async () => {
     try {
-      await handleGenerateRoadmap(processedFile);
+      await handleGenerateRoadmap(processedFile, autoTitle);
       if (isMobile) setMobileStep(2);
     } catch (error) {
       // don't advance on mobile if error

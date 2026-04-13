@@ -1,30 +1,4 @@
 /**
- * Form validation utilities
- * 
- * Provides validation functions for form data including project fields
- * and resource validation.
- */
-
-/**
- * Check if all required project fields are filled
- *
- * @param {Object} values - Form values object
- * @param {string} values.title - Project title
- * @param {string} values.description - Project description
- * @param {string} values.experienceLevel - Experience level selection
- * @param {string} values.projectScope - Project scope selection
- * @returns {boolean} True if all required fields are present
- */
-export const hasRequiredFields = (values) => {
-  const hasTitle = values.title?.trim();
-  const hasDescription = values.description?.trim();
-  const hasExperienceLevel = values.experienceLevel;
-  const hasProjectScope = values.projectScope;
-
-  return hasTitle && hasDescription && hasExperienceLevel && hasProjectScope;
-};
-
-/**
  * ValidateResources function Validates a single resource object
  * It iterate through each resource and validate both name and URL fields
  * Returns an object with errors indexed by resource position and a boolean flag indicating overall validation status
