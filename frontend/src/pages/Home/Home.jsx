@@ -5,7 +5,7 @@ import { ArrowRight, Zap, Target, Users } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import Button from '@/components/ui/Button';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import { stagger, pageTransition } from '@/constants/motion';
+import { stagger } from '@/constants/motion';
 
 const FAKE_CARDS = [
   {
