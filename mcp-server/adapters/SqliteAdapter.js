@@ -13,6 +13,10 @@ const SCHEMA = `
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `;
 
 export class SqliteAdapter {
@@ -20,6 +24,7 @@ export class SqliteAdapter {
     mkdirSync(dirname(dbPath), { recursive: true });
     this._db = new Database(dbPath);
     this._db.exec(SCHEMA);
+    this._applyMigrations();
   }
 
   _applyMigrations() {
@@ -58,6 +63,17 @@ export class SqliteAdapter {
     return { id };
   }
 
+  insertProjectWithId(id, title, content, syncedAt) {
+    const now = new Date().toISOString();
+    this._db
+      .prepare(`
+        INSERT OR IGNORE INTO projects
+          (id, user_id, title, content, created_at, updated_at, last_synced_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `)
+      .run(id, 'local', title, content, now, now, syncedAt);
+  }
+
   deleteProject(projectId) {
     this._db.prepare('DELETE FROM projects WHERE id = ?').run(projectId);
   }
@@ -78,5 +94,16 @@ export class SqliteAdapter {
     this._db
       .prepare('UPDATE projects SET last_synced_at = ? WHERE id = ?')
       .run(syncedAt, projectId);
+  }
+
+  getConfig(key) {
+    const row = this._db.prepare('SELECT value FROM config WHERE key = ?').get(key);
+    return row?.value ?? null;
+  }
+
+  setConfig(key, value) {
+    this._db
+      .prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)')
+      .run(key, value);
   }
 }
