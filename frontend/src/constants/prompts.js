@@ -8,9 +8,6 @@
 export const PROMPT_VARIABLES = {
   PROJECT_TITLE: '[PROJECT_TITLE]',
   PROJECT_DESCRIPTION: '[PROJECT_DESCRIPTION]',
-  EXPERIENCE_LEVEL: '[EXPERIENCE_LEVEL]',
-  TECHNOLOGIES: '[TECHNOLOGIES]',
-  PROJECT_SCOPE: '[PROJECT_SCOPE]',
 };
 
 export const ROADMAP_CONSTRAINTS = `
@@ -24,9 +21,6 @@ Generate a structured JSON roadmap for [PROJECT_TITLE].
 PROJECT DETAILS:
 - Title: [PROJECT_TITLE]
 - Description: [PROJECT_DESCRIPTION]
-- Experience Level: [EXPERIENCE_LEVEL]
-- Technologies: [TECHNOLOGIES]
-- Scope: [PROJECT_SCOPE]
 
 INSTRUCTIONS:
 1. Use the provided project information. DO NOT ask for project details or repeat them in response.
@@ -35,9 +29,6 @@ INSTRUCTIONS:
      "metadata": {
        "title": "[PROJECT_TITLE]",
        "description": "[PROJECT_DESCRIPTION]",
-       "experienceLevel": "[EXPERIENCE_LEVEL]",
-       "technologies": "[TECHNOLOGIES]",
-       "scope": "[PROJECT_SCOPE]",
        "version": "1.0"
      },
      "summary": "Brief 2-3 sentence summary of the project scope",
@@ -71,19 +62,14 @@ INSTRUCTIONS:
      ]
    }
 
-3. Adapt complexity based on experience level:
-   - Beginner: simpler tech stack, more granular steps
-   - Intermediate: moderate task complexity
-   - Advanced: Advanced patterns, optimization strategies
-   - Expert: Enterprise patterns, advanced optimization
-
+3. Infer appropriate complexity from the document content
 4. Ensure valid JSON format with proper escaping
 5. Create appropriate number of phases based on project complexity (typically 3-6 phases)
 6. Include realistic number of milestones per phase (typically 2-5 milestones)
 7. Include sufficient tasks per milestone (typically 3-8 tasks)
 8. Assign proper order numbers (1, 2, 3, etc.) for phases, milestones, and tasks
-11. Include relevant technologies and learning resources in the resources array with real URLs
-12. Write detailed task descriptions that explain step-by-step what needs to be done, including specific actions, tools, and expected outcomes. Each description should be comprehensive enough for someone to follow and complete the task.
+9. Include relevant technologies and learning resources in the resources array with real URLs
+10. Write detailed task descriptions explaining step-by-step what needs to be done
 
 - ONLY respond to roadmap-related questions (tech stack, scope, milestones, tasks)
 - If off-topic, respond: "I can only help you modify your project roadmap. Please tell me what specific aspect you'd like to change: tech stack, scope, milestones, or tasks."
