@@ -58,15 +58,11 @@ function writeMcpJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8');
 }
 
-function buildEntry(mode, mcpToken) {
-  const entry = {
+function buildEntry() {
+  return {
     command: 'npx',
     args: ['-y', '@proplandev/mcp'],
   };
-  if (mode === 'cloud' && mcpToken) {
-    entry.env = { MCP_TOKEN: mcpToken };
-  }
-  return entry;
 }
 
 function addToGitignore(projectDir, entries) {
@@ -86,10 +82,14 @@ const CLAUDE_MD_BLOCK = `
 ## ProPlan MCP — Session Instructions
 
 At the start of every session:
-1. Call \`get_project_status\` with \`include_handoff: true\` on the active project
-2. If projects exist: resume where things left off — say "I see we were working on X..."
-3. If no projects exist: call \`scan_repo\` to read the codebase, then ask "Want me to build a roadmap from this?"
+1. Call \`get_project_status\` — no args first to list all projects
+2. If a project exists: call it again with \`include_handoff: true\` and resume — say "I see we were working on X..."
+3. If no projects exist:
+   a. Ask: "Do you have an existing project in the ProPlan dashboard to import, or should I scan this repo and build a fresh plan?"
+   b. Import: call \`import_from_cloud\` with their token to list cloud projects, let them pick one
+   c. Fresh: call \`scan_repo\`, then propose a project structure and call \`create_project\`
 4. Never ask the user to re-explain context
+5. At session end: always call \`add_session_summary\` — this auto-syncs to the dashboard if a token is cached
 `;
 
 function writeClaudeMd(projectDir) {
@@ -113,29 +113,7 @@ print(bold('  ProPlan MCP — Setup'));
 print(dim('  Configures .mcp.json so Claude Code can find the server'));
 print();
 
-// 1. Mode
-print(cyan('  Storage mode'));
-print('  1. Local  — SQLite file in your project (.project-planner/db.sqlite)');
-print('  2. Cloud  — Supabase + MCP token (required for web dashboard sync)');
-print();
-const modeChoice = (await ask('  Your choice [1/2, default 1]: ')).trim() || '1';
-const mode = modeChoice === '2' ? 'cloud' : 'local';
-print();
-
-let mcpToken = '';
-if (mode === 'cloud') {
-  print(cyan('  Cloud credentials'));
-  print(dim(`  Generate your token at: ${DASHBOARD_URL}/settings`));
-  print();
-  mcpToken = (await ask('  MCP_TOKEN: ')).trim();
-  if (!mcpToken) {
-    print();
-    print('  ' + YELLOW + '⚠  No token entered — switching to local mode.' + RESET);
-  }
-  print();
-}
-
-// 2. Location
+// 1. Location
 print(cyan('  Where to write .mcp.json'));
 const projectLocal = path.join(process.cwd(), '.mcp.json');
 const userLevel    = path.join(os.homedir(), '.mcp.json');
@@ -163,7 +141,7 @@ if (alreadyHas) {
   print();
 }
 
-existing.mcpServers['project-planner'] = buildEntry(mode, mcpToken);
+existing.mcpServers['project-planner'] = buildEntry();
 writeMcpJson(mcpPath, existing);
 print(green('  ✓ .mcp.json written') + '  ' + dim(mcpPath));
 
@@ -179,7 +157,6 @@ if (claudeResult === 'created') {
 
 // 5. .gitignore — add relevant entries
 const gitignoreEntries = ['.project-planner/'];
-if (isProjectLocal && mode === 'cloud') gitignoreEntries.push('.mcp.json');
 const gitignoreUpdated = addToGitignore(process.cwd(), gitignoreEntries);
 if (gitignoreUpdated) {
   print(green('  ✓ .gitignore updated') + '  ' + dim(gitignoreEntries.join(', ') + ' added'));
@@ -192,13 +169,9 @@ print(`  2. Open your project directory in Claude Code`);
 print(`  3. Type ${bold('start')} or ${bold('continue')} — Claude will scan your project and get to work`);
 print();
 
-if (mode === 'local') {
-  print(dim('  Local mode: data stored in .project-planner/db.sqlite'));
-  print(dim('  Run export_to_cloud later to push your projects to the dashboard.'));
-} else {
-  print(dim('  Cloud mode: projects sync automatically to your dashboard.'));
-  print(dim(`  View them at ${DASHBOARD_URL}/dashboard`));
-}
+print(dim('  Data stored locally in .project-planner/db.sqlite (gitignored).'));
+print(dim(`  To sync with the dashboard, run export_to_cloud from Claude Code.`));
+print(dim(`  Get a free token at ${DASHBOARD_URL} → Settings → Claude Code Integration.`));
 print();
 
 // 6. allowedTools — offer to auto-write
@@ -228,7 +201,7 @@ const ALLOWED_TOOLS = [
 ];
 
 const claudeSettingsPath = path.join(os.homedir(), '.claude', 'settings.json');
-print(bold('  Tip — skip approval prompts for read-only tools'));
+print(bold('  Tip — skip approval prompts for all ProPlan tools'));
 const autoWrite = (await ask('  Add these to your Claude settings automatically? [Y/n]: ')).trim().toLowerCase();
 print();
 
