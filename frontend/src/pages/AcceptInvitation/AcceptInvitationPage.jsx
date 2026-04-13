@@ -101,8 +101,6 @@ export default function AcceptInvitationPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--bg-base)] p-4">
-      <div className="orb" style={{ top: '-100px', right: '-100px' }} />
-
       <motion.div {...scaleIn} className="relative z-10 w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-8 text-center shadow-lg">
         <AnimatePresence mode="wait">
           {status === 'loading' && (
