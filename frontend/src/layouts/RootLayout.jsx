@@ -7,6 +7,7 @@ import { ROUTES } from '@/constants/routes';
 import ProfileDropdown from '@/components/Layout/ProfileDropdown';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import Button from '@/components/ui/Button';
+import Logo from '@/components/Logo/Logo';
 import { getDisplayName, getAvatarUrl } from '@/utils/userUtils';
 import resetNewProjectState from '@/utils/resetNewProjectState';
 
@@ -36,10 +37,8 @@ function Navbar() {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <Link to={ROUTES.DASHBOARD} className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent)]">
-            <span className="text-xs font-bold text-white">PP</span>
-          </div>
-          <span className="hidden font-semibold text-[var(--text-primary)] sm:block">ProjectPlanner</span>
+          <Logo size="sm" />
+          <span className="hidden font-semibold text-[var(--text-primary)] sm:block">ProPlan</span>
         </Link>
 
         {/* Nav links */}

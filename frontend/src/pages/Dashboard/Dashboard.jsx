@@ -230,16 +230,11 @@ export default function Dashboard() {
             <McpStatusBadge />
           </div>
         </div>
-        <div className="flex flex-shrink-0 items-center gap-2">
-          {config.alwaysShowInvite && (
-            <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.PROJECT_DETAIL)}>
-              <UserPlus size={15} /> Invite
-            </Button>
-          )}
-          <Button onClick={() => navigate(ROUTES.NEW_PROJECT_CHAT)}>
-            <Plus size={15} /> New Project
+        {config.alwaysShowInvite && (
+          <Button variant="secondary" size="sm" onClick={() => navigate(ROUTES.PROJECT_DETAIL)}>
+            <UserPlus size={15} /> Invite
           </Button>
-        </div>
+        )}
       </div>
 
       {/* Student encouragement banner */}
